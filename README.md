@@ -19,7 +19,9 @@ This software pretends to be an odd piece of code.
 
 ## Docs
 
+Examples of logger usage see at [cmd/*](cmd) subfolders.
 See API description and code samples in [godoc](http://godoc.org/github.com/grafov/kiwi).
+
 
 ## Instead of FAQ
 
