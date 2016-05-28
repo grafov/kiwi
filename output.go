@@ -34,6 +34,7 @@ type (
 const (
 	mustPresentMask int8 = 0x01
 	checkValueMask  int8 = 0x02
+	hiddenKeyMask   int8 = 0x04 // XXX
 )
 
 const (
@@ -135,7 +136,8 @@ func (out *Output) Without(keys ...string) *Output {
 	return out
 }
 
-// Hide filter from the output.
+// Hide keys from the output. Other keys in record will be displayed
+// but not hidden keys.
 func (out *Output) Hide(keys ...string) *Output {
 	out.Lock()
 	for _, tag := range keys {
@@ -145,8 +147,8 @@ func (out *Output) Hide(keys ...string) *Output {
 	return out
 }
 
-// Show filter in the output.
-func (out *Output) Show(keys ...string) *Output {
+// Unhide previously hidden keys. They will be displayed in the output again.
+func (out *Output) Unhide(keys ...string) *Output {
 	out.Lock()
 	for _, tag := range keys {
 		delete(out.hidden, tag)
