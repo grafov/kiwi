@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	kiwi.GetWriter(os.Stdout, kiwi.Logfmt)
+	kiwi.GetOutput(os.Stdout, kiwi.Logfmt)
 	l := kiwi.NewLogger()
 	l.Add("sample-record", 1).Log()
 }

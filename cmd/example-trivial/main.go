@@ -11,7 +11,7 @@ func main() {
 	log := kiwi.NewLogger()
 
 	// For starting write log records to some writer output should be initialized.
-	output := kiwi.GetWriter(os.Stdout, kiwi.Logfmt)
+	output := kiwi.GetOutput(os.Stdout, kiwi.Logfmt)
 
 	log.Add("sample-record", 1, "key", "value")
 	log.Log()
