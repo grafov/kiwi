@@ -138,7 +138,7 @@ func (l *Logger) Reset() *Logger {
 	return l
 }
 
-// Reset contextSrc of the logger.
+// ResetContext resets the context of the logger.
 func (l *Logger) ResetContext() *Logger {
 	l.Lock()
 	l.contextSrc = make(map[interface{}]interface{})

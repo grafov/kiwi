@@ -17,12 +17,12 @@ type (
 	// Output methods are safe for concurrent usage.
 	Output struct {
 		sync.RWMutex
-		In      chan map[string]recVal
-		w       io.Writer
-		format  format
-		paused  bool
-		filters map[string]filter // TODO think about interface{} instead of string
-		hidden  map[string]bool
+		In         chan map[string]recVal
+		w          io.Writer
+		format     format
+		paused     bool
+		filters    map[string]filter // TODO think about interface{} instead of string
+		hiddenKeys map[string]bool
 	}
 	filter struct {
 		Val   string
@@ -34,7 +34,6 @@ type (
 const (
 	mustPresentMask int8 = 0x01
 	checkValueMask  int8 = 0x02
-	hiddenKeyMask   int8 = 0x04 // XXX
 )
 
 const (
@@ -42,10 +41,10 @@ const (
 	JSON
 )
 
-// GetWriter creates a new output for an arbitrary number of loggers.
+// GetOutput creates a new output for an arbitrary number of loggers.
 // There are any number of outputs may be created for saving incoming log
 // records to different places.
-func GetWriter(w io.Writer, logFormat format) *Output {
+func GetOutput(w io.Writer, logFormat format) *Output {
 	outputs.Lock()
 	defer outputs.Unlock()
 	if out, ok := outputs.w[w]; ok {
@@ -141,7 +140,7 @@ func (out *Output) Without(keys ...string) *Output {
 func (out *Output) Hide(keys ...string) *Output {
 	out.Lock()
 	for _, tag := range keys {
-		out.hidden[tag] = true
+		out.hiddenKeys[tag] = true
 	}
 	out.Unlock()
 	return out
@@ -151,16 +150,18 @@ func (out *Output) Hide(keys ...string) *Output {
 func (out *Output) Unhide(keys ...string) *Output {
 	out.Lock()
 	for _, tag := range keys {
-		delete(out.hidden, tag)
+		delete(out.hiddenKeys, tag)
 	}
 	out.Unlock()
 	return out
 }
 
+// Pause stops writing to the output.
 func (out *Output) Pause() {
 	out.paused = true
 }
 
+// Contiunue writing to the output.
 func (out *Output) Continue() {
 	out.paused = false
 }
@@ -169,6 +170,7 @@ func (out *Output) Close() {
 	// TODO close channel and check
 }
 
+// A new record passed to all outputs. Each output routine decides n
 func broadcastRecord(record map[string]recVal) {
 	outputs.RLock()
 	for _, out := range outputs.w {
