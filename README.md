@@ -17,7 +17,7 @@ This software pretends to be an odd piece of code.
 * dynamically change fields visibility in an output
 * keeps a context of an application
 
-## Docs
+## Docs [![GoDoc](https://godoc.org/github.com/grafov/kiwi?status.svg)](https://godoc.org/github.com/grafov/kiwi)
 
 Examples of logger usage see at [cmd/*](cmd) subfolders.
 See API description and code samples in [godoc](http://godoc.org/github.com/grafov/kiwi).
