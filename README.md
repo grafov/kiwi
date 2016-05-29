@@ -1,6 +1,6 @@
 # Kiwi logger & context keeper [![Go Report Card](https://goreportcard.com/badge/grafov/kiwi)](https://goreportcard.com/report/grafov/kiwi)
 
-*unfinished, development in progress*
+*Unfinished. In a state of deep research. Beware dragons. Go out of here!*
 
 ![Kiwi bird](flomar-kiwi-bird-300px.png)
 
