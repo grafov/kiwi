@@ -147,7 +147,7 @@ func (l *Logger) ResetContext() *Logger {
 	return l
 }
 
-// GetContext returns copy of contextSrc saved in the logger.
+// GetContext returns copy of context saved in the logger.
 func (l *Logger) GetContext() map[interface{}]interface{} {
 	var contextSrc = make(map[interface{}]interface{})
 	l.RLock()
@@ -175,20 +175,16 @@ func (l *Logger) GetRecord() map[string]string {
 	return merged
 }
 
-var levelName = "level"
-
-// UseLevelName allows to change default recVal "level" to any recVal you want.
+// LevelName allows to change default recVal "level" to any recVal you want.
 // Set it to empty string if you want to report level without presetting any name.
-func UseLevelName(name string) {
-	levelName = name
-}
+var LevelName = "level"
 
 // Err imitates behaviour of common loggers with severity levels. It adds a record
 // with severity "level" = "error". Default severity name "level" may be changed
 // globally for all package with UseLevelName(). There is nothing special in "level"
 // key so it may be overrided with any recVal you want.
 func (l *Logger) Err(keyVals ...interface{}) *Logger {
-	return l.Add(levelName, "error").Add(keyVals...)
+	return l.Add(LevelName, "error").Add(keyVals...)
 }
 
 // Warn imitates behaviour of common loggers with severity levels. It adds a record
@@ -196,15 +192,15 @@ func (l *Logger) Err(keyVals ...interface{}) *Logger {
 // globally for all package with UseLevelName(). There is nothing special in "level"
 // key so it may be overrided with any recVal you want.
 func (l *Logger) Warn(keyVals ...interface{}) *Logger {
-	return l.Add(levelName, "warning").Add(keyVals...)
+	return l.Add(LevelName, "warning").Add(keyVals...)
 }
 
 // Info imitates behaviour of common loggers with severity levels. It adds a record
 // with severity "level" = "info". Default severity name "level" may be changed
 // globally for all package with UseLevelName(). There is nothing special in "level"
-// key so it may be overrided with any recVal you want.
+// key so it may be overrided with any value what you want.
 func (l *Logger) Info(keyVals ...interface{}) *Logger {
-	return l.Add(levelName, "info").Add(keyVals...)
+	return l.Add(LevelName, "info").Add(keyVals...)
 }
 
 func toRecordKey(val interface{}) string {

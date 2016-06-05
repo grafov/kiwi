@@ -13,9 +13,9 @@ func main() {
 	tmpFile, _ := os.Create("/tmp/something-completely-different.log")
 
 	// You can get arbitrary number of outputs.
-	info := kiwi.GetOutput(os.Stdout, kiwi.Logfmt)
-	errors := kiwi.GetOutput(os.Stderr, kiwi.Logfmt)
-	something := kiwi.GetOutput(tmpFile, kiwi.Logfmt)
+	info := kiwi.UseOutput(os.Stdout, kiwi.Logfmt)
+	errors := kiwi.UseOutput(os.Stderr, kiwi.Logfmt)
+	something := kiwi.UseOutput(tmpFile, kiwi.Logfmt)
 
 	// Each record by default will copied to all outputs.
 	log.Add("level", "INFO", "sample-record", 1, "key", "value")
@@ -29,12 +29,12 @@ func main() {
 	errors.With("error", "msg")
 	// Also filter may take into account key values. So only records with levels
 	// ERROR and FATAL will be passed filter and written to stderr.
-	errors.WithSet("level", "ERROR", "FATAL")
+	errors.WithValues("level", "ERROR", "FATAL")
 
 	// Vice versa you can filter out some keys.
 	info.Without("error")
 	// And define another set of key-val pairs for distinguish outputs.
-	info.WithSet("level", "INFO", "WARNING")
+	info.WithValues("level", "INFO", "WARNING")
 
 	// It will output all records from outputs above if they have key "something".
 	// So you can duplicate some records to several log files based on some criteria.

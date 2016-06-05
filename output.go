@@ -17,43 +17,42 @@ type (
 	// Output methods are safe for concurrent usage.
 	Output struct {
 		sync.RWMutex
-		In         chan map[string]recVal
-		w          io.Writer
-		format     format
-		paused     bool
-		filters    map[string]filter // TODO think about interface{} instead of string
-		hiddenKeys map[string]bool
-	}
-	filter struct {
-		Val   string
-		Flags int8
+		In              chan map[string]recVal
+		w               io.Writer
+		format          format
+		paused          bool
+		positiveFilters map[string]filter
+		negativeFilters map[string]filter
+		hiddenKeys      map[string]bool
 	}
 	format uint8
 )
 
-const (
-	mustPresentMask int8 = 0x01
-	checkValueMask  int8 = 0x02
-)
+// const (
+// 	mustPresentMask int8 = 0x01
+// 	checkValueMask  int8 = 0x02
+// )
 
 const (
 	Logfmt format = iota
 	JSON
 )
 
-// GetOutput creates a new output for an arbitrary number of loggers.
+// UseOutput creates a new output for an arbitrary number of loggers.
 // There are any number of outputs may be created for saving incoming log
 // records to different places.
-func GetOutput(w io.Writer, logFormat format) *Output {
+func UseOutput(w io.Writer, logFormat format) *Output {
 	outputs.Lock()
 	defer outputs.Unlock()
 	if out, ok := outputs.w[w]; ok {
 		return out
 	}
 	out := &Output{
-		In: make(chan map[string]recVal, 1),
-		w:  w, filters: make(map[string]filter),
-		format: logFormat}
+		In:              make(chan map[string]recVal, 1),
+		w:               w,
+		positiveFilters: make(map[string]filter),
+		negativeFilters: make(map[string]filter),
+		format:          logFormat}
 	outputs.w[w] = out
 	go processOutput(out)
 	return out
@@ -62,55 +61,25 @@ func GetOutput(w io.Writer, logFormat format) *Output {
 // With sets restriction for log records output.
 // Only records that has all keys will be logged.
 func (out *Output) With(keys ...string) *Output {
-	var (
-		filter filter
-		ok     bool
-	)
 	out.Lock()
 	for _, tag := range keys {
-		if filter, ok = out.filters[tag]; ok {
-			filter.Flags |= mustPresentMask
-		} else {
-			filter.Flags = mustPresentMask
-		}
-		out.filters[tag] = filter
+		delete(out.negativeFilters, tag)
+		out.positiveFilters[tag] = &keyFilter{Key: tag}
 	}
 	out.Unlock()
 	return out
 }
 
-// WithPairs sets restriction for log records output.
-// It will compare each key and value pair from filters
-// with each key and value from logged record.
-func (out *Output) WithValues(keyVals ...string) *Output {
-	var (
-		filter filter
-		key    string
-		ok     bool
-	)
+// WithValues defines arbitrary set of values for a key.
+// Any of these values for a defined key must be presented
+// in a log record.
+func (out *Output) WithValues(key string, vals ...string) *Output {
+	if len(vals) == 0 {
+		return out.With(key)
+	}
 	out.Lock()
-	for i, val := range keyVals {
-		if i%2 == 0 {
-			key = val
-			continue
-		}
-		if filter, ok = out.filters[key]; ok {
-			filter.Flags |= mustPresentMask
-		} else {
-			filter.Flags = mustPresentMask
-		}
-		filter.Val = val
-		out.filters[key] = filter
-	}
-	// for odd number of key-val pairs just add label without recVal
-	if len(keyVals)%2 == 1 {
-		if filter, ok = out.filters[key]; ok {
-			filter.Flags |= mustPresentMask
-		} else {
-			filter.Flags = mustPresentMask
-		}
-		out.filters[key] = filter
-	}
+	delete(out.negativeFilters, key)
+	out.positiveFilters[key] = &valsFilter{Key: key, Vals: vals}
 	out.Unlock()
 	return out
 }
@@ -118,19 +87,22 @@ func (out *Output) WithValues(keyVals ...string) *Output {
 // Without set filter for keys those should not be present in a log record.
 // It will pass only records that has no one key from this set.
 func (out *Output) Without(keys ...string) *Output {
-	var (
-		filter filter
-		ok     bool
-	)
 	out.Lock()
 	for _, tag := range keys {
-		if filter, ok = out.filters[tag]; ok {
-			filter.Flags = filter.Flags &^ mustPresentMask
-		} else {
-			filter.Flags = 0
-		}
-		out.filters[tag] = filter
+		delete(out.negativeFilters, tag)
+		out.positiveFilters[tag] = &keyFilter{Key: tag}
 	}
+	out.Unlock()
+	return out
+}
+
+func (out *Output) WithoutValues(key string, vals ...string) *Output {
+	if len(vals) == 0 {
+		return out.Without(key)
+	}
+	out.Lock()
+	delete(out.positiveFilters, key)
+	out.negativeFilters[key] = &valsFilter{Key: key, Vals: vals}
 	out.Unlock()
 	return out
 }
@@ -186,13 +158,14 @@ func processOutput(out *Output) {
 			continue
 		}
 		out.RLock()
-		for key, filter := range out.filters {
-			if _, ok := record[key]; ok {
-				if filter.Flags&mustPresentMask == 0 {
+		for key, val := range record {
+			if filter, ok := out.negativeFilters[key]; ok {
+				if filter.Check(key, val.Val) {
 					goto skipRecord
 				}
-			} else {
-				if filter.Flags&mustPresentMask > 0 {
+			}
+			if filter, ok := out.positiveFilters[key]; ok {
+				if !filter.Check(key, val.Val) {
 					goto skipRecord
 				}
 			}
