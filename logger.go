@@ -175,34 +175,6 @@ func (l *Logger) GetRecord() map[string]string {
 	return merged
 }
 
-// LevelName allows to change default recVal "level" to any recVal you want.
-// Set it to empty string if you want to report level without presetting any name.
-var LevelName = "level"
-
-// Err imitates behaviour of common loggers with severity levels. It adds a record
-// with severity "level" = "error". Default severity name "level" may be changed
-// globally for all package with UseLevelName(). There is nothing special in "level"
-// key so it may be overrided with any recVal you want.
-func (l *Logger) Err(keyVals ...interface{}) *Logger {
-	return l.Add(LevelName, "error").Add(keyVals...)
-}
-
-// Warn imitates behaviour of common loggers with severity levels. It adds a record
-// with severity "level" = "warning". Default severity name "level" may be changed
-// globally for all package with UseLevelName(). There is nothing special in "level"
-// key so it may be overrided with any recVal you want.
-func (l *Logger) Warn(keyVals ...interface{}) *Logger {
-	return l.Add(LevelName, "warning").Add(keyVals...)
-}
-
-// Info imitates behaviour of common loggers with severity levels. It adds a record
-// with severity "level" = "info". Default severity name "level" may be changed
-// globally for all package with UseLevelName(). There is nothing special in "level"
-// key so it may be overrided with any value what you want.
-func (l *Logger) Info(keyVals ...interface{}) *Logger {
-	return l.Add(LevelName, "info").Add(keyVals...)
-}
-
 func toRecordKey(val interface{}) string {
 	if val == nil {
 		return ""
