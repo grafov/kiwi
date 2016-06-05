@@ -12,9 +12,9 @@
 
 * priority on high readability for humans
 * JSON mode that liked by machines
-* different outputs for log record selected with filters
+* selectable outputs for writing logs based on field filters
+* dynamically changed fields visibility in an output
 * no nailed levels, no hardcoded fields, but explicit labels for each logged value
-* dynamically change fields visibility in an output
 * keeps a context of an application
 
 ## Docs [![GoDoc](https://godoc.org/github.com/grafov/kiwi?status.svg)](https://godoc.org/github.com/grafov/kiwi)
@@ -28,6 +28,10 @@ See API description and code samples in [godoc](http://godoc.org/github.com/graf
 0. Kiwi logger not strictly follow logfmt specs.
 1. Ideas of key-value format very near to JSON output but with orientation on readability for humans without additional tools for log parsing.
 2. Yes, it was architectured and developed to be a standard number 15 that competing with others. It is not pretend to be log format for everything.
+
+## Similar works
+
+* [log15](https://github.com/inconshreveable/log15)
 
 ## Origins
 
