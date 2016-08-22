@@ -176,13 +176,20 @@ func processOutput(out *Output) {
 	}
 }
 
+// it yet ignores output format
 func (out *Output) write(record map[string]recVal) {
 	var logLine bytes.Buffer
 	out.RLock()
 	for key, val := range record {
 		logLine.WriteString(key)
 		logLine.WriteRune('=')
+		if val.Quoted {
+			logLine.WriteRune('"')
+		}
 		logLine.WriteString(val.Val)
+		if val.Quoted {
+			logLine.WriteRune('"')
+		}
 		logLine.WriteRune(' ')
 	}
 	out.RUnlock()
