@@ -1,6 +1,6 @@
 # Kiwi logger & context keeper [![Go Report Card](https://goreportcard.com/badge/grafov/kiwi)](https://goreportcard.com/report/grafov/kiwi)
 
-*Unfinished and may not work. But may work. Beware dragons. Go out of here!*
+*WIP. It works but not all features completed.*
 
 ![Kiwi bird](flomar-kiwi-bird-300px.png)
 
