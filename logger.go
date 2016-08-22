@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// Logger keep context and log record. There are many loggers initialized
+// Logger keeps context and log record. There are many loggers initialized
 // in different places of application. Loggers are safe for
 // concurrent usage.
 type (
@@ -49,7 +49,7 @@ func NewLogger() *Logger {
 		pairs:      make(map[string]recVal)}
 }
 
-// Log is a most common method for flushing previously added key-val pairs to an output.
+// Log is the most common method for flushing previously added key-val pairs to an output.
 // After current record is flushed all pairs removed from a record except contextSrc pairs.
 func (l *Logger) Log(keyVals ...interface{}) {
 	if len(keyVals) > 0 {
@@ -69,7 +69,7 @@ func (l *Logger) Log(keyVals ...interface{}) {
 	passRecordToOutput(record)
 }
 
-// Add new key-recVal pairs to the log record. If a key already added then value will be
+// Add a new key-recVal pairs to the log record. If a key already added then value will be
 // updated. If a key already exists in a contextSrc then it will be overriden by a new
 // recVal for a current record only. After flushing a record with Log() old context value
 // will be restored.
@@ -169,7 +169,7 @@ func (l *Logger) GetContext() map[interface{}]interface{} {
 
 // GetRecord returns copy of current set of keys and values prepared for logging
 // as strings. With context key-vals included.
-// Most of Logger operations return *Logger itself but it made for operations
+// The most of Logger operations return *Logger itself but it made for operations
 // chaining only. If you need get log pairs use GelRecord() for it.
 func (l *Logger) GetRecord() map[string]string {
 	var merged = make(map[string]string)
