@@ -17,18 +17,17 @@ type (
 		context    map[string]recVal
 		pairs      map[string]recVal
 	}
+	Record interface {
+		fmt.Stringer
+		IsQuoted() bool
+	}
 	recVal struct {
-		Val  string
-		Type uint8
-		//		Quoted bool
+		Val    string
+		Type   uint8
+		Quoted bool
 	}
 	fnVal struct { // вычислять при вызове log
 		fn func() interface{}
-		// quote для простоты возвращает true
-	}
-	strVal struct { // для всех остальных типов, замена switch
-		val      string
-		IsQuoted bool
 	}
 )
 
@@ -86,7 +85,7 @@ func (l *Logger) Add(keyVals ...interface{}) *Logger {
 	}
 	// for odd number of key-val pairs just add label without recVal
 	if len(keyVals)%2 == 1 {
-		l.pairs[key] = recVal{"", emptyVal}
+		l.pairs[key] = recVal{"", emptyVal, false}
 	}
 	l.Unlock()
 	return l
@@ -111,7 +110,7 @@ func (l *Logger) With(keyVals ...interface{}) *Logger {
 	// for odd number of key-val pairs just add label without recVal
 	if len(keyVals)%2 == 1 {
 		l.contextSrc[keySrc] = nil
-		l.context[key] = recVal{"", emptyVal}
+		l.context[key] = recVal{"", emptyVal, false}
 	}
 	l.Unlock()
 	return l
@@ -135,7 +134,7 @@ func (l *Logger) WithTimestamp(format string) *Logger {
 	l.Lock()
 	// TODO think about offer fmt.Stringer here instead of custom func?
 	l.contextSrc["timestamp"] = func() string { return time.Now().Format(format) }
-	l.context["timestamp"] = recVal{time.Now().Format(format), customVal}
+	l.context["timestamp"] = recVal{time.Now().Format(format), customVal, true}
 	l.Unlock()
 	return l
 }
@@ -222,35 +221,37 @@ func toRecordKey(val interface{}) string {
 
 func toRecordValue(val interface{}) recVal {
 	if val == nil {
-		return recVal{"", emptyVal}
+		return recVal{"", emptyVal, false}
 	}
 	switch val.(type) {
 	case bool:
 		if val.(bool) {
-			return recVal{"true", booleanVal}
+			return recVal{"true", booleanVal, false}
 		}
-		return recVal{"false", booleanVal}
+		return recVal{"false", booleanVal, false}
 	case int:
-		return recVal{strconv.Itoa(val.(int)), integerVal}
+		return recVal{strconv.Itoa(val.(int)), integerVal, false}
 	case int8:
-		return recVal{strconv.FormatInt(int64(val.(int8)), 10), integerVal}
+		return recVal{strconv.FormatInt(int64(val.(int8)), 10), integerVal, false}
 	case int16:
-		return recVal{strconv.FormatInt(int64(val.(int16)), 10), integerVal}
+		return recVal{strconv.FormatInt(int64(val.(int16)), 10), integerVal, false}
 	case int32:
-		return recVal{strconv.FormatInt(int64(val.(int32)), 10), integerVal}
+		return recVal{strconv.FormatInt(int64(val.(int32)), 10), integerVal, false}
 	case int64:
-		return recVal{strconv.FormatInt(int64(val.(int64)), 10), integerVal}
+		return recVal{strconv.FormatInt(int64(val.(int64)), 10), integerVal, false}
 	case uint8:
-		return recVal{strconv.FormatUint(uint64(val.(uint8)), 10), integerVal}
+		return recVal{strconv.FormatUint(uint64(val.(uint8)), 10), integerVal, false}
 	case uint16:
-		return recVal{strconv.FormatUint(uint64(val.(uint16)), 10), integerVal}
+		return recVal{strconv.FormatUint(uint64(val.(uint16)), 10), integerVal, false}
 	case uint32:
-		return recVal{strconv.FormatUint(uint64(val.(uint32)), 10), integerVal}
+		return recVal{strconv.FormatUint(uint64(val.(uint32)), 10), integerVal, false}
 	case uint64:
-		return recVal{strconv.FormatUint(uint64(val.(uint64)), 10), integerVal}
+		return recVal{strconv.FormatUint(uint64(val.(uint64)), 10), integerVal, false}
+	case Record:
+		return recVal{val.(Record).String(), stringVal, true}
 	case fmt.Stringer:
-		return recVal{val.(fmt.Stringer).String(), stringVal}
+		return recVal{val.(fmt.Stringer).String(), stringVal, true}
 	default:
-		return recVal{fmt.Sprintf("%v", val), stringVal}
+		return recVal{fmt.Sprintf("%v", val), stringVal, true}
 	}
 }
