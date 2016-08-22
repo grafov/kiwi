@@ -143,7 +143,7 @@ func (out *Output) Close() {
 }
 
 // A new record passed to all outputs. Each output routine decides n
-func broadcastRecord(record map[string]recVal) {
+func passRecordToOutput(record map[string]recVal) {
 	outputs.RLock()
 	for _, out := range outputs.w {
 		out.In <- record

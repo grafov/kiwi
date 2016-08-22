@@ -2,14 +2,13 @@ package kiwi
 
 import (
 	"fmt"
-	"reflect"
 	"strconv"
 	"sync"
 	"time"
 )
 
 // Logger keep context and log record. There are many loggers initialized
-// in different places of application. Logger methods are safe for
+// in different places of application. Loggers are safe for
 // concurrent usage.
 type (
 	Logger struct {
@@ -21,9 +20,19 @@ type (
 	recVal struct {
 		Val  string
 		Type uint8
+		//		Quoted bool
+	}
+	fnVal struct { // вычислять при вызове log
+		fn func() interface{}
+		// quote для простоты возвращает true
+	}
+	strVal struct { // для всех остальных типов, замена switch
+		val      string
+		IsQuoted bool
 	}
 )
 
+// obsoleted by recVal iface
 const (
 	emptyVal uint8 = iota
 	stringVal
@@ -48,6 +57,7 @@ func (l *Logger) Log(keyVals ...interface{}) {
 		l.Add(keyVals...)
 	}
 	l.Lock()
+
 	record := l.pairs
 	l.pairs = make(map[string]recVal)
 	for key, val := range l.context {
@@ -57,7 +67,7 @@ func (l *Logger) Log(keyVals ...interface{}) {
 		}
 	}
 	l.Unlock()
-	broadcastRecord(record)
+	passRecordToOutput(record)
 }
 
 // Add new key-recVal pairs to the log record. If a key already added then value will be
@@ -185,19 +195,24 @@ func toRecordKey(val interface{}) string {
 			return "true"
 		}
 		return "false"
-	case int, int8, int16, int32, int64, uint8, uint16, uint32, uint64:
-		num, ok := val.(int)
-		if !ok {
-			switch v := reflect.ValueOf(val); v.Kind() {
-			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-				return strconv.FormatInt(v.Int(), 10)
-			case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-				return strconv.FormatUint(v.Uint(), 10)
-			default:
-				return fmt.Sprintf("%v", val)
-			}
-		}
-		return strconv.Itoa(num)
+	case int:
+		return strconv.Itoa(val.(int))
+	case int8:
+		return strconv.FormatInt(int64(val.(int8)), 10)
+	case int16:
+		return strconv.FormatInt(int64(val.(int16)), 10)
+	case int32:
+		return strconv.FormatInt(int64(val.(int32)), 10)
+	case int64:
+		return strconv.FormatInt(int64(val.(int64)), 10)
+	case uint8:
+		return strconv.FormatUint(uint64(val.(uint8)), 10)
+	case uint16:
+		return strconv.FormatUint(uint64(val.(uint16)), 10)
+	case uint32:
+		return strconv.FormatUint(uint64(val.(uint32)), 10)
+	case uint64:
+		return strconv.FormatUint(uint64(val.(uint64)), 10)
 	case fmt.Stringer:
 		return val.(fmt.Stringer).String()
 	default:
@@ -215,20 +230,24 @@ func toRecordValue(val interface{}) recVal {
 			return recVal{"true", booleanVal}
 		}
 		return recVal{"false", booleanVal}
-	case int, int8, int16, int32, int64, uint8, uint16, uint32, uint64:
-		num, ok := val.(int)
-		if !ok {
-			switch v := reflect.ValueOf(val); v.Kind() {
-			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-				return recVal{strconv.FormatInt(v.Int(), 10), integerVal}
-			case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-				return recVal{strconv.FormatUint(v.Uint(), 10), integerVal}
-			default:
-				return recVal{fmt.Sprintf("%v", val), integerVal}
-			}
-
-		}
-		return recVal{strconv.Itoa(num), integerVal}
+	case int:
+		return recVal{strconv.Itoa(val.(int)), integerVal}
+	case int8:
+		return recVal{strconv.FormatInt(int64(val.(int8)), 10), integerVal}
+	case int16:
+		return recVal{strconv.FormatInt(int64(val.(int16)), 10), integerVal}
+	case int32:
+		return recVal{strconv.FormatInt(int64(val.(int32)), 10), integerVal}
+	case int64:
+		return recVal{strconv.FormatInt(int64(val.(int64)), 10), integerVal}
+	case uint8:
+		return recVal{strconv.FormatUint(uint64(val.(uint8)), 10), integerVal}
+	case uint16:
+		return recVal{strconv.FormatUint(uint64(val.(uint16)), 10), integerVal}
+	case uint32:
+		return recVal{strconv.FormatUint(uint64(val.(uint32)), 10), integerVal}
+	case uint64:
+		return recVal{strconv.FormatUint(uint64(val.(uint64)), 10), integerVal}
 	case fmt.Stringer:
 		return recVal{val.(fmt.Stringer).String(), stringVal}
 	default:
