@@ -10,12 +10,16 @@
 
 ## Features
 
-* priority on high readability for humans
-* JSON mode that liked by machines
-* selectable outputs for writing logs based on field filters
-* dynamically changed fields visibility in an output
-* no nailed levels, no hardcoded fields, but explicit labels for each logged value
-* keeps a context of an application
+Shortly: both humans and robots are love it!
+
+Briefly:
+
+* explicit labels for logged values for high readability by humans
+* optional JSON format that liked by machines
+* selectable outputs (filters define which output use)
+* dynamically change records visibility in an output
+* no nailed levels, no hardcoded fields in the format
+* keep the context of an application
 
 ## Docs [![GoDoc](https://godoc.org/github.com/grafov/kiwi?status.svg)](https://godoc.org/github.com/grafov/kiwi)
 
