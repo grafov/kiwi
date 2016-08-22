@@ -18,7 +18,7 @@ type (
 		pairs      map[string]recVal
 	}
 	Record interface {
-		fmt.Stringer
+		String() string
 		IsQuoted() bool
 	}
 	recVal struct {
