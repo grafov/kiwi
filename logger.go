@@ -7,16 +7,19 @@ import (
 	"time"
 )
 
-// Logger keeps context and log record. There are many loggers initialized
-// in different places of application. Loggers are safe for
-// concurrent usage.
 type (
+	// Logger keeps context and log record. There are many loggers initialized
+	// in different places of application. Loggers are safe for
+	// concurrent usage.
 	Logger struct {
 		sync.RWMutex
 		contextSrc map[interface{}]interface{}
 		context    map[string]recVal
 		pairs      map[string]recVal
 	}
+	// Record allows log data from any custom types in they conform this interface.
+	// Also types that conform fmt.Stringer can be used. But as they not have IsQuoted() check
+	// they always treated as strings and displayed in quotes.
 	Record interface {
 		String() string
 		IsQuoted() bool
@@ -25,9 +28,6 @@ type (
 		Val    string
 		Type   uint8
 		Quoted bool
-	}
-	fnVal struct { // вычислять при вызове log
-		fn func() interface{}
 	}
 )
 
