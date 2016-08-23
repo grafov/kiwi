@@ -1,8 +1,11 @@
 package kiwi
 
 import (
+	"bytes"
 	"reflect"
+	"strings"
 	"testing"
+	"time"
 )
 
 /* All tests consists of three parts:
@@ -134,4 +137,17 @@ func TestLogger_Add_Chained(t *testing.T) {
 
 	log.Log()
 	log.Add("key", "value2").Log()
+}
+
+func TestLogger_IntValues(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := NewLogger()
+	UseOutput(output, Logfmt)
+
+	log.Log("k", 123)
+
+	time.Sleep(10 * time.Millisecond)
+	if strings.TrimSpace(output.String()) != "k=123" {
+		t.Fail()
+	}
 }
