@@ -58,8 +58,8 @@ func UseOutput(w io.Writer, logFormat format) *Output {
 	return out
 }
 
-// With sets restriction for log records output.
-// Only records that has all keys will be logged.
+// With sets restriction for records output.
+// Only the records WITH any of the keys will be passed to output.
 func (out *Output) With(keys ...string) *Output {
 	out.Lock()
 	for _, tag := range keys {
@@ -70,9 +70,20 @@ func (out *Output) With(keys ...string) *Output {
 	return out
 }
 
-// WithValues defines arbitrary set of values for a key.
-// Any of these values for a defined key must be presented
-// in a log record.
+// Without sets restriction for records output.
+// Only the records WITHOUT any of the keys will be passed to output.
+func (out *Output) Without(keys ...string) *Output {
+	out.Lock()
+	for _, tag := range keys {
+		out.negativeFilters[tag] = &keyFilter{Key: tag}
+		delete(out.positiveFilters, tag)
+	}
+	out.Unlock()
+	return out
+}
+
+// WithValues sets restriction for records output.
+// A record passed to output if the key equal one of any of the listed values.
 func (out *Output) WithValues(key string, vals ...string) *Output {
 	if len(vals) == 0 {
 		return out.With(key)
@@ -84,18 +95,7 @@ func (out *Output) WithValues(key string, vals ...string) *Output {
 	return out
 }
 
-// Without set filter for keys those should not be present in a log record.
-// It will pass only records that has no one key from this set.
-func (out *Output) Without(keys ...string) *Output {
-	out.Lock()
-	for _, tag := range keys {
-		delete(out.negativeFilters, tag)
-		out.positiveFilters[tag] = &keyFilter{Key: tag}
-	}
-	out.Unlock()
-	return out
-}
-
+// WithoutValues sets restriction for records output.
 func (out *Output) WithoutValues(key string, vals ...string) *Output {
 	if len(vals) == 0 {
 		return out.Without(key)
@@ -103,6 +103,25 @@ func (out *Output) WithoutValues(key string, vals ...string) *Output {
 	out.Lock()
 	delete(out.positiveFilters, key)
 	out.negativeFilters[key] = &valsFilter{Key: key, Vals: vals}
+	out.Unlock()
+	return out
+}
+
+func (out *Output) WithRangeInt64(key string, from, to int64) *Output {
+	return out
+}
+
+func (out *Output) WithRangeFloat64(key string, from, to float64) *Output {
+	return out
+}
+
+// Reset all filters for the keys for the output.
+func (out *Output) Reset(keys ...string) *Output {
+	out.Lock()
+	for _, tag := range keys {
+		delete(out.positiveFilters, tag)
+		delete(out.negativeFilters, tag)
+	}
 	out.Unlock()
 	return out
 }
