@@ -3,5 +3,5 @@ package kiwi
 import "io"
 
 func init() {
-	outputs.w = make(map[io.Writer]*Output)
+	outputs.m = make(map[io.Writer]*Output)
 }

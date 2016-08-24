@@ -8,7 +8,7 @@ import (
 
 var outputs struct {
 	sync.RWMutex
-	w map[io.Writer]*Output
+	m map[io.Writer]*Output
 }
 
 type (
@@ -44,7 +44,7 @@ const (
 func UseOutput(w io.Writer, logFormat format) *Output {
 	outputs.Lock()
 	defer outputs.Unlock()
-	if out, ok := outputs.w[w]; ok {
+	if out, ok := outputs.m[w]; ok {
 		return out
 	}
 	out := &Output{
@@ -53,7 +53,7 @@ func UseOutput(w io.Writer, logFormat format) *Output {
 		positiveFilters: make(map[string]filter),
 		negativeFilters: make(map[string]filter),
 		format:          logFormat}
-	outputs.w[w] = out
+	outputs.m[w] = out
 	go processOutput(out)
 	return out
 }
@@ -145,7 +145,7 @@ func (out *Output) Close() {
 // A new record passed to all outputs. Each output routine decides n
 func passRecordToOutput(record map[string]recVal) {
 	outputs.RLock()
-	for _, out := range outputs.w {
+	for _, out := range outputs.m {
 		out.In <- record
 	}
 	outputs.RUnlock()
