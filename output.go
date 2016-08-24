@@ -181,6 +181,9 @@ func (out *Output) write(record map[string]recVal) {
 	var logLine bytes.Buffer
 	out.RLock()
 	for key, val := range record {
+		if ok := out.hiddenKeys[key]; ok {
+			continue
+		}
 		logLine.WriteString(key)
 		logLine.WriteRune('=')
 		if val.Quoted {
