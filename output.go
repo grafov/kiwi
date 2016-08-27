@@ -107,11 +107,31 @@ func (out *Output) WithoutValues(key string, vals ...string) *Output {
 	return out
 }
 
+// WithRangeInt64 sets restriction for records output.
 func (out *Output) WithRangeInt64(key string, from, to int64) *Output {
+	out.Lock()
+	delete(out.negativeFilters, key)
+	out.positiveFilters[key] = &rangeInt64Filter{Key: key, From: from, To: to}
+	out.Unlock()
 	return out
 }
 
+// WithRangeFloat64 sets restriction for records output.
+func (out *Output) WithoutRangeInt64(key string, from, to int64) *Output {
+	return out
+}
+
+// WithRangeFloat64 sets restriction for records output.
 func (out *Output) WithRangeFloat64(key string, from, to float64) *Output {
+	out.Lock()
+	delete(out.negativeFilters, key)
+	out.positiveFilters[key] = &rangeFloat64Filter{Key: key, From: from, To: to}
+	out.Unlock()
+	return out
+}
+
+// WithoutRangeFloat64  sets restriction for records output.
+func (out *Output) WithoutRangeFloat64(key string, from, to float64) *Output {
 	return out
 }
 
