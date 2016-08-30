@@ -45,7 +45,6 @@ func (l *Logger) Log(keyVals ...interface{}) {
 		l.Add(keyVals...)
 	}
 	l.Lock()
-
 	record := l.pairs
 	l.pairs = make(map[string]value)
 	for key, val := range l.context {
@@ -96,7 +95,6 @@ func (l *Logger) With(keyVals ...interface{}) *Logger {
 		l.contextSrc[keySrc] = val
 		l.context[key] = toRecordValue(val)
 	}
-
 	// for odd number of key-val pairs just add label without value
 	if len(keyVals)%2 == 1 {
 		l.contextSrc[keySrc] = nil
@@ -119,10 +117,9 @@ func (l *Logger) Without(keys ...interface{}) *Logger {
 	return l
 }
 
-// WithTimestamp adds "timestamp" field to a context.
+// WithTimestamp adds "timestamp" field to the context.
 func (l *Logger) WithTimestamp(format string) *Logger {
 	l.Lock()
-	// TODO think about offer fmt.Stringer here instead of custom func?
 	l.contextSrc["timestamp"] = func() string { return time.Now().Format(format) }
 	l.context["timestamp"] = value{"", func() string { return time.Now().Format(format) }, stringVal, true}
 	l.Unlock()
@@ -146,7 +143,7 @@ func (l *Logger) ResetContext() *Logger {
 	return l
 }
 
-// GetContext returns copy of context saved in the logger.
+// GetContext returns copy of the context saved in the logger.
 func (l *Logger) GetContext() map[interface{}]interface{} {
 	var contextSrc = make(map[interface{}]interface{})
 	l.RLock()
@@ -155,6 +152,14 @@ func (l *Logger) GetContext() map[interface{}]interface{} {
 	}
 	l.RUnlock()
 	return contextSrc
+}
+
+// GetContextValue returns single context value for the key.
+func (l *Logger) GetContextValue(key string) interface{} {
+	l.RLock()
+	value := l.contextSrc[key]
+	l.RUnlock()
+	return value
 }
 
 // GetRecord returns copy of current set of keys and values prepared for logging

@@ -210,7 +210,9 @@ func processOutput(out *Output) {
 				}
 			}
 		}
+		out.RUnlock()
 		out.write(record)
+		continue
 	skipRecord:
 		out.RUnlock()
 	}
@@ -219,10 +221,10 @@ func processOutput(out *Output) {
 // it yet ignores output format
 func (out *Output) write(record map[string]value) {
 	var logLine bytes.Buffer
-	out.RLock()
 	switch out.format {
 	case JSON:
 		logLine.WriteRune('{')
+		out.RLock()
 		for key, val := range record {
 			if ok := out.hiddenKeys[key]; ok {
 				continue
@@ -247,8 +249,7 @@ func (out *Output) write(record map[string]value) {
 		}
 		logLine.WriteRune('}')
 	case Logfmt:
-		fallthrough
-	default:
+		out.RLock()
 		for key, val := range record {
 			if ok := out.hiddenKeys[key]; ok {
 				continue

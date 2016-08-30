@@ -17,9 +17,6 @@ const (
 
 // it applicable for all scalar types and for strings
 func toRecordKey(val interface{}) string {
-	if val == nil {
-		return ""
-	}
 	switch val.(type) {
 	case bool:
 		if val.(bool) {
@@ -63,9 +60,6 @@ func toRecordKey(val interface{}) string {
 
 // it applicable for all scalar types and for strings
 func toRecordValue(val interface{}) value {
-	if val == nil {
-		return value{"", nil, voidVal, false}
-	}
 	switch val.(type) {
 	case string:
 		return value{val.(string), nil, stringVal, true}
@@ -118,6 +112,8 @@ func toRecordValue(val interface{}) value {
 		return value{"", val, floatVal, true}
 	case func() complex64:
 		return value{"", val, complexVal, false}
+	case nil:
+		return value{"", nil, voidVal, false}
 	default:
 		return value{fmt.Sprintf("%v", val), nil, stringVal, true}
 	}
