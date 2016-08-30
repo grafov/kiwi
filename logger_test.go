@@ -23,12 +23,12 @@ var (
 )
 
 // Get records from logger. Helper for testing.
-func (l *Logger) getRecords() map[string]recVal {
+func (l *Logger) getRecords() map[string]value {
 	return l.pairs
 }
 
 // Get context from logger. Helper for testing.
-func (l *Logger) getContext() map[string]recVal {
+func (l *Logger) getContext() map[string]value {
 	return l.context
 }
 

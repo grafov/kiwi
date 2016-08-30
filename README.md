@@ -35,7 +35,7 @@ Package have not external dependencies except standard library. So just
 ## Evaluating rules of record values
 
 * Logged values evaluated *immediately* when they added to a record.
-* Context of a logger *evaluated once* when it added to a logger.
+* Context values evaluated *once* when they added to a logger.
 * For lazy evaluating of context and record values use workaround with functions without call them in a log record:
 
         # For lazy evaluating you need function that returns interface{} or []interface{}
@@ -45,8 +45,9 @@ Package have not external dependencies except standard library. So just
         }
         myLog.Add("lazy-sample", longActionForDelayedEvaluation) # but not longActionForDelayedEvaluation()
 
-Logger recognizes next function types on adding key-val pairs to a record:
+Logger recognizes next function types when adding key-val pairs to a record:
 
+* `func () string`
 * `func () interface{}`
 * `func () []interface{}`
 
@@ -62,6 +63,20 @@ Hence value of `lazy-sample` from the example above will be evaluated only on `L
 ## Similar works
 
 * [log15](https://github.com/inconshreveable/log15)
+
+## Comparison with other loggers
+
+    $ go test -bench=. -benchmem 2>/dev/null
+    BenchmarkLog-4                 50000         28010 ns/op       0.07 MB/s        6177 B/op        124 allocs/op
+    BenchmarkLogComplex-4          30000         53556 ns/op       0.04 MB/s        9763 B/op        200 allocs/op
+    BenchmarkKiwi-4                30000         57021 ns/op       0.04 MB/s        8936 B/op        178 allocs/op
+    BenchmarkKiwiComplex-4         20000         93398 ns/op       0.02 MB/s       15162 B/op        218 allocs/op
+    BenchmarkLogxi-4              100000         17624 ns/op       0.11 MB/s        2704 B/op         74 allocs/op
+    BenchmarkLogxiComplex-4        50000         37384 ns/op       0.05 MB/s        6608 B/op        162 allocs/op
+    BenchmarkLogrus-4              30000         49310 ns/op       0.04 MB/s       11235 B/op        184 allocs/op
+    BenchmarkLogrusComplex-4       30000         54531 ns/op       0.04 MB/s       12568 B/op        238 allocs/op
+    BenchmarkLog15-4               20000         69580 ns/op       0.03 MB/s       13733 B/op        224 allocs/op
+    BenchmarkLog15Complex-4        20000         80240 ns/op       0.02 MB/s       12245 B/op        245 allocs/op
 
 ## Origins
 
