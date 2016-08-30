@@ -7,10 +7,7 @@ import (
 	"sync"
 )
 
-var outputs struct {
-	sync.RWMutex
-	m map[io.Writer]*Output
-}
+var outputs []*Output
 
 type (
 	// Output used for filtering incoming log records from all logger instances
@@ -22,6 +19,7 @@ type (
 		w               io.Writer
 		format          format
 		paused          bool
+		closed          bool
 		positiveFilters map[string]filter
 		negativeFilters map[string]filter
 		hiddenKeys      map[string]bool
@@ -43,10 +41,10 @@ const (
 // There are any number of outputs may be created for saving incoming log
 // records to different places.
 func UseOutput(w io.Writer, logFormat format) *Output {
-	outputs.Lock()
-	defer outputs.Unlock()
-	if out, ok := outputs.m[w]; ok {
-		return out
+	for _, out := range outputs {
+		if out.w == w {
+			return out
+		}
 	}
 	out := &Output{
 		In:              make(chan map[string]value, 1),
@@ -54,7 +52,7 @@ func UseOutput(w io.Writer, logFormat format) *Output {
 		positiveFilters: make(map[string]filter),
 		negativeFilters: make(map[string]filter),
 		format:          logFormat}
-	outputs.m[w] = out
+	outputs = append(outputs, out)
 	go processOutput(out)
 	return out
 }
@@ -63,9 +61,11 @@ func UseOutput(w io.Writer, logFormat format) *Output {
 // Only the records WITH any of the keys will be passed to output.
 func (out *Output) With(keys ...string) *Output {
 	out.Lock()
-	for _, tag := range keys {
-		delete(out.negativeFilters, tag)
-		out.positiveFilters[tag] = &keyFilter{Key: tag}
+	if !out.closed {
+		for _, tag := range keys {
+			delete(out.negativeFilters, tag)
+			out.positiveFilters[tag] = &keyFilter{Key: tag}
+		}
 	}
 	out.Unlock()
 	return out
@@ -75,9 +75,11 @@ func (out *Output) With(keys ...string) *Output {
 // Only the records WITHOUT any of the keys will be passed to output.
 func (out *Output) Without(keys ...string) *Output {
 	out.Lock()
-	for _, tag := range keys {
-		out.negativeFilters[tag] = &keyFilter{Key: tag}
-		delete(out.positiveFilters, tag)
+	if !out.closed {
+		for _, tag := range keys {
+			out.negativeFilters[tag] = &keyFilter{Key: tag}
+			delete(out.positiveFilters, tag)
+		}
 	}
 	out.Unlock()
 	return out
@@ -90,8 +92,10 @@ func (out *Output) WithValues(key string, vals ...string) *Output {
 		return out.With(key)
 	}
 	out.Lock()
-	delete(out.negativeFilters, key)
-	out.positiveFilters[key] = &valsFilter{Key: key, Vals: vals}
+	if !out.closed {
+		delete(out.negativeFilters, key)
+		out.positiveFilters[key] = &valsFilter{Key: key, Vals: vals}
+	}
 	out.Unlock()
 	return out
 }
@@ -102,8 +106,10 @@ func (out *Output) WithoutValues(key string, vals ...string) *Output {
 		return out.Without(key)
 	}
 	out.Lock()
-	delete(out.positiveFilters, key)
-	out.negativeFilters[key] = &valsFilter{Key: key, Vals: vals}
+	if !out.closed {
+		delete(out.positiveFilters, key)
+		out.negativeFilters[key] = &valsFilter{Key: key, Vals: vals}
+	}
 	out.Unlock()
 	return out
 }
@@ -111,8 +117,10 @@ func (out *Output) WithoutValues(key string, vals ...string) *Output {
 // WithRangeInt64 sets restriction for records output.
 func (out *Output) WithRangeInt64(key string, from, to int64) *Output {
 	out.Lock()
-	delete(out.negativeFilters, key)
-	out.positiveFilters[key] = &rangeInt64Filter{Key: key, From: from, To: to}
+	if !out.closed {
+		delete(out.negativeFilters, key)
+		out.positiveFilters[key] = &rangeInt64Filter{Key: key, From: from, To: to}
+	}
 	out.Unlock()
 	return out
 }
@@ -133,6 +141,7 @@ func (out *Output) WithRangeFloat64(key string, from, to float64) *Output {
 
 // WithoutRangeFloat64  sets restriction for records output.
 func (out *Output) WithoutRangeFloat64(key string, from, to float64) *Output {
+	// XXX
 	return out
 }
 
@@ -151,8 +160,10 @@ func (out *Output) Reset(keys ...string) *Output {
 // but not hidden keys.
 func (out *Output) Hide(keys ...string) *Output {
 	out.Lock()
-	for _, tag := range keys {
-		out.hiddenKeys[tag] = true
+	if !out.closed {
+		for _, tag := range keys {
+			out.hiddenKeys[tag] = true
+		}
 	}
 	out.Unlock()
 	return out
@@ -161,8 +172,10 @@ func (out *Output) Hide(keys ...string) *Output {
 // Unhide previously hidden keys. They will be displayed in the output again.
 func (out *Output) Unhide(keys ...string) *Output {
 	out.Lock()
-	for _, tag := range keys {
-		delete(out.hiddenKeys, tag)
+	if !out.closed {
+		for _, tag := range keys {
+			delete(out.hiddenKeys, tag)
+		}
 	}
 	out.Unlock()
 	return out
@@ -179,29 +192,31 @@ func (out *Output) Continue() {
 }
 
 func (out *Output) Close() {
-	// TODO refactor for concurrency access!
-	out.paused = true
+	out.Lock()
+	out.closed = true
+	out.Unlock()
 	close(out.In)
 }
 
 // A new record passed to all outputs. Each output routine decides n
 func passRecordToOutput(record map[string]value) {
-	outputs.RLock()
-	for _, out := range outputs.m {
-		if !out.paused {
+	for _, out := range outputs {
+		if !out.closed && !out.paused {
 			out.In <- record
 		}
 	}
-	outputs.RUnlock()
 }
 
 func processOutput(out *Output) {
 	for {
-		record, closed := <-out.In
-		if !closed {
+		record, ok := <-out.In
+		if !ok {
+			out.positiveFilters = nil
+			out.negativeFilters = nil
+			out.hiddenKeys = nil
 			return
 		}
-		if out.paused {
+		if out.closed || out.paused {
 			continue
 		}
 		out.RLock()

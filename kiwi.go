@@ -1,7 +1,7 @@
 package kiwi
 
-import "io"
+//import "io"
 
 func init() {
-	outputs.m = make(map[io.Writer]*Output)
+	//	outputs.m = make(map[io.Writer]*Output)
 }

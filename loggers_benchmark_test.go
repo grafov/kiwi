@@ -49,48 +49,6 @@ func toJSON(m map[string]interface{}) string {
 // These tests write out all log levels with concurrency turned on and
 // (mostly) equivalent fields.
 
-func BenchmarkLog(b *testing.B) {
-	buf := &bytes.Buffer{}
-	b.SetBytes(2)
-	l := L.New(buf, "bench ", L.LstdFlags)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		debug := map[string]interface{}{"l": "debug", "key1": 1, "key2": 3.141592, "key3": "string", "key4": false}
-		l.Printf(toJSON(debug))
-
-		info := map[string]interface{}{"l": "info", "key1": 1, "key2": 3.141592, "key3": "string", "key4": false}
-		l.Printf(toJSON(info))
-
-		warn := map[string]interface{}{"l": "warn", "key1": 1, "key2": 3.141592, "key3": "string", "key4": false}
-		l.Printf(toJSON(warn))
-
-		err := map[string]interface{}{"l": "error", "key1": 1, "key2": 3.141592, "key3": "string", "key4": false}
-		l.Printf(toJSON(err))
-	}
-	b.StopTimer()
-}
-
-func BenchmarkLogComplex(b *testing.B) {
-	buf := &bytes.Buffer{}
-	b.SetBytes(2)
-	l := L.New(buf, "bench ", L.LstdFlags)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		debug := map[string]interface{}{"l": "debug", "key1": 1, "obj": testObject}
-		l.Printf(toJSON(debug))
-
-		info := map[string]interface{}{"l": "info", "key1": 1, "obj": testObject}
-		l.Printf(toJSON(info))
-
-		warn := map[string]interface{}{"l": "warn", "key1": 1, "obj": testObject}
-		l.Printf(toJSON(warn))
-
-		err := map[string]interface{}{"l": "error", "key1": 1, "obj": testObject}
-		l.Printf(toJSON(err))
-	}
-	b.StopTimer()
-}
-
 func BenchmarkKiwi(b *testing.B) {
 	buf := &bytes.Buffer{}
 	b.SetBytes(2)
@@ -125,6 +83,48 @@ func BenchmarkKiwiComplex(b *testing.B) {
 		l.Info("key", 1, "obj", testObject)
 		l.Warn("key", 1, "obj", testObject)
 		l.Error("key", 1, "obj", testObject)
+	}
+	b.StopTimer()
+}
+
+func BenchmarkStdLog(b *testing.B) {
+	buf := &bytes.Buffer{}
+	b.SetBytes(2)
+	l := L.New(buf, "bench ", L.LstdFlags)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		debug := map[string]interface{}{"l": "debug", "key1": 1, "key2": 3.141592, "key3": "string", "key4": false}
+		l.Printf(toJSON(debug))
+
+		info := map[string]interface{}{"l": "info", "key1": 1, "key2": 3.141592, "key3": "string", "key4": false}
+		l.Printf(toJSON(info))
+
+		warn := map[string]interface{}{"l": "warn", "key1": 1, "key2": 3.141592, "key3": "string", "key4": false}
+		l.Printf(toJSON(warn))
+
+		err := map[string]interface{}{"l": "error", "key1": 1, "key2": 3.141592, "key3": "string", "key4": false}
+		l.Printf(toJSON(err))
+	}
+	b.StopTimer()
+}
+
+func BenchmarkStdLogComplex(b *testing.B) {
+	buf := &bytes.Buffer{}
+	b.SetBytes(2)
+	l := L.New(buf, "bench ", L.LstdFlags)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		debug := map[string]interface{}{"l": "debug", "key1": 1, "obj": testObject}
+		l.Printf(toJSON(debug))
+
+		info := map[string]interface{}{"l": "info", "key1": 1, "obj": testObject}
+		l.Printf(toJSON(info))
+
+		warn := map[string]interface{}{"l": "warn", "key1": 1, "obj": testObject}
+		l.Printf(toJSON(warn))
+
+		err := map[string]interface{}{"l": "error", "key1": 1, "obj": testObject}
+		l.Printf(toJSON(err))
 	}
 	b.StopTimer()
 }
