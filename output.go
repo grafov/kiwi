@@ -3,6 +3,7 @@ package kiwi
 import (
 	"bytes"
 	"io"
+	"strconv"
 	"sync"
 )
 
@@ -17,7 +18,7 @@ type (
 	// Output methods are safe for concurrent usage.
 	Output struct {
 		sync.RWMutex
-		In              chan map[string]recVal
+		In              chan map[string]value
 		w               io.Writer
 		format          format
 		paused          bool
@@ -48,7 +49,7 @@ func UseOutput(w io.Writer, logFormat format) *Output {
 		return out
 	}
 	out := &Output{
-		In:              make(chan map[string]recVal, 1),
+		In:              make(chan map[string]value, 1),
 		w:               w,
 		positiveFilters: make(map[string]filter),
 		negativeFilters: make(map[string]filter),
@@ -182,7 +183,7 @@ func (out *Output) Close() {
 }
 
 // A new record passed to all outputs. Each output routine decides n
-func passRecordToOutput(record map[string]recVal) {
+func passRecordToOutput(record map[string]value) {
 	outputs.RLock()
 	for _, out := range outputs.m {
 		out.In <- record
@@ -216,23 +217,59 @@ func processOutput(out *Output) {
 }
 
 // it yet ignores output format
-func (out *Output) write(record map[string]recVal) {
+func (out *Output) write(record map[string]value) {
 	var logLine bytes.Buffer
 	out.RLock()
-	for key, val := range record {
-		if ok := out.hiddenKeys[key]; ok {
-			continue
-		}
-		logLine.WriteString(key)
-		logLine.WriteRune('=')
-		if val.Quoted {
+	switch out.format {
+	case JSON:
+		logLine.WriteRune('{')
+		for key, val := range record {
+			if ok := out.hiddenKeys[key]; ok {
+				continue
+			}
 			logLine.WriteRune('"')
+			logLine.WriteString(key)
+			logLine.WriteString("\":")
+			var curVal string
+			if val.Func != nil {
+				// Evaluate lazy value here
+				tmp := toRecordValue(toFunc(val.Func))
+				curVal = tmp.Val
+			} else {
+				curVal = val.Val
+			}
+			if val.Quoted {
+				logLine.WriteString(strconv.Quote(curVal))
+			} else {
+				logLine.WriteString(curVal)
+			}
+			logLine.WriteString(", ")
 		}
-		logLine.WriteString(val.Val)
-		if val.Quoted {
-			logLine.WriteRune('"')
+		logLine.WriteRune('}')
+	case Logfmt:
+		fallthrough
+	default:
+		for key, val := range record {
+			if ok := out.hiddenKeys[key]; ok {
+				continue
+			}
+			logLine.WriteString(key)
+			logLine.WriteRune('=')
+			var curVal string
+			if val.Func != nil {
+				// Evaluate lazy value here
+				tmp := toRecordValue(toFunc(val.Func))
+				curVal = tmp.Val
+			} else {
+				curVal = val.Val
+			}
+			if val.Quoted {
+				logLine.WriteString(strconv.Quote(curVal))
+			} else {
+				logLine.WriteString(curVal)
+			}
+			logLine.WriteRune(' ')
 		}
-		logLine.WriteRune(' ')
 	}
 	out.RUnlock()
 	logLine.WriteRune('\n')
