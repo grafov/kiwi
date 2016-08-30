@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"bytes"
 	"github.com/Sirupsen/logrus"
 	"github.com/grafov/kiwi"
 	"github.com/mgutz/logxi/v1"
@@ -49,8 +50,9 @@ func toJSON(m map[string]interface{}) string {
 // (mostly) equivalent fields.
 
 func BenchmarkLog(b *testing.B) {
+	buf := &bytes.Buffer{}
 	b.SetBytes(2)
-	l := L.New(os.Stderr, "bench ", L.LstdFlags)
+	l := L.New(buf, "bench ", L.LstdFlags)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		debug := map[string]interface{}{"l": "debug", "key1": 1, "key2": 3.141592, "key3": "string", "key4": false}
@@ -69,8 +71,9 @@ func BenchmarkLog(b *testing.B) {
 }
 
 func BenchmarkLogComplex(b *testing.B) {
+	buf := &bytes.Buffer{}
 	b.SetBytes(2)
-	l := L.New(os.Stderr, "bench ", L.LstdFlags)
+	l := L.New(buf, "bench ", L.LstdFlags)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		debug := map[string]interface{}{"l": "debug", "key1": 1, "obj": testObject}
@@ -89,12 +92,13 @@ func BenchmarkLogComplex(b *testing.B) {
 }
 
 func BenchmarkKiwi(b *testing.B) {
+	buf := &bytes.Buffer{}
 	b.SetBytes(2)
 	l := kiwi.NewLogger()
 	l.With("_n", "bench", "_p", pid)
 	l.WithTimestamp(time.RFC3339)
 	kiwi.LevelName = "l"
-	kiwi.UseOutput(os.Stderr, kiwi.JSON)
+	kiwi.UseOutput(buf, kiwi.JSON)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		l.Debug("key", 1, "key2", 3.141592, "key3", "string", "key4", false)
@@ -106,12 +110,13 @@ func BenchmarkKiwi(b *testing.B) {
 }
 
 func BenchmarkKiwiComplex(b *testing.B) {
+	buf := &bytes.Buffer{}
 	b.SetBytes(2)
 	l := kiwi.NewLogger()
 	l.With("_n", "bench", "_p", pid)
 	l.WithTimestamp(time.RFC3339)
 	kiwi.LevelName = "l"
-	kiwi.UseOutput(os.Stderr, kiwi.JSON)
+	kiwi.UseOutput(buf, kiwi.JSON)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		l.Debug("key", 1, "obj", testObject)
@@ -123,8 +128,9 @@ func BenchmarkKiwiComplex(b *testing.B) {
 }
 
 func BenchmarkLogxi(b *testing.B) {
+	buf := &bytes.Buffer{}
 	b.SetBytes(2)
-	stdout := log.NewConcurrentWriter(os.Stderr)
+	stdout := log.NewConcurrentWriter(buf)
 	l := log.NewLogger3(stdout, "bench", log.NewJSONFormatter("bench"))
 	l.SetLevel(log.LevelDebug)
 	b.ResetTimer()
@@ -138,8 +144,9 @@ func BenchmarkLogxi(b *testing.B) {
 }
 
 func BenchmarkLogxiComplex(b *testing.B) {
+	buf := &bytes.Buffer{}
 	b.SetBytes(2)
-	stdout := log.NewConcurrentWriter(os.Stderr)
+	stdout := log.NewConcurrentWriter(buf)
 	l := log.NewLogger3(stdout, "bench", log.NewJSONFormatter("bench"))
 	l.SetLevel(log.LevelDebug)
 	b.ResetTimer()
@@ -154,8 +161,10 @@ func BenchmarkLogxiComplex(b *testing.B) {
 }
 
 func BenchmarkLogrus(b *testing.B) {
+	buf := &bytes.Buffer{}
 	b.SetBytes(2)
 	l := logrus.New()
+	l.Out = buf
 	l.Formatter = &logrus.JSONFormatter{}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -168,8 +177,10 @@ func BenchmarkLogrus(b *testing.B) {
 }
 
 func BenchmarkLogrusComplex(b *testing.B) {
+	buf := &bytes.Buffer{}
 	b.SetBytes(2)
 	l := logrus.New()
+	l.Out = buf
 	l.Formatter = &logrus.JSONFormatter{}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -182,9 +193,10 @@ func BenchmarkLogrusComplex(b *testing.B) {
 }
 
 func BenchmarkLog15(b *testing.B) {
+	buf := &bytes.Buffer{}
 	b.SetBytes(2)
 	l := log15.New(log15.Ctx{"_n": "bench", "_p": pid})
-	l.SetHandler(log15.SyncHandler(log15.StreamHandler(os.Stderr, log15.JsonFormat())))
+	l.SetHandler(log15.SyncHandler(log15.StreamHandler(buf, log15.JsonFormat())))
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		l.Debug("debug", "key", 1, "key2", 3.141592, "key3", "string", "key4", false)
@@ -197,9 +209,10 @@ func BenchmarkLog15(b *testing.B) {
 }
 
 func BenchmarkLog15Complex(b *testing.B) {
+	buf := &bytes.Buffer{}
 	b.SetBytes(2)
 	l := log15.New(log15.Ctx{"_n": "bench", "_p": pid})
-	l.SetHandler(log15.SyncHandler(log15.StreamHandler(os.Stderr, log15.JsonFormat())))
+	l.SetHandler(log15.SyncHandler(log15.StreamHandler(buf, log15.JsonFormat())))
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		l.Debug("debug", "key", 1, "obj", testObject)
