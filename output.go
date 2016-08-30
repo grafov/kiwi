@@ -179,21 +179,28 @@ func (out *Output) Continue() {
 }
 
 func (out *Output) Close() {
-	// TODO close channel and check
+	// TODO refactor for concurrency access!
+	out.paused = true
+	close(out.In)
 }
 
 // A new record passed to all outputs. Each output routine decides n
 func passRecordToOutput(record map[string]value) {
 	outputs.RLock()
 	for _, out := range outputs.m {
-		out.In <- record
+		if !out.paused {
+			out.In <- record
+		}
 	}
 	outputs.RUnlock()
 }
 
 func processOutput(out *Output) {
 	for {
-		record := <-out.In
+		record, closed := <-out.In
+		if !closed {
+			return
+		}
 		if out.paused {
 			continue
 		}

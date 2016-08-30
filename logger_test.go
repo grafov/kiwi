@@ -142,12 +142,13 @@ func TestLogger_Add_Chained(t *testing.T) {
 func TestLogger_IntValues(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := NewLogger()
-	UseOutput(output, Logfmt)
+	out := UseOutput(output, Logfmt)
+	defer out.Close()
 
 	log.Log("k", 123)
 
-	time.Sleep(10 * time.Millisecond)
-	if strings.TrimSpace(output.String()) != "k=123" {
+	time.Sleep(20 * time.Millisecond)
+	if strings.TrimSpace(output.String()) != "k=123" { // XXX
 		t.Fail()
 	}
 }

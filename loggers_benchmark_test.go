@@ -98,7 +98,8 @@ func BenchmarkKiwi(b *testing.B) {
 	l.With("_n", "bench", "_p", pid)
 	l.WithTimestamp(time.RFC3339)
 	kiwi.LevelName = "l"
-	kiwi.UseOutput(buf, kiwi.JSON)
+	out := kiwi.UseOutput(buf, kiwi.JSON)
+	defer out.Close()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		l.Debug("key", 1, "key2", 3.141592, "key3", "string", "key4", false)
@@ -116,7 +117,8 @@ func BenchmarkKiwiComplex(b *testing.B) {
 	l.With("_n", "bench", "_p", pid)
 	l.WithTimestamp(time.RFC3339)
 	kiwi.LevelName = "l"
-	kiwi.UseOutput(buf, kiwi.JSON)
+	out := kiwi.UseOutput(buf, kiwi.JSON)
+	defer out.Close()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		l.Debug("key", 1, "obj", testObject)
