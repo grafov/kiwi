@@ -14,12 +14,11 @@ Shortly: both humans and robots are love it!
 
 Briefly:
 
-* explicit labels for logged values for high readability by humans
+* structured logging for high readability by humans
 * optional JSON format that liked by machines
-* selectable outputs (filters define which output use)
-* dynamically change records visibility in an output
+* dynamically selectable outputs (changing log verbosity on the fly)
 * no nailed levels, no hardcoded fields in the format
-* keep the context of an application
+* can keep context of application
 
 ## Docs [![GoDoc](https://godoc.org/github.com/grafov/kiwi?status.svg)](https://godoc.org/github.com/grafov/kiwi)
 
