@@ -47,13 +47,27 @@ func (l *Logger) Log(keyVals ...interface{}) {
 	l.Lock()
 	record := l.pairs
 	l.pairs = make(map[string]value)
+	l.Unlock()
+	var key string
+	for i, val := range keyVals {
+		if i%2 == 0 {
+			key = toRecordKey(val)
+			continue
+		}
+		record[key] = toRecordValue(val)
+	}
+	// for odd number of key-val pairs just add label without value
+	if len(keyVals)%2 == 1 {
+		record[key] = value{"", nil, voidVal, false}
+	}
+	l.RLock()
 	for key, val := range l.context {
 		// pairs override context
 		if _, ok := record[key]; !ok {
 			record[key] = val
 		}
 	}
-	l.Unlock()
+	l.RUnlock()
 	passRecordToOutput(record)
 }
 
