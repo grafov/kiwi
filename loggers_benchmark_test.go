@@ -3,13 +3,13 @@ package kiwi_test
 // It was adapted from logxi package.
 
 import (
+	"bytes"
 	"encoding/json"
 	L "log"
 	"os"
 	"testing"
 	"time"
 
-	"bytes"
 	"github.com/Sirupsen/logrus"
 	"github.com/grafov/kiwi"
 	"github.com/mgutz/logxi/v1"
@@ -49,7 +49,7 @@ func toJSON(m map[string]interface{}) string {
 // These tests write out all log levels with concurrency turned on and
 // (mostly) equivalent fields.
 
-func BenchmarkKiwi(b *testing.B) {
+func BenchmarkLevelsKiwi(b *testing.B) {
 	buf := &bytes.Buffer{}
 	b.SetBytes(2)
 	l := kiwi.NewLogger()
@@ -68,7 +68,7 @@ func BenchmarkKiwi(b *testing.B) {
 	b.StopTimer()
 }
 
-func BenchmarkKiwiComplex(b *testing.B) {
+func BenchmarkLevelsKiwiComplex(b *testing.B) {
 	buf := &bytes.Buffer{}
 	b.SetBytes(2)
 	l := kiwi.NewLogger()
@@ -87,7 +87,7 @@ func BenchmarkKiwiComplex(b *testing.B) {
 	b.StopTimer()
 }
 
-func BenchmarkStdLog(b *testing.B) {
+func BenchmarkLevelsStdLog(b *testing.B) {
 	buf := &bytes.Buffer{}
 	b.SetBytes(2)
 	l := L.New(buf, "bench ", L.LstdFlags)
@@ -108,7 +108,7 @@ func BenchmarkStdLog(b *testing.B) {
 	b.StopTimer()
 }
 
-func BenchmarkStdLogComplex(b *testing.B) {
+func BenchmarkLevelsStdLogComplex(b *testing.B) {
 	buf := &bytes.Buffer{}
 	b.SetBytes(2)
 	l := L.New(buf, "bench ", L.LstdFlags)
@@ -129,7 +129,7 @@ func BenchmarkStdLogComplex(b *testing.B) {
 	b.StopTimer()
 }
 
-func BenchmarkLogxi(b *testing.B) {
+func BenchmarkLevelsLogxi(b *testing.B) {
 	buf := &bytes.Buffer{}
 	b.SetBytes(2)
 	stdout := log.NewConcurrentWriter(buf)
@@ -145,7 +145,7 @@ func BenchmarkLogxi(b *testing.B) {
 	b.StopTimer()
 }
 
-func BenchmarkLogxiComplex(b *testing.B) {
+func BenchmarkLevelsLogxiComplex(b *testing.B) {
 	buf := &bytes.Buffer{}
 	b.SetBytes(2)
 	stdout := log.NewConcurrentWriter(buf)
@@ -162,7 +162,7 @@ func BenchmarkLogxiComplex(b *testing.B) {
 
 }
 
-func BenchmarkLogrus(b *testing.B) {
+func BenchmarkLevelsLogrus(b *testing.B) {
 	buf := &bytes.Buffer{}
 	b.SetBytes(2)
 	l := logrus.New()
@@ -178,7 +178,7 @@ func BenchmarkLogrus(b *testing.B) {
 	b.StopTimer()
 }
 
-func BenchmarkLogrusComplex(b *testing.B) {
+func BenchmarkLevelsLogrusComplex(b *testing.B) {
 	buf := &bytes.Buffer{}
 	b.SetBytes(2)
 	l := logrus.New()
@@ -194,7 +194,7 @@ func BenchmarkLogrusComplex(b *testing.B) {
 	b.StopTimer()
 }
 
-func BenchmarkLog15(b *testing.B) {
+func BenchmarkLevelsLog15(b *testing.B) {
 	buf := &bytes.Buffer{}
 	b.SetBytes(2)
 	l := log15.New(log15.Ctx{"_n": "bench", "_p": pid})
@@ -210,7 +210,7 @@ func BenchmarkLog15(b *testing.B) {
 
 }
 
-func BenchmarkLog15Complex(b *testing.B) {
+func BenchmarkLevelsLog15Complex(b *testing.B) {
 	buf := &bytes.Buffer{}
 	b.SetBytes(2)
 	l := log15.New(log15.Ctx{"_n": "bench", "_p": pid})
