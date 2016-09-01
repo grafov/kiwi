@@ -34,7 +34,7 @@ var testObject = M{
 // interface as well.
 // You need Record interface if you want specify quotation rules with IsQuoted().
 // Elsewere String() is enough.
-func (m *M) String() string {
+func (m M) String() string {
 	b, _ := json.Marshal(m)
 	return string(b)
 }
@@ -48,6 +48,44 @@ func toJSON(m map[string]interface{}) string {
 
 // These tests write out all log levels with concurrency turned on and
 // (mostly) equivalent fields.
+
+func BenchmarkLevelsKiwiTyped(b *testing.B) {
+	buf := &bytes.Buffer{}
+	b.SetBytes(2)
+	l := kiwi.NewLogger()
+	l.With("_n", "bench", "_p", pid)
+	l.WithTimestamp(time.RFC3339)
+	kiwi.LevelName = "l"
+	out := kiwi.UseOutput(buf, kiwi.JSON)
+	defer out.Close()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		l.AddInt("key", 1).AddFloat("key2", 3.141592).AddString("key3", "string").AddBool("key4", false).Debug()
+		l.AddInt("key", 1).AddFloat("key2", 3.141592).AddString("key3", "string").AddBool("key4", false).Info()
+		l.AddInt("key", 1).AddFloat("key2", 3.141592).AddString("key3", "string").AddBool("key4", false).Warn()
+		l.AddInt("key", 1).AddFloat("key2", 3.141592).AddString("key3", "string").AddBool("key4", false).Error()
+	}
+	b.StopTimer()
+}
+
+func BenchmarkLevelsKiwiTypedComplex(b *testing.B) {
+	buf := &bytes.Buffer{}
+	b.SetBytes(2)
+	l := kiwi.NewLogger()
+	l.With("_n", "bench", "_p", pid)
+	l.WithTimestamp(time.RFC3339)
+	kiwi.LevelName = "l"
+	out := kiwi.UseOutput(buf, kiwi.JSON)
+	defer out.Close()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		l.AddInt("key", 1).AddStringer("obj", testObject).Debug()
+		l.AddInt("key", 1).AddStringer("obj", testObject).Info()
+		l.AddInt("key", 1).AddStringer("obj", testObject).Warn()
+		l.AddInt("key", 1).AddStringer("obj", testObject).Error()
+	}
+	b.StopTimer()
+}
 
 func BenchmarkLevelsKiwi(b *testing.B) {
 	buf := &bytes.Buffer{}
@@ -224,3 +262,17 @@ func BenchmarkLevelsLog15Complex(b *testing.B) {
 	}
 	b.StopTimer()
 }
+
+/*
+$ go test -bench=. -benchmem
+BenchmarkLevelsKiwi-4            	   50000	     31437 ns/op	   0.06 MB/s	    6993 B/op	     115 allocs/op
+BenchmarkLevelsKiwiComplex-4     	   30000	     57841 ns/op	   0.03 MB/s	   10303 B/op	     173 allocs/op
+BenchmarkLevelsStdLog-4          	  100000	     21769 ns/op	   0.09 MB/s	    7159 B/op	     124 allocs/op
+BenchmarkLevelsStdLogComplex-4   	   50000	     35168 ns/op	   0.06 MB/s	   11446 B/op	     200 allocs/op
+BenchmarkLevelsLogxi-4           	  100000	     13628 ns/op	   0.15 MB/s	    4127 B/op	      74 allocs/op
+BenchmarkLevelsLogxiComplex-4    	   50000	     31377 ns/op	   0.06 MB/s	    8713 B/op	     162 allocs/op
+BenchmarkLevelsLogrus-4          	   50000	     38582 ns/op	   0.05 MB/s	   12320 B/op	     177 allocs/op
+BenchmarkLevelsLogrusComplex-4   	   30000	     45749 ns/op	   0.04 MB/s	   13990 B/op	     231 allocs/op
+BenchmarkLevelsLog15-4           	   30000	     53837 ns/op	   0.04 MB/s	   14998 B/op	     224 allocs/op
+BenchmarkLevelsLog15Complex-4    	   20000	     61730 ns/op	   0.03 MB/s	   15127 B/op	     246 allocs/op
+*/

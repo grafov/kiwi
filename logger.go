@@ -1,6 +1,8 @@
 package kiwi
 
 import (
+	"fmt"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -64,10 +66,10 @@ func (l *Logger) Log(keyVals ...interface{}) {
 	if len(keyVals) > 0 {
 		l.Add(keyVals...)
 	}
-	l.Lock()
+	// XXX	l.Lock()
 	record := l.pairs
 	l.pairs = make(map[string]value)
-	l.Unlock()
+	// XXX	l.Unlock()
 	var key string
 	for i, val := range keyVals {
 		if i%2 == 0 {
@@ -80,14 +82,14 @@ func (l *Logger) Log(keyVals ...interface{}) {
 	if len(keyVals)%2 == 1 {
 		record[key] = value{"", nil, voidVal, false}
 	}
-	l.RLock()
+	// XXX	l.RLock()
 	for key, val := range l.context {
 		// pairs override context
 		if _, ok := record[key]; !ok {
 			record[key] = val
 		}
 	}
-	l.RUnlock()
+	// XXX	l.RUnlock()
 	passRecordToOutput(record)
 }
 
@@ -97,7 +99,7 @@ func (l *Logger) Log(keyVals ...interface{}) {
 // will be restored.
 func (l *Logger) Add(keyVals ...interface{}) *Logger {
 	var key string
-	l.Lock()
+	// XXX	l.Lock()
 	for i, val := range keyVals {
 		if i%2 == 0 {
 			key = toRecordKey(val)
@@ -109,7 +111,7 @@ func (l *Logger) Add(keyVals ...interface{}) *Logger {
 	if len(keyVals)%2 == 1 {
 		l.pairs[key] = value{"", nil, voidVal, false}
 	}
-	l.Unlock()
+	// XXX	l.Unlock()
 	return l
 }
 
@@ -217,4 +219,43 @@ func (l *Logger) GetRecord() map[string]string {
 func (l *Logger) Flush() {
 	// XXX
 	time.Sleep(100 * time.Millisecond)
+}
+
+func (l *Logger) AddString(key string, val string) *Logger {
+	// XXX	l.Lock()
+	l.pairs[key] = value{val, nil, stringVal, true}
+	//	l.Unlock()
+	return l
+}
+
+func (l *Logger) AddStringer(key string, val fmt.Stringer) *Logger {
+	// XXX	l.Lock(
+	l.pairs[key] = value{val.String(), nil, stringVal, true}
+	//	l.Unlock()
+	return l
+}
+
+func (l *Logger) AddInt(key string, val int) *Logger {
+	// XXX	l.Lock()
+	l.pairs[key] = value{strconv.Itoa(val), nil, integerVal, true}
+	//	l.Unlock()
+	return l
+}
+
+func (l *Logger) AddFloat(key string, val float64) *Logger {
+	// XXX	l.Lock()
+	l.pairs[key] = value{strconv.FormatFloat(val, 'e', -1, 64), nil, floatVal, true}
+	//	l.Unlock()
+	return l
+}
+
+func (l *Logger) AddBool(key string, val bool) *Logger {
+	// XXX	l.Lock()
+	sv := "false"
+	if val {
+		sv = "true"
+	}
+	l.pairs[key] = value{sv, nil, booleanVal, true}
+	//	l.Unlock()
+	return l
 }
