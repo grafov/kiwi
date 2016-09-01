@@ -38,6 +38,26 @@ func NewLogger() *Logger {
 		pairs:      make(map[string]value)}
 }
 
+// Copy creates copy of logger instance.
+func (l *Logger) Copy() *Logger {
+	var (
+		newContextSrc = make(map[interface{}]interface{})
+		newContext    = make(map[string]value)
+	)
+	l.RLock()
+	for k, v := range l.contextSrc {
+		newContextSrc[k] = v
+	}
+	for k, v := range l.context {
+		newContext[k] = v
+	}
+	l.RUnlock()
+	return &Logger{
+		contextSrc: newContextSrc,
+		context:    newContext,
+		pairs:      make(map[string]value)}
+}
+
 // Log is the most common method for flushing previously added key-val pairs to an output.
 // After current record is flushed all pairs removed from a record except contextSrc pairs.
 func (l *Logger) Log(keyVals ...interface{}) {
