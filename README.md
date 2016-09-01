@@ -65,17 +65,17 @@ Hence value of `lazy-sample` from the example above will be evaluated only on `L
 
 ## Comparison with other loggers
 
-    $ go test -bench=. -benchmem 
-    BenchmarkLog-4                 20000         66733 ns/op       0.03 MB/s        7407 B/op        124 allocs/op
-    BenchmarkLogComplex-4          20000         92365 ns/op       0.02 MB/s       11871 B/op        200 allocs/op
-    BenchmarkKiwi-4                20000         82286 ns/op       0.02 MB/s        7410 B/op        130 allocs/op
-    BenchmarkKiwiComplex-4         10000        150488 ns/op       0.01 MB/s       11176 B/op        169 allocs/op
-    BenchmarkLogxi-4               50000         36533 ns/op       0.05 MB/s        4117 B/op         74 allocs/op
-    BenchmarkLogxiComplex-4        20000         86944 ns/op       0.02 MB/s        9227 B/op        162 allocs/op
-    BenchmarkLogrus-4              20000         97535 ns/op       0.02 MB/s       12168 B/op        184 allocs/op
-    BenchmarkLogrusComplex-4       10000        114248 ns/op       0.02 MB/s       13943 B/op        238 allocs/op
-    BenchmarkLog15-4               10000        139884 ns/op       0.01 MB/s       15618 B/op        224 allocs/op
-    BenchmarkLog15Complex-4        10000        157494 ns/op       0.01 MB/s       14995 B/op        245 allocs/op
+    $ go test -bench=. -benchmem
+    BenchmarkLevelsKiwi-4                  50000         31437 ns/op       0.06 MB/s        6993 B/op        115 allocs/op
+    BenchmarkLevelsKiwiComplex-4           30000         57841 ns/op       0.03 MB/s       10303 B/op        173 allocs/op
+    BenchmarkLevelsStdLog-4               100000         21769 ns/op       0.09 MB/s        7159 B/op        124 allocs/op
+    BenchmarkLevelsStdLogComplex-4         50000         35168 ns/op       0.06 MB/s       11446 B/op        200 allocs/op
+    BenchmarkLevelsLogxi-4                100000         13628 ns/op       0.15 MB/s        4127 B/op         74 allocs/op
+    BenchmarkLevelsLogxiComplex-4          50000         31377 ns/op       0.06 MB/s        8713 B/op        162 allocs/op
+    BenchmarkLevelsLogrus-4                50000         38582 ns/op       0.05 MB/s       12320 B/op        177 allocs/op
+    BenchmarkLevelsLogrusComplex-4         30000         45749 ns/op       0.04 MB/s       13990 B/op        231 allocs/op
+    BenchmarkLevelsLog15-4                 30000         53837 ns/op       0.04 MB/s       14998 B/op        224 allocs/op
+    BenchmarkLevelsLog15Complex-4          20000         61730 ns/op       0.03 MB/s       15127 B/op        246 allocs/op
 
 ## Origins
 
