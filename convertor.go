@@ -13,11 +13,22 @@ const (
 	integerVal
 	floatVal
 	complexVal
+	flushCmd
 )
 
 // it applicable for all scalar types and for strings
 func toRecordKey(val interface{}) string {
 	switch val.(type) {
+	case string:
+		return val.(string)
+	// case rune:
+	// 	return string(val.(rune))
+	// case byte:
+	// 	return string(val.(byte))
+	case []byte:
+		return string(val.([]byte))
+	case fmt.Stringer:
+		return val.(fmt.Stringer).String()
 	case bool:
 		if val.(bool) {
 			return "true"
@@ -51,8 +62,6 @@ func toRecordKey(val interface{}) string {
 		return fmt.Sprintf("%f", val.(complex64))
 	case complex128:
 		return fmt.Sprintf("%f", val.(complex128))
-	case fmt.Stringer:
-		return val.(fmt.Stringer).String()
 	default:
 		return fmt.Sprintf("%v", val)
 	}
@@ -63,6 +72,10 @@ func toRecordValue(val interface{}) value {
 	switch val.(type) {
 	case string:
 		return value{val.(string), nil, stringVal, true}
+	case []byte:
+		return value{string(val.([]byte)), nil, stringVal, true}
+	// case rune:
+	// 	return value{string(val.(rune)), nil, stringVal, true}
 	case bool:
 		if val.(bool) {
 			return value{"true", nil, booleanVal, false}

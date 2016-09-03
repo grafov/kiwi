@@ -5,6 +5,7 @@ import (
 	"io"
 	"strconv"
 	"sync"
+	"time"
 )
 
 var outputs []*Output
@@ -15,7 +16,8 @@ type (
 	// Output methods are safe for concurrent usage.
 	Output struct {
 		sync.RWMutex
-		In              chan map[string]value
+		//		In              chan map[string]value // TODO список вместо мапы
+		In              chan *[]pair
 		w               io.Writer
 		format          format
 		paused          bool
@@ -47,7 +49,7 @@ func UseOutput(w io.Writer, logFormat format) *Output {
 		}
 	}
 	out := &Output{
-		In:              make(chan map[string]value, 1),
+		In:              make(chan *[]pair, 16),
 		w:               w,
 		positiveFilters: make(map[string]filter),
 		negativeFilters: make(map[string]filter),
@@ -198,11 +200,16 @@ func (out *Output) Close() {
 	close(out.In)
 }
 
+func (out *Output) Flush() {
+	out.In <- nil
+	time.Sleep(5 * time.Millisecond)
+}
+
 // A new record passed to all outputs. Each output routine decides n
-func passRecordToOutput(record map[string]value) {
+func passRecordToOutput(record []pair) {
 	for _, out := range outputs {
 		if !out.closed && !out.paused {
-			out.In <- record
+			out.In <- &record
 		}
 	}
 }
@@ -219,15 +226,20 @@ func processOutput(out *Output) {
 		if out.closed || out.paused {
 			continue
 		}
+		if record == nil {
+			// Flush!
+			time.Sleep(5 * time.Millisecond) // XXX make real flush
+			continue
+		}
 		out.RLock()
-		for key, val := range record {
-			if filter, ok := out.negativeFilters[key]; ok {
-				if filter.Check(key, val.Val) {
+		for _, pair := range *record {
+			if filter, ok := out.negativeFilters[pair.Key]; ok {
+				if filter.Check(pair.Key, pair.Val.Val) {
 					goto skipRecord
 				}
 			}
-			if filter, ok := out.positiveFilters[key]; ok {
-				if !filter.Check(key, val.Val) {
+			if filter, ok := out.positiveFilters[pair.Key]; ok {
+				if !filter.Check(pair.Key, pair.Val.Val) {
 					goto skipRecord
 				}
 			}
@@ -241,28 +253,30 @@ func processOutput(out *Output) {
 }
 
 // it yet ignores output format
-func (out *Output) write(record map[string]value) {
+func (out *Output) write(record *[]pair) {
 	var logLine bytes.Buffer
 	switch out.format {
 	case JSON:
 		logLine.WriteRune('{')
 		out.RLock()
-		for key, val := range record {
-			if ok := out.hiddenKeys[key]; ok {
+		for _, pair := range *record {
+			if ok := out.hiddenKeys[pair.Key]; ok {
 				continue
 			}
 			logLine.WriteRune('"')
-			logLine.WriteString(key)
+			logLine.WriteString(pair.Key)
 			logLine.WriteString("\":")
 			var curVal string
-			if val.Func != nil {
+			if pair.Val.Func != nil {
 				// Evaluate lazy value here
-				tmp := toRecordValue(toFunc(val.Func))
+				// TODO exaluation should be made in logger not output!
+				// XXX refactor it!
+				tmp := toRecordValue(toFunc(pair.Val.Func))
 				curVal = tmp.Val
 			} else {
-				curVal = val.Val
+				curVal = pair.Val.Val
 			}
-			if val.Quoted {
+			if pair.Val.Quoted {
 				logLine.WriteString(strconv.Quote(curVal))
 			} else {
 				logLine.WriteString(curVal)
@@ -272,21 +286,23 @@ func (out *Output) write(record map[string]value) {
 		logLine.WriteRune('}')
 	case Logfmt:
 		out.RLock()
-		for key, val := range record {
-			if ok := out.hiddenKeys[key]; ok {
+		for _, pair := range *record {
+			if ok := out.hiddenKeys[pair.Key]; ok {
 				continue
 			}
-			logLine.WriteString(key)
+			logLine.WriteString(pair.Key)
 			logLine.WriteRune('=')
 			var curVal string
-			if val.Func != nil {
+			if pair.Val.Func != nil {
 				// Evaluate lazy value here
-				tmp := toRecordValue(toFunc(val.Func))
+				// TODO exaluation should be made in logger not output!
+				// XXX refactor it!
+				tmp := toRecordValue(toFunc(pair.Val.Func))
 				curVal = tmp.Val
 			} else {
-				curVal = val.Val
+				curVal = pair.Val.Val
 			}
-			if val.Quoted {
+			if pair.Val.Quoted {
 				logLine.WriteString(strconv.Quote(curVal))
 			} else {
 				logLine.WriteString(curVal)

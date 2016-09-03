@@ -3,19 +3,31 @@ package kiwi
 import (
 	"fmt"
 	"strconv"
-	"sync"
+	//	"sync"
 	"time"
 )
 
 type (
+	// или сделать log.Lock() log.Unlock() методами?
+	// // SafeLogger keeps context and log record. There are many loggers initialized
+	// // in different places of application. Loggers are safe for
+	// // concurrent usage.
+	// SafeLogger struct {
+	// 	sync.RWMutex
+	// 	contextSrc map[interface{}]interface{}
+	// 	context    map[string]value
+	// 	pairs      map[string]value
+	// }
 	// Logger keeps context and log record. There are many loggers initialized
 	// in different places of application. Loggers are safe for
 	// concurrent usage.
 	Logger struct {
-		sync.RWMutex
+		//		sync.RWMutex
 		contextSrc map[interface{}]interface{}
-		context    map[string]value
-		pairs      map[string]value
+		//		context    map[string]value
+		context []pair
+		//		pairs      map[string]value
+		pairs []pair
 	}
 	// Record allows log data from any custom types in they conform this interface.
 	// Also types that conform fmt.Stringer can be used. But as they not have IsQuoted() check
@@ -30,98 +42,136 @@ type (
 		Type   uint8
 		Quoted bool
 	}
+	pair struct {
+		Key string
+		Val value
+	}
 )
 
 // NewLogger creates logger instance.
 func NewLogger() *Logger {
-	return &Logger{
-		contextSrc: make(map[interface{}]interface{}),
-		context:    make(map[string]value),
-		pairs:      make(map[string]value)}
+	return &Logger{contextSrc: make(map[interface{}]interface{})}
+	//		context:    make(map[string]value),
+	//		pairs:      make(map[string]value)}
 }
 
 // Copy creates copy of logger instance.
 func (l *Logger) Copy() *Logger {
 	var (
 		newContextSrc = make(map[interface{}]interface{})
-		newContext    = make(map[string]value)
+		//newContext    = make(map[string]value)
 	)
-	l.RLock()
+	// XXX	l.RLock()
 	for k, v := range l.contextSrc {
 		newContextSrc[k] = v
 	}
-	for k, v := range l.context {
-		newContext[k] = v
-	}
-	l.RUnlock()
+	// for k, v := range l.context {
+	// 	newContext[k] = v
+	// }
+	// XXX	l.RUnlock()
 	return &Logger{
-		contextSrc: newContextSrc,
-		context:    newContext,
-		pairs:      make(map[string]value)}
+		contextSrc: newContextSrc}
+	//		context:    newContext, TODO copy slice
+	//		pairs:      make(map[string]value)}
 }
 
 // Log is the most common method for flushing previously added key-val pairs to an output.
 // After current record is flushed all pairs removed from a record except contextSrc pairs.
 func (l *Logger) Log(keyVals ...interface{}) {
-	if len(keyVals) > 0 {
-		l.Add(keyVals...)
-	}
-	// XXX	l.Lock()
-	record := l.pairs
-	l.pairs = make(map[string]value)
-	// XXX	l.Unlock()
-	var key string
+	var (
+		key    string
+		record = append(l.context, l.pairs...)
+	)
 	for i, val := range keyVals {
 		if i%2 == 0 {
 			key = toRecordKey(val)
 			continue
 		}
-		record[key] = toRecordValue(val)
+		record = append(record, pair{key, toRecordValue(val)})
 	}
 	// for odd number of key-val pairs just add label without value
 	if len(keyVals)%2 == 1 {
-		record[key] = value{"", nil, voidVal, false}
+		record = append(record, pair{key, value{"", nil, voidVal, false}})
 	}
-	// XXX	l.RLock()
-	for key, val := range l.context {
-		// pairs override context
-		if _, ok := record[key]; !ok {
-			record[key] = val
-		}
-	}
-	// XXX	l.RUnlock()
 	passRecordToOutput(record)
+	l.pairs = nil
+
+	// if len(keyVals) > 0 {
+	// 	l.Add(keyVals...)
+	// }
+	// // XXX	l.Lock()
+	// record := l.pairs
+	// l.pairs = make(map[string]value)
+	// // XXX	l.Unlock()
+	// var key string
+	// for i, val := range keyVals {
+	// 	if i%2 == 0 {
+	// 		key = toRecordKey(val)
+	// 		continue
+	// 	}
+	// 	record[key] = toRecordValue(val)
+	// }
+	// // for odd number of key-val pairs just add label without value
+	// if len(keyVals)%2 == 1 {
+	// 	record[key] = value{"", nil, voidVal, false}
+	// }
+	// // XXX	l.RLock()
+	// // The context overrides the pairs
+	// for key, val := range l.context {
+	// 	// pairs override context
+	// 	if _, ok := record[key]; !ok {
+	// 		record[key] = val
+	// 	}
+	// }
+	// // XXX	l.RUnlock()
+	// passRecordToOutput(record)
 }
 
 // Add a new key-value pairs to the log record. If a key already added then value will be
-// updated. If a key already exists in a contextSrc then it will be overriden by a new
+// updated. If a key already exists in a contextSrc then it will be overridden by a new
 // value for a current record only. After flushing a record with Log() old context value
 // will be restored.
 func (l *Logger) Add(keyVals ...interface{}) *Logger {
-	var key string
-	// XXX	l.Lock()
+	var (
+		key string
+	)
 	for i, val := range keyVals {
 		if i%2 == 0 {
 			key = toRecordKey(val)
 			continue
 		}
-		l.pairs[key] = toRecordValue(val)
+		l.pairs = append(l.pairs, pair{key, toRecordValue(val)})
 	}
 	// for odd number of key-val pairs just add label without value
 	if len(keyVals)%2 == 1 {
-		l.pairs[key] = value{"", nil, voidVal, false}
+		l.pairs = append(l.pairs, pair{key, value{"", nil, voidVal, false}})
 	}
-	// XXX	l.Unlock()
 	return l
+
+	// var key string
+	// // XXX	l.Lock()
+	// for i, val := range keyVals {
+	// 	if i%2 == 0 {
+	// 		key = toRecordKey(val)
+	// 		continue
+	// 	}
+	// 	l.pairs[key] = toRecordValue(val)
+	// }
+	// // for odd number of key-val pairs just add label without value
+	// if len(keyVals)%2 == 1 {
+	// 	l.pairs[key] = value{"", nil, voidVal, false}
+	// }
+	// // XXX	l.Unlock()
+	// return l
 }
 
-// With defines a context for the logger.
+// With defines a context for the logger. The context overrides pairs in the record.
 func (l *Logger) With(keyVals ...interface{}) *Logger {
 	var (
 		keySrc interface{}
 		key    string
 	)
-	l.Lock()
+	//	l.Lock()
 	for i, val := range keyVals {
 		if i%2 == 0 {
 			keySrc = val
@@ -129,72 +179,77 @@ func (l *Logger) With(keyVals ...interface{}) *Logger {
 			continue
 		}
 		l.contextSrc[keySrc] = val
-		l.context[key] = toRecordValue(val)
+		//		l.context[key] = toRecordValue(val)
+		l.context = append(l.context, pair{key, toRecordValue(val)})
 	}
 	// for odd number of key-val pairs just add label without value
 	if len(keyVals)%2 == 1 {
 		l.contextSrc[keySrc] = nil
-		l.context[key] = value{"", nil, voidVal, false}
+		//		l.context[key] = value{"", nil, voidVal, false}
+		l.context = append(l.context, pair{key, value{"", nil, voidVal, false}})
 	}
-	l.Unlock()
+	//	l.Unlock()
 	return l
 }
 
-// Without drops some keys from a context for the logger.
-func (l *Logger) Without(keys ...interface{}) *Logger {
-	l.Lock()
-	for _, key := range keys {
-		if _, ok := l.contextSrc[key]; ok {
-			delete(l.contextSrc, key)
-			delete(l.context, toRecordKey(key))
-		}
-	}
-	l.Unlock()
-	return l
-}
+// // Without drops some keys from a context for the logger.
+// func (l *Logger) Without(keys ...interface{}) *Logger {
+// 	//	l.Lock()
+// 	for _, key := range keys {
+// 		if _, ok := l.contextSrc[key]; ok {
+// 			delete(l.contextSrc, key)
+// 			delete(l.context, toRecordKey(key))
+// 		}
+// 	}
+// 	//	l.Unlock()
+// 	return l
+// }
 
 // WithTimestamp adds "timestamp" field to the context.
 func (l *Logger) WithTimestamp(format string) *Logger {
-	l.Lock()
+	//	l.Lock()
 	l.contextSrc["timestamp"] = func() string { return time.Now().Format(format) }
-	l.context["timestamp"] = value{"", func() string { return time.Now().Format(format) }, stringVal, true}
-	l.Unlock()
+	//	l.context["timestamp"] = value{"", func() string { return time.Now().Format(format) }, stringVal, true}
+	l.context = append(l.context, pair{"timestamp", value{"", func() string { return time.Now().Format(format) }, stringVal, true}})
+	//	l.Unlock()
 	return l
 }
 
 // Reset logger values added after last Log() call. It keeps contextSrc untouched.
 func (l *Logger) Reset() *Logger {
-	l.Lock()
-	l.pairs = make(map[string]value)
-	l.Unlock()
+	//	l.Lock()
+	//	l.pairs = make(map[string]value)
+	l.pairs = nil
+	//	l.Unlock()
 	return l
 }
 
 // ResetContext resets the context of the logger.
 func (l *Logger) ResetContext() *Logger {
-	l.Lock()
+	//	l.Lock()
 	l.contextSrc = make(map[interface{}]interface{})
-	l.context = make(map[string]value)
-	l.Unlock()
+	//l.context = make(map[string]value)
+	l.context = nil
+	//	l.Unlock()
 	return l
 }
 
 // GetContext returns copy of the context saved in the logger.
 func (l *Logger) GetContext() map[interface{}]interface{} {
 	var contextSrc = make(map[interface{}]interface{})
-	l.RLock()
+	//	l.RLock()
 	for k, v := range l.contextSrc {
 		contextSrc[k] = v
 	}
-	l.RUnlock()
+	//	l.RUnlock()
 	return contextSrc
 }
 
 // GetContextValue returns single context value for the key.
 func (l *Logger) GetContextValue(key string) interface{} {
-	l.RLock()
+	//	l.RLock()
 	value := l.contextSrc[key]
-	l.RUnlock()
+	//	l.RUnlock()
 	return value
 }
 
@@ -202,49 +257,47 @@ func (l *Logger) GetContextValue(key string) interface{} {
 // as strings. With context key-vals included.
 // The most of Logger operations return *Logger itself but it made for operations
 // chaining only. If you need get log pairs use GelRecord() for it.
-func (l *Logger) GetRecord() map[string]string {
-	var merged = make(map[string]string)
-	l.RLock()
-	for k, v := range l.context {
-		merged[k] = v.Val
-	}
-	for k, v := range l.pairs {
-		merged[k] = v.Val
-	}
-	l.RUnlock()
-	return merged
-}
-
-// Flush confirms that all outputs got the last logged record.
-func (l *Logger) Flush() {
-	// XXX
-	time.Sleep(100 * time.Millisecond)
-}
+// func (l *Logger) GetRecord() map[string]string {
+// 	var merged = make(map[string]string)
+// 	//	l.RLock()
+// 	for k, v := range l.context {
+// 		merged[k] = v.Val
+// 	}
+// 	for k, v := range l.pairs {
+// 		merged[k] = v.Val
+// 	}
+// 	//	l.RUnlock()
+// 	return merged
+// }
 
 func (l *Logger) AddString(key string, val string) *Logger {
 	// XXX	l.Lock()
-	l.pairs[key] = value{val, nil, stringVal, true}
+	//l.pairs[key] = value{val, nil, stringVal, true}
+	l.pairs = append(l.pairs, pair{key, value{val, nil, stringVal, true}})
 	//	l.Unlock()
 	return l
 }
 
 func (l *Logger) AddStringer(key string, val fmt.Stringer) *Logger {
 	// XXX	l.Lock(
-	l.pairs[key] = value{val.String(), nil, stringVal, true}
+	//	l.pairs[key] = value{val.String(), nil, stringVal, true}
+	l.pairs = append(l.pairs, pair{key, value{val.String(), nil, stringVal, true}})
 	//	l.Unlock()
 	return l
 }
 
 func (l *Logger) AddInt(key string, val int) *Logger {
 	// XXX	l.Lock()
-	l.pairs[key] = value{strconv.Itoa(val), nil, integerVal, true}
+	//	l.pairs[key] = value{strconv.Itoa(val), nil, integerVal, true}
+	l.pairs = append(l.pairs, pair{key, value{strconv.Itoa(val), nil, integerVal, true}})
 	//	l.Unlock()
 	return l
 }
 
 func (l *Logger) AddFloat(key string, val float64) *Logger {
 	// XXX	l.Lock()
-	l.pairs[key] = value{strconv.FormatFloat(val, 'e', -1, 64), nil, floatVal, true}
+	//	l.pairs[key] = value{strconv.FormatFloat(val, 'e', -1, 64), nil, floatVal, true}
+	l.pairs = append(l.pairs, pair{key, value{strconv.FormatFloat(val, 'e', -1, 64), nil, floatVal, true}})
 	//	l.Unlock()
 	return l
 }
@@ -255,7 +308,8 @@ func (l *Logger) AddBool(key string, val bool) *Logger {
 	if val {
 		sv = "true"
 	}
-	l.pairs[key] = value{sv, nil, booleanVal, true}
+	//	l.pairs[key] = value{sv, nil, booleanVal, true}
+	l.pairs = append(l.pairs, pair{key, value{sv, nil, booleanVal, true}})
 	//	l.Unlock()
 	return l
 }
