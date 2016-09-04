@@ -48,7 +48,6 @@ type (
 	// Output methods are safe for concurrent usage.
 	Output struct {
 		sync.RWMutex
-		//		In              chan map[string]value // TODO список вместо мапы
 		In              chan *[]pair
 		w               io.Writer
 		format          format
@@ -61,11 +60,7 @@ type (
 	format uint8
 )
 
-// const (
-// 	mustPresentMask int8 = 0x01
-// 	checkValueMask  int8 = 0x02
-// )
-
+// current output formats
 const (
 	Logfmt format = iota
 	JSON
@@ -94,28 +89,28 @@ func UseOutput(w io.Writer, logFormat format) *Output {
 // With sets restriction for records output.
 // Only the records WITH any of the keys will be passed to output.
 func (out *Output) With(keys ...string) *Output {
-	out.Lock()
 	if !out.closed {
+		out.Lock()
 		for _, tag := range keys {
 			delete(out.negativeFilters, tag)
 			out.positiveFilters[tag] = &keyFilter{Key: tag}
 		}
+		out.Unlock()
 	}
-	out.Unlock()
 	return out
 }
 
 // Without sets restriction for records output.
 // Only the records WITHOUT any of the keys will be passed to output.
 func (out *Output) Without(keys ...string) *Output {
-	out.Lock()
 	if !out.closed {
+		out.Lock()
 		for _, tag := range keys {
 			out.negativeFilters[tag] = &keyFilter{Key: tag}
 			delete(out.positiveFilters, tag)
 		}
+		out.Unlock()
 	}
-	out.Unlock()
 	return out
 }
 
@@ -125,12 +120,12 @@ func (out *Output) WithValues(key string, vals ...string) *Output {
 	if len(vals) == 0 {
 		return out.With(key)
 	}
-	out.Lock()
 	if !out.closed {
+		out.Lock()
 		delete(out.negativeFilters, key)
 		out.positiveFilters[key] = &valsFilter{Key: key, Vals: vals}
+		out.Unlock()
 	}
-	out.Unlock()
 	return out
 }
 
@@ -139,28 +134,35 @@ func (out *Output) WithoutValues(key string, vals ...string) *Output {
 	if len(vals) == 0 {
 		return out.Without(key)
 	}
-	out.Lock()
 	if !out.closed {
+		out.Lock()
 		delete(out.positiveFilters, key)
 		out.negativeFilters[key] = &valsFilter{Key: key, Vals: vals}
+		out.Unlock()
 	}
-	out.Unlock()
 	return out
 }
 
 // WithRangeInt64 sets restriction for records output.
 func (out *Output) WithRangeInt64(key string, from, to int64) *Output {
-	out.Lock()
 	if !out.closed {
+		out.Lock()
+
 		delete(out.negativeFilters, key)
 		out.positiveFilters[key] = &rangeInt64Filter{Key: key, From: from, To: to}
+		out.Unlock()
 	}
-	out.Unlock()
 	return out
 }
 
 // WithRangeFloat64 sets restriction for records output.
 func (out *Output) WithoutRangeInt64(key string, from, to int64) *Output {
+	out.Lock()
+	if !out.closed {
+		delete(out.positiveFilters, key)
+		out.negativeFilters[key] = &rangeInt64Filter{Key: key, From: from, To: to}
+	}
+	out.Unlock()
 	return out
 }
 
@@ -175,7 +177,12 @@ func (out *Output) WithRangeFloat64(key string, from, to float64) *Output {
 
 // WithoutRangeFloat64  sets restriction for records output.
 func (out *Output) WithoutRangeFloat64(key string, from, to float64) *Output {
-	// XXX
+	if !out.closed {
+		out.Lock()
+		delete(out.positiveFilters, key)
+		out.negativeFilters[key] = &rangeFloat64Filter{Key: key, From: from, To: to}
+		out.Unlock()
+	}
 	return out
 }
 
