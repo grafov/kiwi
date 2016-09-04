@@ -79,8 +79,9 @@ func New() *Logger {
 // but skips values of the current record of the old logger.
 func (l *Logger) New() *Logger {
 	var (
-		newContextSrc = make(map[string]interface{})
-		newContext    = make([]pair, 0, len(l.context))
+		newContextSrc     = make(map[string]interface{})
+		newContext        = make([]pair, 0, len(l.context))
+		newDelayedContext = make([]pair, 0, len(l.delayedContext))
 	)
 	for _, pair := range l.context {
 		if !pair.Deleted {
@@ -88,7 +89,13 @@ func (l *Logger) New() *Logger {
 			newContext = append(newContext, pair)
 		}
 	}
-	return &Logger{contextSrc: newContextSrc, context: newContext}
+	for _, pair := range l.delayedContext {
+		if !pair.Deleted {
+			newContextSrc[pair.Key] = l.contextSrc[pair.Key]
+			newDelayedContext = append(newDelayedContext, pair)
+		}
+	}
+	return &Logger{contextSrc: newContextSrc, context: newContext, delayedContext: newDelayedContext}
 }
 
 // Log is the most common method for flushing previously added key-val pairs to an output.
