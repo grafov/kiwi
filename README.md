@@ -30,7 +30,7 @@ Kiwi logger has two primary design goals:
 Examples of logger usage see at [cmd/*](cmd) subfolders.
 See API description and code samples in [godoc](http://godoc.org/github.com/grafov/kiwi).
 
-## Installation
+## Installation [![Build Status](https://travis-ci.org/grafov/kiwi.svg?branch=master)](https://travis-ci.org/grafov/kiwi)
 
 Package have not external dependencies except standard library. So just
 
