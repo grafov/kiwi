@@ -25,6 +25,30 @@ Kiwi logger has two primary design goals:
 1. Convenient structured logging syntax: logfmt as default format, method chaining.
 2. Separation of logging flow from control flow: you log everything without conditions but output filtering really select what and where will be saved.
 
+Point 2 needs more explanations. 
+Traditional way for logging is set level of severity for each log record. 
+And check level before passing this record to a writer.
+It is not bad way but it is not obvious. 
+Especially when logger introduces many severity levels like "debug", "info", "warning", "critical", "fatal", "panic" and so on. 
+Look the internet for many guides with controversial recommendations how to distinguish all these "standard" levels and apply them to various events in your application.
+When you should use "fatal" instead of "panic" or "debug" instead of "info".
+
+There is alternative way not use severity levels at all. Structured logging do in this way. 
+Especially it right for *logfmt* format.
+It is not required part of logfmt or structured logging but it naturally ensued from rules they offer.
+You just log pairs of keys and values and these pairs may be of any kind. There is not a standard list of keys.
+If you need you can use levels for log records for example set key named "level" (or any other name you want) with values INFO, WARNING, ERROR etc.
+But it is not requirement.
+So you log just pairs of arbitrary keys and values and interprete them as you wish.
+
+Feature of kiwi logger is dynamic filtering of incoming records.
+You log all then set for each output point what you want to see in log stream.
+And it can be changed in any moment:
+`kiwi` has methods for filtering by keys, values, ranges of values.
+Use case for it is export some handler for setting these filters and you got
+ability dynamycally change flow and verbosity of logs.
+For example increase verbosity for a specific module or a handler and decrease for rest of the application.
+
 ## Docs [![GoDoc](https://godoc.org/github.com/grafov/kiwi?status.svg)](https://godoc.org/github.com/grafov/kiwi)
 
 Examples of logger usage see at [cmd/*](cmd) subfolders.
