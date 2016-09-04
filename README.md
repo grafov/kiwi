@@ -36,7 +36,79 @@ Package have not external dependencies except standard library. So just
 
     go get github.com/grafov/kiwi
 
-## Evaluating rules of record values
+## Usage examples
+
+```go
+import "github.com/grafov/kiwi"
+
+func main() {
+	// Creates a new logger instance.
+	log:=kiwi.New()
+
+	// Now just log something as key/value pair. It will pass to output immediately (read about outputs below).
+	log.Log("msg", "something", "another key", "another value")
+	// Expected output:
+	// msg="something" another\ key="another value"
+
+	// You can pass odd number of parameters. Odd parameter passed to output just as is.
+	log.Log("key-only")
+	// Expected output:
+	// "key-only"
+
+	// It can add key=value pairs to a new log record.
+	// They don't passed to the output until Log() call.
+	log.Add("where", "module1", "event", "something happened")
+
+	// So it may be any number of Add() calls with additional pairs.
+	log.Add("event", "and now something completely different")
+
+	// Then flush them all.
+	log.Log()
+
+	// You can pass any scalar types from Go standard library as record keys and values
+	// they will be converted to their string representation.
+	log.Log("key", 123, "key2", 1.23e3, "key3", 'u', "key4", true)
+	// Expected output:
+	// key=123 key2=1.23e3 key3="u" key4=true
+
+	// You can set permanent pairs as logger context.
+	log.With("userID", 1000, "PID", os.GetPID())
+
+	// They will be passed along pairs for each record.
+	// log.Log("msg", "details about something")
+	// Expect output:
+	// userID=1000 PID=12345 msg="details about something"
+	
+	// You need define even one output: set writer and logging format.
+	out:=kiwi.UseOutput(os.StdOut, kiwi.Logfmt)
+	
+	// Until the output defined log records just saved nowhere.
+	// You can define arbitrary number of outputs. Each output has its own set of filters.
+	// Filters decide pass or not incoming log record to this output.	
+	// Example filters below will pass only records which has key "userID" and has value of level="FATAL".	
+	out.With("userID").WithValues("level", "FATAL")
+	
+	// So in this manner you can fan out log record to several outputs.
+	// For example write separate log of critical errors and common log with all errors.
+}
+```
+
+See more ready to run samples in `cmd` subdirs.
+
+
+### Thread safety
+
+TBD
+
+### Work with context
+
+TBD
+
+### Evaluating rules of record values
+
+Obsoleted.
+
+TODO Need update!
 
 * Logged values evaluated *immediately* when they added to a record.
 * Context values evaluated *once* when they added to a logger.
