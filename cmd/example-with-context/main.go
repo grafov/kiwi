@@ -10,10 +10,10 @@ import (
 
 func main() {
 	// Bind a new logger to a variable. You may create any number of loggers.
-	ctx := kiwi.NewLogger()
+	ctx := kiwi.New()
 
 	// For starting write ctx records to some writer output should be initialized.
-	kiwi.UseOutput(os.Stdout, kiwi.Logfmt)
+	out := kiwi.UseOutput(os.Stdout, kiwi.Logfmt)
 
 	// setup context of the logger
 	ctx.With("userID", 1000, "host", "local", "startedAt", time.Now())
@@ -31,13 +31,12 @@ func main() {
 
 	// Get previously saved context for use in the application.
 	// They were keep as is without conversion to strings.
-	currentContext := make(map[interface{}]interface{})
-	currentContext = ctx.GetContext()
+	currentContext := ctx.GetContext()
 	fmt.Printf("some of the context values are: %d, %s\n", currentContext["userID"], currentContext["host"])
 
 	// These records will be output each its own currentTime value because currentTime will
 	// be evaluated on each Log() call.
 	ctx.Add("sample", 3).Log()
 	ctx.Add("sample", 4).Log()
-	ctx.Flush()
+	out.Flush()
 }

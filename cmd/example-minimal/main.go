@@ -8,6 +8,6 @@ import (
 
 func main() {
 	kiwi.UseOutput(os.Stdout, kiwi.Logfmt)
-	l := kiwi.NewLogger()
+	l := kiwi.New()
 	l.Add("sample-record", 1).Log()
 }

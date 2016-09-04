@@ -8,7 +8,7 @@ import (
 
 func main() {
 	// Bind a new logger to a variable. You may create any number of loggers.
-	log := kiwi.NewLogger()
+	log := kiwi.New()
 
 	// For starting write log records to some writer output should be initialized.
 	output := kiwi.UseOutput(os.Stdout, kiwi.Logfmt)
