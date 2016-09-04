@@ -305,20 +305,10 @@ func (out *Output) write(record *[]pair) {
 			logLine.WriteRune('"')
 			logLine.WriteString(pair.Key)
 			logLine.WriteString("\":")
-			var curVal string
-			if pair.Val.Func != nil {
-				// Evaluate lazy value here
-				// TODO exaluation should be made in logger not output!
-				// XXX refactor it!
-				tmp := toRecordValue(toFunc(pair.Val.Func))
-				curVal = tmp.Strv
-			} else {
-				curVal = pair.Val.Strv
-			}
 			if pair.Val.Quoted {
-				logLine.WriteString(strconv.Quote(curVal))
+				logLine.WriteString(strconv.Quote(pair.Val.Strv))
 			} else {
-				logLine.WriteString(curVal)
+				logLine.WriteString(pair.Val.Strv)
 			}
 			logLine.WriteString(", ")
 		}
@@ -331,20 +321,10 @@ func (out *Output) write(record *[]pair) {
 			}
 			logLine.WriteString(pair.Key)
 			logLine.WriteRune('=')
-			var curVal string
-			if pair.Val.Func != nil {
-				// Evaluate lazy value here
-				// TODO exaluation should be made in logger not output!
-				// XXX refactor it!
-				tmp := toRecordValue(toFunc(pair.Val.Func))
-				curVal = tmp.Strv
-			} else {
-				curVal = pair.Val.Strv
-			}
 			if pair.Val.Quoted {
-				logLine.WriteString(strconv.Quote(curVal))
+				logLine.WriteString(strconv.Quote(pair.Val.Strv))
 			} else {
-				logLine.WriteString(curVal)
+				logLine.WriteString(pair.Val.Strv)
 			}
 			logLine.WriteRune(' ')
 		}

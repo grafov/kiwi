@@ -1,11 +1,11 @@
 package kiwi_test
 
-// It was adapted from logxi package.
+// It was adapted from logxi package tests.
 
 import (
 	"bytes"
 	"encoding/json"
-	L "log"
+	stdLog "log"
 	"os"
 	"testing"
 	"time"
@@ -128,7 +128,7 @@ func BenchmarkLevelsKiwiComplex(b *testing.B) {
 func BenchmarkLevelsStdLog(b *testing.B) {
 	buf := &bytes.Buffer{}
 	b.SetBytes(2)
-	l := L.New(buf, "bench ", L.LstdFlags)
+	l := stdLog.New(buf, "bench ", stdLog.LstdFlags)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		debug := map[string]interface{}{"l": "debug", "key1": 1, "key2": 3.141592, "key3": "string", "key4": false}
@@ -149,7 +149,7 @@ func BenchmarkLevelsStdLog(b *testing.B) {
 func BenchmarkLevelsStdLogComplex(b *testing.B) {
 	buf := &bytes.Buffer{}
 	b.SetBytes(2)
-	l := L.New(buf, "bench ", L.LstdFlags)
+	l := stdLog.New(buf, "bench ", stdLog.LstdFlags)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		debug := map[string]interface{}{"l": "debug", "key1": 1, "obj": testObject}

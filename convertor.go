@@ -169,6 +169,16 @@ func toFunc(fn interface{}) interface{} {
 	switch fn.(type) {
 	case func() string:
 		return fn.(func() string)()
+	case func() bool:
+		return fn.(func() bool)()
+	case func() int, func() int8, func() int16, func() int32, func() int64: // XXX
+		return fn.(func() int)()
+	case func() uint8, func() uint16, func() uint32, func() uint64: // XXX
+		return fn.(func() uint8)()
+	case func() float32, func() float64: // XXX
+		return fn.(func() float32)()
+	case func() complex64:
+		return fn.(func() complex64)()
 	}
 	return nil
 }

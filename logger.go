@@ -44,9 +44,11 @@ type (
 	// in different places of application. Loggers are safe for
 	// concurrent usage.
 	Logger struct {
-		contextSrc map[string]interface{}
-		context    []pair
-		pairs      []pair
+		contextSrc     map[string]interface{}
+		context        []pair
+		delayedContext []pair
+		pairs          []pair
+		delayedPairs   []pair
 	}
 	// Record allows log data from any custom types in they conform this interface.
 	// Also types that conform fmt.Stringer can be used. But as they not have IsQuoted() check
@@ -94,17 +96,32 @@ func (l *Logger) New() *Logger {
 func (l *Logger) Log(keyVals ...interface{}) {
 	var (
 		key    string
-		record = append(l.context, l.pairs...)
+		record = l.context
 	)
+	// 1) evaluate and append delayed context pairs
+	for _, p := range l.delayedContext {
+		record = append(record, pair{p.Key, toRecordValue(toFunc(p.Val.Func)), false})
+	}
+	// 2) append pairs from the current record
+	record = append(record, l.pairs...)
 	l.pairs = nil
+	// 3) evaluate and append delayed pairs
+	for _, p := range l.delayedPairs {
+		record = append(record, pair{p.Key, toRecordValue(toFunc(p.Val.Func)), false})
+	}
+	// 3) append pairs from this call args with no delay
 	for i, val := range keyVals {
 		if i%2 == 0 {
 			key = toRecordKey(val)
 			continue
 		}
-		record = append(record, pair{key, toRecordValue(val), false})
+		if value := toRecordValue(val); value.Func != nil {
+			record = append(record, pair{key, toRecordValue(toFunc(value.Func)), false})
+		} else {
+			record = append(record, pair{key, value, false})
+		}
 	}
-	// add label without value for odd number of key-val pairs
+	// 4) append key without value if args length has odd number
 	if len(keyVals)%2 == 1 {
 		record = append(record, pair{key, value{"", nil, voidVal, false}, false})
 	}
@@ -125,7 +142,11 @@ func (l *Logger) Add(keyVals ...interface{}) *Logger {
 			key = toRecordKey(val)
 			continue
 		}
-		l.pairs = append(l.pairs, pair{key, toRecordValue(val), false})
+		if value := toRecordValue(val); value.Func != nil {
+			l.delayedPairs = append(l.pairs, pair{key, value, false})
+		} else {
+			l.pairs = append(l.pairs, pair{key, value, false})
+		}
 	}
 	//  add a key without value for odd number for key-val pairs
 	if len(keyVals)%2 == 1 {
@@ -268,10 +289,10 @@ func (l *Logger) AddFloat(key string, val float64) *Logger {
 }
 
 func (l *Logger) AddBool(key string, val bool) *Logger {
-	sv := "false"
 	if val {
-		sv = "true"
+		l.pairs = append(l.pairs, pair{key, value{"true", nil, booleanVal, false}, false})
+	} else {
+		l.pairs = append(l.pairs, pair{key, value{"false", nil, booleanVal, false}, false})
 	}
-	l.pairs = append(l.pairs, pair{key, value{sv, nil, booleanVal, true}, false})
 	return l
 }
