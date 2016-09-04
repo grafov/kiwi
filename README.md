@@ -60,10 +60,8 @@ func main() {
 	log.Add("where", "module1", "event", "something happened")
 
 	// So it may be any number of Add() calls with additional pairs.
-	log.Add("event", "and now something completely different")
-
 	// Then flush them all.
-	log.Log()
+	log.Add("event", "and now something completely different").Log()
 
 	// You can pass any scalar types from Go standard library as record keys and values
 	// they will be converted to their string representation.
@@ -135,10 +133,11 @@ Hence value of `lazy-sample` from the example above will be evaluated only on `L
 0. Kiwi logger not strictly follow logfmt specs.
 1. Ideas of key-value format very near to JSON output but with orientation on readability for humans without additional tools for log parsing.
 2. Yes, it was architectured and developed to be a standard number 15 that competing with others. It is not pretend to be log format for everything.
+3. No, it is not related to `log15` logger though `kiwi` uses the same logfmt format.
 
 ## Similar works
 
-* [log15](https://github.com/inconshreveable/log15)
+* [log15](https://github.com/inconshreveable/log15) — another standard No 15 realization :)
 
 ## Comparison with other loggers
 
