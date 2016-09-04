@@ -143,7 +143,7 @@ func (l *Logger) Add(keyVals ...interface{}) *Logger {
 			continue
 		}
 		if value := toRecordValue(val); value.Func != nil {
-			l.delayedPairs = append(l.pairs, pair{key, value, false})
+			l.delayedPairs = append(l.delayedPairs, pair{key, value, false})
 		} else {
 			l.pairs = append(l.pairs, pair{key, value, false})
 		}
@@ -175,7 +175,11 @@ func (l *Logger) With(keyVals ...interface{}) *Logger {
 				}
 			}
 		} else {
-			l.context = append(l.context, pair{key, toRecordValue(val), false})
+			if value := toRecordValue(val); value.Func != nil {
+				l.delayedContext = append(l.delayedContext, pair{key, value, false})
+			} else {
+				l.context = append(l.context, pair{key, value, false})
+			}
 		}
 		l.contextSrc[key] = val
 	}
@@ -216,12 +220,13 @@ func (l *Logger) Without(keys ...string) *Logger {
 // WithTimestamp adds "timestamp" field to the context.
 func (l *Logger) WithTimestamp(format string) *Logger {
 	l.contextSrc["timestamp"] = func() string { return time.Now().Format(format) }
-	l.context = append(l.context, pair{"timestamp", value{"", func() string { return time.Now().Format(format) }, stringVal, true}, false})
+	l.delayedContext = append(l.delayedContext, pair{"timestamp", value{"", func() string { return time.Now().Format(format) }, stringVal, true}, false})
 	return l
 }
 
 // Reset logger values added after last Log() call. It keeps context untouched.
 func (l *Logger) Reset() *Logger {
+	l.delayedPairs = nil
 	l.pairs = nil
 	return l
 }
@@ -229,6 +234,7 @@ func (l *Logger) Reset() *Logger {
 // ResetContext resets the context of the logger.
 func (l *Logger) ResetContext() *Logger {
 	l.contextSrc = make(map[string]interface{})
+	l.delayedContext = nil
 	l.context = nil
 	return l
 }
