@@ -8,7 +8,7 @@
 
 *Kiwi Logger* — this is a library with an odd logic that log your application data in its own strange way.
 
-## Features
+## Features offered by structered logging and logfmt generally and by Kiwi particularly
 
 Shortly: both humans and robots will love it!
 
@@ -137,20 +137,21 @@ TODO Need update!
 * For lazy evaluating of context and record values use workaround with functions without call them in a log record:
 
         # For lazy evaluating you need function that returns interface{} or []interface{}
-        func longActionForDelayedEvaluation() interface{} {
+        func longActionForDelayedEvaluation() string {
            // do something complex
            return "something"
         }
         myLog.Add("lazy-sample", longActionForDelayedEvaluation) # but not longActionForDelayedEvaluation()
 
-Logger recognizes next function types when adding key-val pairs to a record:
+Logger accepts functions without args that return any of scalar types from standard library. For example:
 
 * `func () string`
-* `func () interface{}`
-* `func () []interface{}`
+* `func () float64`
+* `func () int8`
+
+and so on.
 
 Hence value of `lazy-sample` from the example above will be evaluated only on `Log()` call.
-
 
 ## Instead of FAQ
 
