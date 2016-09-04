@@ -156,6 +156,9 @@ Hence value of `lazy-sample` from the example above will be evaluated only on `L
     BenchmarkLevelsLogrusComplex-4             30000         41640 ns/op       0.05 MB/s       13989 B/op        231 allocs/op
     BenchmarkLevelsLog15-4                     30000         54341 ns/op       0.04 MB/s       14998 B/op        224 allocs/op
     BenchmarkLevelsLog15Complex-4              20000         63527 ns/op       0.03 MB/s       18339 B/op        300 allocs/op
+	
+Well after oftimization kiwi runs faster. It is not the fastest logger among benchmarked but not slowest.
+It much faster than `logrus` and `log15` but slower than `logxi`.
 
 ## Origins
 
