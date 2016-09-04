@@ -137,7 +137,7 @@ Hence value of `lazy-sample` from the example above will be evaluated only on `L
 
 ## Similar works for structured logging
 
-* [logxi](github.com/mgutz/logxi)
+* [logxi](https://github.com/mgutz/logxi)
 * [logrus](https://github.com/Sirupsen/logrus)
 * [log15](https://github.com/inconshreveable/log15) — another standard No 15 realization :)
 
