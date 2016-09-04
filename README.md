@@ -1,6 +1,6 @@
 # Kiwi logger & context keeper [![Go Report Card](https://goreportcard.com/badge/grafov/kiwi)](https://goreportcard.com/report/grafov/kiwi)
 
-*WIP. It works but not all features completed.*
+*WIP. API and features is subject of changes.*
 
 ![Kiwi bird](flomar-kiwi-bird-300px.png)
 
@@ -112,6 +112,11 @@ func main() {
 	
 	// So in this manner you can fan out log record to several outputs.
 	// For example write separate log of critical errors and common log with all errors.
+	// By default without any filters any output accepts any incoming log records.
+	out2 := kiwi.UseOutput(os.StdErr, kiwi.JSON)
+
+	// Kiwi offers various filters for set conditions for outputs.
+	out2.WithInt64Range("userID", 100, 500).WithoutValues("label", "debug")
 }
 ```
 
