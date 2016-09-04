@@ -133,10 +133,12 @@ Hence value of `lazy-sample` from the example above will be evaluated only on `L
 0. Kiwi logger not strictly follow logfmt specs.
 1. Ideas of key-value format very near to JSON output but with orientation on readability for humans without additional tools for log parsing.
 2. Yes, it was architectured and developed to be a standard number 15 that competing with others. It is not pretend to be log format for everything.
-3. No, it is not related to `log15` logger though `kiwi` uses the same logfmt format.
+3. No, it is not related to `log15` logger though `kiwi` shares the same logfmt format and some ideas with him.
 
-## Similar works
+## Similar works for structured logging
 
+* [logxi](github.com/mgutz/logxi)
+* [logrus](https://github.com/Sirupsen/logrus)
 * [log15](https://github.com/inconshreveable/log15) — another standard No 15 realization :)
 
 ## Comparison with other loggers
