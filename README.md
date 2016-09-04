@@ -10,7 +10,7 @@
 
 ## Features
 
-Shortly: both humans and robots are love it!
+Shortly: both humans and robots will love it!
 
 Briefly:
 
@@ -19,6 +19,11 @@ Briefly:
 * dynamically selectable outputs (changing log verbosity on the fly)
 * no nailed levels, no hardcoded fields in the format
 * can keep context of application
+
+Kiwi logger has two primary design goals:
+
+1. Convenient structured logging syntax: logfmt as default format, method chaining.
+2. Separation of logging flow from control flow: you log everything without conditions but output filtering really select what and where will be saved.
 
 ## Docs [![GoDoc](https://godoc.org/github.com/grafov/kiwi?status.svg)](https://godoc.org/github.com/grafov/kiwi)
 

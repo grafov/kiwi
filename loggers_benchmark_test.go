@@ -52,7 +52,7 @@ func toJSON(m map[string]interface{}) string {
 func BenchmarkLevelsKiwiTyped(b *testing.B) {
 	buf := &bytes.Buffer{}
 	b.SetBytes(2)
-	l := kiwi.NewLogger()
+	l := kiwi.New()
 	l.With("_n", "bench", "_p", pid)
 	l.WithTimestamp(time.RFC3339)
 	kiwi.LevelName = "l"
@@ -71,7 +71,7 @@ func BenchmarkLevelsKiwiTyped(b *testing.B) {
 func BenchmarkLevelsKiwiTypedComplex(b *testing.B) {
 	buf := &bytes.Buffer{}
 	b.SetBytes(2)
-	l := kiwi.NewLogger()
+	l := kiwi.New()
 	l.With("_n", "bench", "_p", pid)
 	l.WithTimestamp(time.RFC3339)
 	kiwi.LevelName = "l"
@@ -90,7 +90,7 @@ func BenchmarkLevelsKiwiTypedComplex(b *testing.B) {
 func BenchmarkLevelsKiwi(b *testing.B) {
 	buf := &bytes.Buffer{}
 	b.SetBytes(2)
-	l := kiwi.NewLogger()
+	l := kiwi.New()
 	l.With("_n", "bench", "_p", pid)
 	l.WithTimestamp(time.RFC3339)
 	kiwi.LevelName = "l"
@@ -109,7 +109,7 @@ func BenchmarkLevelsKiwi(b *testing.B) {
 func BenchmarkLevelsKiwiComplex(b *testing.B) {
 	buf := &bytes.Buffer{}
 	b.SetBytes(2)
-	l := kiwi.NewLogger()
+	l := kiwi.New()
 	l.With("_n", "bench", "_p", pid)
 	l.WithTimestamp(time.RFC3339)
 	kiwi.LevelName = "l"

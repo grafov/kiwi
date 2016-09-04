@@ -32,7 +32,7 @@ func (l *Logger) getContext() []pair {
 }
 
 func TestNewLogger(t *testing.T) {
-	l := NewLogger()
+	l := New()
 
 	if l == nil {
 		t.Fatal("initalized logger is nil")
@@ -45,7 +45,7 @@ func TestLogger_With(t *testing.T) {
 }
 
 // func TestLogger_Add(t *testing.T) {
-// 	l := NewLogger()
+// 	l := New()
 
 // 	l.Add(sampleRecord...)
 
@@ -68,7 +68,7 @@ func TestLogger_With(t *testing.T) {
 
 // // //
 // // func TestLogger_Get_RecordsOnly(t *testing.T) {
-// // 	l := NewLogger()
+// // 	l := New()
 // // 	l.Add(sampleRecord...)
 
 // // 	records := l.GetRecord()
@@ -85,7 +85,7 @@ func TestLogger_With(t *testing.T) {
 
 // // // XXX
 // // func TestLogger_GetLog_ContextOnly(t *testing.T) {
-// // 	l := NewLogger()
+// // 	l := New()
 
 // // 	l.With(sampleContext...)
 
@@ -103,7 +103,7 @@ func TestLogger_With(t *testing.T) {
 
 // // // XXX
 // // func TestLogger_GetLog_ContextOverridenByRecords(t *testing.T) {
-// // 	l := NewLogger()
+// // 	l := New()
 
 // // 	l.With(sampleContext...).Add(sampleRecord...)
 
@@ -121,7 +121,7 @@ func TestLogger_With(t *testing.T) {
 // // }
 
 // // func TestLogger_Reset(t *testing.T) {
-// // 	l := NewLogger()
+// // 	l := New()
 // // 	l.Add(sampleRecord...)
 
 // // 	l.Reset()
@@ -132,7 +132,7 @@ func TestLogger_With(t *testing.T) {
 // // }
 
 func TestLogger_Add_Chained(t *testing.T) {
-	log := NewLogger().With(sampleContext...).Add(sampleRecord...)
+	log := New().With(sampleContext...).Add(sampleRecord...)
 
 	log.Log()
 	log.Add("key", "value2").Log()
@@ -140,7 +140,7 @@ func TestLogger_Add_Chained(t *testing.T) {
 
 func TestLogger_IntValues(t *testing.T) {
 	output := bytes.NewBufferString("")
-	log := NewLogger()
+	log := New()
 	out := UseOutput(output, Logfmt)
 	defer out.Close()
 

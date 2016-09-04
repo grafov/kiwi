@@ -234,12 +234,12 @@ func processOutput(out *Output) {
 		out.RLock()
 		for _, pair := range *record {
 			if filter, ok := out.negativeFilters[pair.Key]; ok {
-				if filter.Check(pair.Key, pair.Val.Val) {
+				if filter.Check(pair.Key, pair.Val.Strv) {
 					goto skipRecord
 				}
 			}
 			if filter, ok := out.positiveFilters[pair.Key]; ok {
-				if !filter.Check(pair.Key, pair.Val.Val) {
+				if !filter.Check(pair.Key, pair.Val.Strv) {
 					goto skipRecord
 				}
 			}
@@ -272,9 +272,9 @@ func (out *Output) write(record *[]pair) {
 				// TODO exaluation should be made in logger not output!
 				// XXX refactor it!
 				tmp := toRecordValue(toFunc(pair.Val.Func))
-				curVal = tmp.Val
+				curVal = tmp.Strv
 			} else {
-				curVal = pair.Val.Val
+				curVal = pair.Val.Strv
 			}
 			if pair.Val.Quoted {
 				logLine.WriteString(strconv.Quote(curVal))
@@ -298,9 +298,9 @@ func (out *Output) write(record *[]pair) {
 				// TODO exaluation should be made in logger not output!
 				// XXX refactor it!
 				tmp := toRecordValue(toFunc(pair.Val.Func))
-				curVal = tmp.Val
+				curVal = tmp.Strv
 			} else {
-				curVal = pair.Val.Val
+				curVal = pair.Val.Strv
 			}
 			if pair.Val.Quoted {
 				logLine.WriteString(strconv.Quote(curVal))
