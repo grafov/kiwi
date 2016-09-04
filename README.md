@@ -174,9 +174,6 @@ Hence value of `lazy-sample` from the example above will be evaluated only on `L
 ## Comparison with other loggers
 
     $ go test -bench=. -benchmem
-    BenchmarkGokitSimpleLogfmt-4              500000          2363 ns/op         353 B/op          9 allocs/op
-    BenchmarkKiwiTypedSimpleLogfmt-4          500000          2849 ns/op        1310 B/op         18 allocs/op
-    BenchmarkKiwiSimpleLogfmt-4              1000000          1969 ns/op         854 B/op         16 allocs/op
     BenchmarkLevelsKiwiTyped-4                100000         21215 ns/op       0.09 MB/s        9061 B/op        116 allocs/op
     BenchmarkLevelsKiwiTypedComplex-4          50000         33572 ns/op       0.06 MB/s       17075 B/op        227 allocs/op
     BenchmarkLevelsKiwi-4                     100000         17003 ns/op       0.12 MB/s        8250 B/op        115 allocs/op
