@@ -36,12 +36,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Set it to empty string if you want to report level without presetting any name.
 var LevelName = "level"
 
+// Fatal imitates behaviour of common loggers with severity levels. It adds a record
+// with severity "level" = "fatal". Default severity name "level" may be changed
+// globally for all package with UseLevelName(). There is nothing special in "level"
+// key so it may be overrided with any value what you want.
 func (l *Logger) Fatal(keyVals ...interface{}) {
-	l.Add(keyVals...).Log(LevelName, "fatal")
+	l.Log(append(keyVals, LevelName, "fatal")...)
 }
 
+// Crit imitates behaviour of common loggers with severity levels. It adds a record
+// with severity "level" = "critical". Default severity name "level" may be changed
+// globally for all package with UseLevelName(). There is nothing special in "level"
+// key so it may be overrided with any value what you want.
 func (l *Logger) Crit(keyVals ...interface{}) {
-	l.Add(keyVals...).Log(LevelName, "critical")
+	l.Log(append(keyVals, LevelName, "critical")...)
 }
 
 // Error imitates behaviour of common loggers with severity levels. It adds a record
@@ -49,7 +57,7 @@ func (l *Logger) Crit(keyVals ...interface{}) {
 // globally for all package with UseLevelName(). There is nothing special in "level"
 // key so it may be overrided with any recVal you want.
 func (l *Logger) Error(keyVals ...interface{}) {
-	l.Add(keyVals...).Log(LevelName, "error")
+	l.Log(append(keyVals, LevelName, "error")...)
 }
 
 // Warn imitates behaviour of common loggers with severity levels. It adds a record
@@ -57,7 +65,7 @@ func (l *Logger) Error(keyVals ...interface{}) {
 // globally for all package with UseLevelName(). There is nothing special in "level"
 // key so it may be overrided with any recVal you want.
 func (l *Logger) Warn(keyVals ...interface{}) {
-	l.Add(keyVals...).Log(LevelName, "warning")
+	l.Log(append(keyVals, LevelName, "warning")...)
 }
 
 // Info imitates behaviour of common loggers with severity levels. It adds a record
@@ -65,9 +73,13 @@ func (l *Logger) Warn(keyVals ...interface{}) {
 // globally for all package with UseLevelName(). There is nothing special in "level"
 // key so it may be overrided with any value what you want.
 func (l *Logger) Info(keyVals ...interface{}) {
-	l.Add(keyVals...).Log(LevelName, "info")
+	l.Log(append(keyVals, LevelName, "info")...)
 }
 
+// Debug imitates behaviour of common loggers with severity levels. It adds a record
+// with severity "level" = "debug". Default severity name "level" may be changed
+// globally for all package with UseLevelName(). There is nothing special in "level"
+// key so it may be overrided with any value what you want.
 func (l *Logger) Debug(keyVals ...interface{}) {
-	l.Add(keyVals...).Log(LevelName, "debug")
+	l.Log(append(keyVals, LevelName, "debug")...)
 }
