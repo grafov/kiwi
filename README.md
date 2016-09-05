@@ -14,10 +14,10 @@ Shortly: both humans and robots will love it!
 
 Briefly:
 
-* structured logging for high readability by humans
+* structured logging in *logfmt* for high readability by humans
 * optional JSON format that liked by machines
 * dynamically selectable outputs (changing log verbosity on the fly)
-* no nailed levels, no hardcoded fields in the format
+* there are not nailed levels, not hardcoded fields in the format
 * can keep context of application
 
 Kiwi logger has two primary design goals:
@@ -26,28 +26,28 @@ Kiwi logger has two primary design goals:
 2. Separation of logging flow from control flow: you log everything without conditions but output filtering really select what and where will be saved.
 
 Point 2 needs more explanations. 
-Traditional way for logging is set level of severity for each log record. 
-And check level before passing this record to a writer.
-It is not bad way but it is not obvious. 
+Traditional way for logging is set a level of severity for each log record. 
+And check a level before passing this record to a writer.
+It is not bad way but it is not obvious.
 Especially when logger introduces many severity levels like "debug", "info", "warning", "critical", "fatal", "panic" and so on. 
 Look the internet for many guides with controversial recommendations how to distinguish all these "standard" levels and apply them to various events in your application.
 When you should use "fatal" instead of "panic" or "debug" instead of "info".
 
-There is alternative way not use severity levels at all. Structured logging do in this way. 
+There is alternative way not use severity levels at all. Structured logging does thing in this way. 
 Especially it right for *logfmt* format.
 It is not required part of logfmt or structured logging but it naturally ensued from rules they offer.
 You just log pairs of keys and values and these pairs may be of any kind. There is not a standard list of keys.
 If you need you can use levels for log records for example set key named "level" (or any other name you want) with values INFO, WARNING, ERROR etc.
-But it is not requirement.
+But it is not a requirement.
 So you log just pairs of arbitrary keys and values and interprete them as you wish.
 
 Feature of kiwi logger is dynamic filtering of incoming records.
-You log all then set for each output point what you want to see in log stream.
-And it can be changed in any moment:
-`kiwi` has methods for filtering by keys, values, ranges of values.
-Use case for it is export some handler for setting these filters and you got
-ability dynamycally change flow and verbosity of logs.
-For example increase verbosity for a specific module or a handler and decrease for rest of the application.
+You log all data of any severity. These log records passed to all defined outputs (log streams).
+And you restrict them by set filters for pass only records and their fields which you want to see in this log stream.
+It can be changed in any moment: `kiwi` has methods for filtering by keys, values, ranges of values.
+Recipe: export the handler or setup any kind of client for setting these filters in your app.
+Then you got ability for dynamically change flow and verbosity of logs. 
+For example increase verbosity for a specific module or a single handler and decrease them for the rest of the application.
 
 ## Docs [![GoDoc](https://godoc.org/github.com/grafov/kiwi?status.svg)](https://godoc.org/github.com/grafov/kiwi)
 
