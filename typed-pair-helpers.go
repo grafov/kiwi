@@ -1,10 +1,5 @@
 package kiwi
 
-import (
-	"fmt"
-	"strconv"
-)
-
 /*
 Copyright (c) 2016, Alexander I.Grafov aka Axel
 All rights reserved.
@@ -36,6 +31,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ॐ तारे तुत्तारे तुरे स्व
 */
+
+import (
+	"fmt"
+	"strconv"
+)
 
 func String(key string, val string) pair {
 	return pair{key, value{val, nil, stringVal, true}, false}

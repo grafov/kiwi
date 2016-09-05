@@ -1,4 +1,3 @@
-// Convert incoming values to string representation. For keys and values.
 package kiwi
 
 /*
@@ -32,6 +31,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ॐ तारे तुत्तारे तुरे स्व
 */
+
+// Convert incoming values to string representation. For keys and values.
 
 import (
 	"fmt"
