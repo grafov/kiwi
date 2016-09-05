@@ -60,10 +60,10 @@ func BenchmarkLevelsKiwiTyped(b *testing.B) {
 	defer out.Close()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		l.AddInt("key", 1).AddFloat("key2", 3.141592).AddString("key3", "string").AddBool("key4", false).Debug()
-		l.AddInt("key", 1).AddFloat("key2", 3.141592).AddString("key3", "string").AddBool("key4", false).Info()
-		l.AddInt("key", 1).AddFloat("key2", 3.141592).AddString("key3", "string").AddBool("key4", false).Warn()
-		l.AddInt("key", 1).AddFloat("key2", 3.141592).AddString("key3", "string").AddBool("key4", false).Error()
+		l.AddInt("key", 1).AddFloat64("key2", 3.141592).AddString("key3", "string").AddBool("key4", false).Debug()
+		l.AddInt("key", 1).AddFloat64("key2", 3.141592).AddString("key3", "string").AddBool("key4", false).Info()
+		l.AddInt("key", 1).AddFloat64("key2", 3.141592).AddString("key3", "string").AddBool("key4", false).Warn()
+		l.AddInt("key", 1).AddFloat64("key2", 3.141592).AddString("key3", "string").AddBool("key4", false).Error()
 	}
 	b.StopTimer()
 }
@@ -83,6 +83,52 @@ func BenchmarkLevelsKiwiTypedComplex(b *testing.B) {
 		l.AddInt("key", 1).AddStringer("obj", testObject).Info()
 		l.AddInt("key", 1).AddStringer("obj", testObject).Warn()
 		l.AddInt("key", 1).AddStringer("obj", testObject).Error()
+	}
+	b.StopTimer()
+}
+
+func BenchmarkLevelsKiwiTypedHelpers(b *testing.B) {
+	buf := &bytes.Buffer{}
+	b.SetBytes(2)
+	l := kiwi.New()
+	l.With("_n", "bench", "_p", pid)
+	l.WithTimestamp(time.RFC3339)
+	kiwi.LevelName = "l"
+	out := kiwi.UseOutput(buf, kiwi.JSON)
+	defer out.Close()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		l.AddPairs(
+			kiwi.Int("key", 1), kiwi.Float64("key2", 3.141592), kiwi.String("key3", "string"), kiwi.Bool("key4", false),
+		).Debug()
+		l.AddPairs(
+			kiwi.Int("key", 1), kiwi.Float64("key2", 3.141592), kiwi.String("key3", "string"), kiwi.Bool("key4", false),
+		).Info()
+		l.AddPairs(
+			kiwi.Int("key", 1), kiwi.Float64("key2", 3.141592), kiwi.String("key3", "string"), kiwi.Bool("key4", false),
+		).Warn()
+		l.AddPairs(
+			kiwi.Int("key", 1), kiwi.Float64("key2", 3.141592), kiwi.String("key3", "string"), kiwi.Bool("key4", false),
+		).Error()
+	}
+	b.StopTimer()
+}
+
+func BenchmarkLevelsKiwiTypedHelpersComplex(b *testing.B) {
+	buf := &bytes.Buffer{}
+	b.SetBytes(2)
+	l := kiwi.New()
+	l.With("_n", "bench", "_p", pid)
+	l.WithTimestamp(time.RFC3339)
+	kiwi.LevelName = "l"
+	out := kiwi.UseOutput(buf, kiwi.JSON)
+	defer out.Close()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		l.AddPairs(kiwi.Int("key", 1), kiwi.Stringer("obj", testObject)).Debug()
+		l.AddPairs(kiwi.Int("key", 1), kiwi.Stringer("obj", testObject)).Info()
+		l.AddPairs(kiwi.Int("key", 1), kiwi.Stringer("obj", testObject)).Warn()
+		l.AddPairs(kiwi.Int("key", 1), kiwi.Stringer("obj", testObject)).Error()
 	}
 	b.StopTimer()
 }

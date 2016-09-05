@@ -44,11 +44,9 @@ type (
 	// in different places of application. Loggers are safe for
 	// concurrent usage.
 	Logger struct {
-		contextSrc     map[string]interface{}
-		context        []pair
-		delayedContext []pair
-		pairs          []pair
-		delayedPairs   []pair
+		contextSrc map[string]interface{}
+		context    []pair
+		pairs      []pair
 	}
 	// Record allows log data from any custom types in they conform this interface.
 	// Also types that conform fmt.Stringer can be used. But as they not have IsQuoted() check
@@ -79,9 +77,8 @@ func New() *Logger {
 // but skips values of the current record of the old logger.
 func (l *Logger) New() *Logger {
 	var (
-		newContextSrc     = make(map[string]interface{})
-		newContext        = make([]pair, 0, len(l.context))
-		newDelayedContext = make([]pair, 0, len(l.delayedContext))
+		newContextSrc = make(map[string]interface{})
+		newContext    = make([]pair, 0, len(l.context))
 	)
 	for _, pair := range l.context {
 		if !pair.Deleted {
@@ -89,13 +86,7 @@ func (l *Logger) New() *Logger {
 			newContext = append(newContext, pair)
 		}
 	}
-	for _, pair := range l.delayedContext {
-		if !pair.Deleted {
-			newContextSrc[pair.Key] = l.contextSrc[pair.Key]
-			newDelayedContext = append(newDelayedContext, pair)
-		}
-	}
-	return &Logger{contextSrc: newContextSrc, context: newContext, delayedContext: newDelayedContext}
+	return &Logger{contextSrc: newContextSrc, context: newContext}
 }
 
 // Log is the most common method for flushing previously added key-val pairs to an output.
@@ -103,20 +94,28 @@ func (l *Logger) New() *Logger {
 func (l *Logger) Log(keyVals ...interface{}) {
 	var (
 		key    string
-		record = l.context
+		record = make([]pair, 0, len(l.context)+len(l.pairs)+len(keyVals))
 	)
-	// 1) evaluate and append delayed context pairs
-	for _, p := range l.delayedContext {
-		record = append(record, pair{p.Key, toRecordValue(toFunc(p.Val.Func)), false})
+	for _, p := range l.context {
+		if !p.Deleted {
+			if p.Val.Func != nil {
+				// evaluate delayed context values
+				record = append(record, pair{p.Key, toRecordValue(toFunc(p.Val.Func)), false})
+			} else {
+				record = append(record, p)
+			}
+		}
 	}
-	// 2) append pairs from the current record
-	record = append(record, l.pairs...)
+	for _, p := range l.pairs {
+		if !p.Deleted {
+			if p.Val.Func != nil {
+				record = append(record, pair{p.Key, toRecordValue(toFunc(p.Val.Func)), false})
+			} else {
+				record = append(record, p)
+			}
+		}
+	}
 	l.pairs = nil
-	// 3) evaluate and append delayed pairs
-	for _, p := range l.delayedPairs {
-		record = append(record, pair{p.Key, toRecordValue(toFunc(p.Val.Func)), false})
-	}
-	// 3) append pairs from this call args with no delay
 	for i, val := range keyVals {
 		if i%2 == 0 {
 			key = toRecordKey(val)
@@ -128,7 +127,6 @@ func (l *Logger) Log(keyVals ...interface{}) {
 			record = append(record, pair{key, value, false})
 		}
 	}
-	// 4) append key without value if args length has odd number
 	if len(keyVals)%2 == 1 {
 		record = append(record, pair{key, value{"", nil, voidVal, false}, false})
 	}
@@ -149,11 +147,7 @@ func (l *Logger) Add(keyVals ...interface{}) *Logger {
 			key = toRecordKey(val)
 			continue
 		}
-		if value := toRecordValue(val); value.Func != nil {
-			l.delayedPairs = append(l.delayedPairs, pair{key, value, false})
-		} else {
-			l.pairs = append(l.pairs, pair{key, value, false})
-		}
+		l.pairs = append(l.pairs, pair{key, toRecordValue(val), false})
 	}
 	//  add a key without value for odd number for key-val pairs
 	if len(keyVals)%2 == 1 {
@@ -182,11 +176,7 @@ func (l *Logger) With(keyVals ...interface{}) *Logger {
 				}
 			}
 		} else {
-			if value := toRecordValue(val); value.Func != nil {
-				l.delayedContext = append(l.delayedContext, pair{key, value, false})
-			} else {
-				l.context = append(l.context, pair{key, value, false})
-			}
+			l.context = append(l.context, pair{key, toRecordValue(val), false})
 		}
 		l.contextSrc[key] = val
 	}
@@ -227,13 +217,12 @@ func (l *Logger) Without(keys ...string) *Logger {
 // WithTimestamp adds "timestamp" field to the context.
 func (l *Logger) WithTimestamp(format string) *Logger {
 	l.contextSrc["timestamp"] = func() string { return time.Now().Format(format) }
-	l.delayedContext = append(l.delayedContext, pair{"timestamp", value{"", func() string { return time.Now().Format(format) }, stringVal, true}, false})
+	l.context = append(l.context, pair{"timestamp", value{"", func() string { return time.Now().Format(format) }, stringVal, true}, false})
 	return l
 }
 
 // Reset logger values added after last Log() call. It keeps context untouched.
 func (l *Logger) Reset() *Logger {
-	l.delayedPairs = nil
 	l.pairs = nil
 	return l
 }
@@ -241,7 +230,6 @@ func (l *Logger) Reset() *Logger {
 // ResetContext resets the context of the logger.
 func (l *Logger) ResetContext() *Logger {
 	l.contextSrc = make(map[string]interface{})
-	l.delayedContext = nil
 	l.context = nil
 	return l
 }
@@ -296,7 +284,12 @@ func (l *Logger) AddInt(key string, val int) *Logger {
 	return l
 }
 
-func (l *Logger) AddFloat(key string, val float64) *Logger {
+func (l *Logger) AddInt64(key string, val int64) *Logger {
+	l.pairs = append(l.pairs, pair{key, value{strconv.FormatInt(val, 10), nil, integerVal, true}, false})
+	return l
+}
+
+func (l *Logger) AddFloat64(key string, val float64) *Logger {
 	l.pairs = append(l.pairs, pair{key, value{strconv.FormatFloat(val, 'e', -1, 64), nil, floatVal, true}, false})
 	return l
 }
@@ -307,5 +300,10 @@ func (l *Logger) AddBool(key string, val bool) *Logger {
 	} else {
 		l.pairs = append(l.pairs, pair{key, value{"false", nil, booleanVal, false}, false})
 	}
+	return l
+}
+
+func (l *Logger) AddPairs(pairs ...pair) *Logger {
+	l.pairs = append(l.pairs, pairs...)
 	return l
 }

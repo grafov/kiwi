@@ -174,18 +174,20 @@ Hence value of `lazy-sample` from the example above will be evaluated only on `L
 ## Comparison with other loggers
 
     $ go test -bench=. -benchmem
-    BenchmarkLevelsKiwiTyped-4                100000         21215 ns/op       0.09 MB/s        9061 B/op        116 allocs/op
-    BenchmarkLevelsKiwiTypedComplex-4          50000         33572 ns/op       0.06 MB/s       17075 B/op        227 allocs/op
-    BenchmarkLevelsKiwi-4                     100000         17003 ns/op       0.12 MB/s        8250 B/op        115 allocs/op
-    BenchmarkLevelsKiwiComplex-4               30000         36378 ns/op       0.05 MB/s       16409 B/op        220 allocs/op
-    BenchmarkLevelsStdLog-4                   100000         21450 ns/op       0.09 MB/s        7159 B/op        124 allocs/op
-    BenchmarkLevelsStdLogComplex-4             50000         33192 ns/op       0.06 MB/s       11446 B/op        200 allocs/op
-    BenchmarkLevelsLogxi-4                    100000         13662 ns/op       0.15 MB/s        4127 B/op         74 allocs/op
-    BenchmarkLevelsLogxiComplex-4              50000         36058 ns/op       0.06 MB/s       10747 B/op        182 allocs/op
-    BenchmarkLevelsLogrus-4                    50000         36269 ns/op       0.06 MB/s       12320 B/op        177 allocs/op
-    BenchmarkLevelsLogrusComplex-4             30000         42818 ns/op       0.05 MB/s       13989 B/op        231 allocs/op
-    BenchmarkLevelsLog15-4                     30000         52142 ns/op       0.04 MB/s       14996 B/op        224 allocs/op
-    BenchmarkLevelsLog15Complex-4              20000         62509 ns/op       0.03 MB/s       18340 B/op        300 allocs/op
+    BenchmarkLevelsKiwiTyped-4                    100000         21378 ns/op       0.09 MB/s        8293 B/op        112 allocs/op
+    BenchmarkLevelsKiwiTypedComplex-4              50000         32892 ns/op       0.06 MB/s       15795 B/op        224 allocs/op
+    BenchmarkLevelsKiwiTypedHelpers-4             100000         20784 ns/op       0.10 MB/s        7525 B/op        103 allocs/op
+    BenchmarkLevelsKiwiTypedHelpersComplex-4       50000         32645 ns/op       0.06 MB/s       15539 B/op        219 allocs/op
+    BenchmarkLevelsKiwi-4                         100000         15779 ns/op       0.13 MB/s        8761 B/op        111 allocs/op
+    BenchmarkLevelsKiwiComplex-4                   50000         31951 ns/op       0.06 MB/s       16034 B/op        216 allocs/op
+    BenchmarkLevelsStdLog-4                       100000         21287 ns/op       0.09 MB/s        7159 B/op        124 allocs/op
+    BenchmarkLevelsStdLogComplex-4                 50000         32315 ns/op       0.06 MB/s       11446 B/op        200 allocs/op
+    BenchmarkLevelsLogxi-4                        100000         13027 ns/op       0.15 MB/s        4127 B/op         74 allocs/op
+    BenchmarkLevelsLogxiComplex-4                  50000         35141 ns/op       0.06 MB/s       10747 B/op        182 allocs/op
+    BenchmarkLevelsLogrus-4                        50000         36739 ns/op       0.05 MB/s       12320 B/op        177 allocs/op
+    BenchmarkLevelsLogrusComplex-4                 30000         41804 ns/op       0.05 MB/s       13989 B/op        231 allocs/op
+    BenchmarkLevelsLog15-4                         30000         54864 ns/op       0.04 MB/s       14998 B/op        224 allocs/op
+    BenchmarkLevelsLog15Complex-4                  20000         62604 ns/op       0.03 MB/s       18340 B/op        300 allocs/op
 
 Well after oftimization kiwi runs faster. It is not the fastest logger among benchmarked but not slowest.
 It much faster than `logrus` and `log15` but slower than `logxi`.
