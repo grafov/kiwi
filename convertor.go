@@ -49,15 +49,15 @@ const (
 	flushCmd
 )
 
+// FloatFormat used in Float to String conversion.
+// It is second parameter passed to strconv.FormatFloat()
+var FloatFormat byte = 'e'
+
 // it applicable for all scalar types and for strings
 func toRecordKey(val interface{}) string {
 	switch val.(type) {
 	case string:
 		return val.(string)
-	// case rune:
-	// 	return string(val.(rune))
-	// case byte:
-	// 	return string(val.(byte))
 	case []byte:
 		return string(val.([]byte))
 	case fmt.Stringer:
@@ -88,9 +88,9 @@ func toRecordKey(val interface{}) string {
 	case uint64:
 		return strconv.FormatUint(val.(uint64), 10)
 	case float32:
-		return strconv.FormatFloat(float64(val.(float32)), 'e', -1, 32)
+		return strconv.FormatFloat(float64(val.(float32)), FloatFormat, -1, 32)
 	case float64:
-		return strconv.FormatFloat(val.(float64), 'e', -1, 64)
+		return strconv.FormatFloat(val.(float64), FloatFormat, -1, 64)
 	case complex64:
 		return fmt.Sprintf("%f", val.(complex64))
 	case complex128:
@@ -135,9 +135,9 @@ func toRecordValue(val interface{}) value {
 	case uint64:
 		return value{strconv.FormatUint(val.(uint64), 10), nil, integerVal, false}
 	case float32:
-		return value{strconv.FormatFloat(float64(val.(float32)), 'e', -1, 32), nil, floatVal, false}
+		return value{strconv.FormatFloat(float64(val.(float32)), FloatFormat, -1, 32), nil, floatVal, false}
 	case float64:
-		return value{strconv.FormatFloat(val.(float64), 'e', -1, 64), nil, floatVal, false}
+		return value{strconv.FormatFloat(val.(float64), FloatFormat, -1, 64), nil, floatVal, false}
 	case complex64:
 		return value{fmt.Sprintf("%f", val.(complex64)), nil, complexVal, false}
 	case complex128:
