@@ -172,6 +172,8 @@ Hence value of `lazy-sample` from the example above will be evaluated only on `L
 
 ## Comparison with other loggers
 
+Briefly: it looks not bad :)
+
     $ go test -bench=. -benchmem
     BenchmarkLevelsKiwiTyped-4                    100000         21378 ns/op       0.09 MB/s        8293 B/op        112 allocs/op
     BenchmarkLevelsKiwiTypedComplex-4              50000         32892 ns/op       0.06 MB/s       15795 B/op        224 allocs/op
@@ -188,7 +190,7 @@ Hence value of `lazy-sample` from the example above will be evaluated only on `L
     BenchmarkLevelsLog15-4                         30000         54864 ns/op       0.04 MB/s       14998 B/op        224 allocs/op
     BenchmarkLevelsLog15Complex-4                  20000         62604 ns/op       0.03 MB/s       18340 B/op        300 allocs/op
 
-Well after oftimization kiwi runs faster. It is not the fastest logger among benchmarked but not slowest.
+Well after oftimization kiwi runs faster. It is not the fastest logger among benchmarked but not the slowest.
 It much faster than `logrus` and `log15` but slower than `logxi`.
 
 ## Origins
