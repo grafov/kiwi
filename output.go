@@ -44,7 +44,7 @@ var outputs []*Output
 
 type (
 	// Output used for filtering incoming log records from all logger instances
-	// and decides how to write them. Each output wraps its own io.Writer.
+	// and decides how to filter them. Each output wraps its own io.Writer.
 	// Output methods are safe for concurrent usage.
 	Output struct {
 		sync.RWMutex
@@ -243,9 +243,10 @@ func (o *Output) Close() {
 	close(o.In)
 }
 
+// XXX fix it
 func (o *Output) Flush() {
-	o.In <- nil
-	time.Sleep(5 * time.Millisecond)
+	o.In <- nil                      // XXX
+	time.Sleep(5 * time.Millisecond) // XXX
 }
 
 // A new record passed to all outputs. Each output routine decides n
@@ -288,14 +289,15 @@ func processOutput(o *Output) {
 			}
 		}
 		o.RUnlock()
-		o.write(record)
+		o.filter(record)
 		continue
 	skipRecord:
 		o.RUnlock()
 	}
 }
 
-func (o *Output) write(record *[]pair) {
+// TODO separate filter from formatter
+func (o *Output) filter(record *[]pair) {
 	var logLine bytes.Buffer
 	switch o.format {
 	case JSON:

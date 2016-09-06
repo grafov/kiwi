@@ -107,8 +107,6 @@ func toRecordValue(val interface{}) value {
 		return value{val.(string), nil, stringVal, true}
 	case []byte:
 		return value{string(val.([]byte)), nil, stringVal, true}
-	// case rune:
-	// 	return value{string(val.(rune)), nil, stringVal, true}
 	case bool:
 		if val.(bool) {
 			return value{"true", nil, booleanVal, false}
@@ -156,7 +154,7 @@ func toRecordValue(val interface{}) value {
 		return value{"", val, integerVal, true}
 	case func() float32, func() float64:
 		return value{"", val, floatVal, true}
-	case func() complex64:
+	case func() complex64, func() complex128:
 		return value{"", val, complexVal, false}
 	case nil:
 		return value{"", nil, voidVal, false}
