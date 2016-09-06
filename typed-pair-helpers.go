@@ -34,35 +34,48 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import (
 	"strconv"
+	"time"
 )
 
+// AsString formats pair for string.
 func AsString(key string, val string) pair {
 	return pair{key, value{val, nil, stringVal, true}, false}
 }
 
+// AsStringes formats pair for string with Stringer interface (the same as fmt.Stringer).
 func AsStringer(key string, val Stringer) pair {
 	return pair{key, value{val.String(), nil, stringVal, true}, false}
 }
 
+// AsInt formats pair for int value.
 func AsInt(key string, val int) pair {
 	return pair{key, value{strconv.Itoa(val), nil, integerVal, true}, false}
 }
 
+// AsInt64 formats pair for int64 value.
 func AsInt64(key string, val int64) pair {
 	return pair{key, value{strconv.FormatInt(val, 10), nil, integerVal, true}, false}
 }
 
+// AsUint64 formats pair for uint64 value.
 func AsUint64(key string, val uint64) pair {
 	return pair{key, value{strconv.FormatUint(val, 10), nil, integerVal, true}, false}
 }
 
+// AsFloat64 formats pair for float64 value.
 func AsFloat64(key string, val float64) pair {
 	return pair{key, value{strconv.FormatFloat(val, 'e', -1, 64), nil, floatVal, true}, false}
 }
 
+// AsBool formats pair for bool value.
 func AsBool(key string, val bool) pair {
 	if val {
 		return pair{key, value{"true", nil, booleanVal, false}, false}
 	}
 	return pair{key, value{"false", nil, booleanVal, false}, false}
+}
+
+// AsTime formats pair for time.Time value.
+func AsTime(key string, val time.Time, layout string) pair {
+	return pair{key, value{val.Format(layout), nil, stringVal, false}, false}
 }
