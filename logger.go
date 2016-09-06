@@ -33,7 +33,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import (
-	"fmt"
 	"strconv"
 	"time"
 )
@@ -48,11 +47,15 @@ type (
 		context    []pair
 		pairs      []pair
 	}
-	// Record allows log data from any custom types in they conform this interface.
+	// Stringer is the same as fmt.Stringer
+	Stringer interface {
+		String() string
+	}
+	// Valuer allows log data from any custom types in they conform this interface.
 	// Also types that conform fmt.Stringer can be used. But as they not have IsQuoted() check
 	// they always treated as strings and displayed in quotes.
-	Record interface {
-		String() string
+	Valuer interface {
+		Stringer
 		IsQuoted() bool
 	}
 	value struct {
@@ -274,7 +277,7 @@ func (l *Logger) AddString(key string, val string) *Logger {
 	return l
 }
 
-func (l *Logger) AddStringer(key string, val fmt.Stringer) *Logger {
+func (l *Logger) AddStringer(key string, val Stringer) *Logger {
 	l.pairs = append(l.pairs, pair{key, value{val.String(), nil, stringVal, true}, false})
 	return l
 }
@@ -286,6 +289,11 @@ func (l *Logger) AddInt(key string, val int) *Logger {
 
 func (l *Logger) AddInt64(key string, val int64) *Logger {
 	l.pairs = append(l.pairs, pair{key, value{strconv.FormatInt(val, 10), nil, integerVal, true}, false})
+	return l
+}
+
+func (l *Logger) AddUint64(key string, val uint64) *Logger {
+	l.pairs = append(l.pairs, pair{key, value{strconv.FormatUint(val, 10), nil, integerVal, true}, false})
 	return l
 }
 

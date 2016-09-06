@@ -44,7 +44,7 @@ var outputs []*Output
 
 type (
 	// Output used for filtering incoming log records from all logger instances
-	// and decides how to write them. Each Output wraps its own io.Writer.
+	// and decides how to write them. Each output wraps its own io.Writer.
 	// Output methods are safe for concurrent usage.
 	Output struct {
 		sync.RWMutex

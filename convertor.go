@@ -142,10 +142,10 @@ func toRecordValue(val interface{}) value {
 		return value{fmt.Sprintf("%f", val.(complex64)), nil, complexVal, false}
 	case complex128:
 		return value{fmt.Sprintf("%f", val.(complex128)), nil, complexVal, false}
-	case Record:
-		return value{val.(Record).String(), nil, stringVal, true}
-	case fmt.Stringer:
-		return value{val.(fmt.Stringer).String(), nil, stringVal, true}
+	case Valuer:
+		return value{val.(Valuer).String(), nil, stringVal, true}
+	case Stringer:
+		return value{val.(Stringer).String(), nil, stringVal, true}
 	case func() string:
 		return value{"", val, stringVal, true}
 	case func() bool:
