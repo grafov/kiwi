@@ -172,14 +172,32 @@ func toFunc(fn interface{}) interface{} {
 		return fn.(func() string)()
 	case func() bool:
 		return fn.(func() bool)()
-	case func() int, func() int8, func() int16, func() int32, func() int64: // XXX
+	case func() int:
 		return fn.(func() int)()
-	case func() uint8, func() uint16, func() uint32, func() uint64: // XXX
+	case func() int8:
+		return fn.(func() int8)()
+	case func() int16:
+		return fn.(func() int16)()
+	case func() int32:
+		return fn.(func() int32)()
+	case func() int64:
+		return fn.(func() int64)()
+	case func() uint8:
 		return fn.(func() uint8)()
-	case func() float32, func() float64: // XXX
+	case func() uint16:
+		return fn.(func() uint16)()
+	case func() uint32:
+		return fn.(func() uint32)()
+	case func() uint64:
+		return fn.(func() uint64)()
+	case func() float32:
 		return fn.(func() float32)()
+	case func() float64:
+		return fn.(func() float64)()
 	case func() complex64:
 		return fn.(func() complex64)()
+	case func() complex128:
+		return fn.(func() complex128)()
 	}
 	return nil
 }
