@@ -153,8 +153,7 @@ Logger accepts functions without args that return any of scalar types from stand
 * `func () string`
 * `func () float64`
 * `func () int8`
-
-and so on.
+* and so on.
 
 Hence value of `lazy-sample` from the example above will be evaluated only on `Log()` call.
 
