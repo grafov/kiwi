@@ -37,7 +37,6 @@ import (
 	"io"
 	"strconv"
 	"sync"
-	"time"
 )
 
 var outputs []*Output
@@ -243,10 +242,14 @@ func (o *Output) Close() {
 	close(o.In)
 }
 
-// XXX fix it
+// Flush waits that all previously sent to the output records worked.
 func (o *Output) Flush() {
-	o.In <- nil                      // XXX
-	time.Sleep(5 * time.Millisecond) // XXX
+	var flush = make(chan struct{})
+	// Well, it uses some kind of lifehack instead of dedicated flag.
+	// It send "deleted" record with unbuffered channel in the value.
+	// Then just wait for the value from this channel.
+	o.In <- &[]pair{{Deleted: true, Val: value{Func: flush}}}
+	<-flush
 }
 
 // A new record passed to all outputs. Each output routine decides n
@@ -270,13 +273,12 @@ func processOutput(o *Output) {
 		if o.closed || o.paused {
 			continue
 		}
-		if record == nil {
-			// Flush!
-			time.Sleep(5 * time.Millisecond) // XXX make real flush
-			continue
-		}
 		o.RLock()
-		for _, pair := range *record {
+		for i, pair := range *record {
+			if i == 0 && pair.Deleted {
+				pair.Val.Func.(chan struct{}) <- struct{}{}
+				goto skipRecord
+			}
 			if filter, ok := o.negativeFilters[pair.Key]; ok {
 				if filter.Check(pair.Key, pair.Val.Strv) {
 					goto skipRecord
