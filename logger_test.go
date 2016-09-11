@@ -173,7 +173,7 @@ func TestLogger_Add_Chained(t *testing.T) {
 func TestLogger_IntValues(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := UseOutput(output, Logfmt)
+	out := UseOutput(output, FormatLogfmt)
 	defer out.Close()
 
 	log.Log("k", 123)

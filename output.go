@@ -35,9 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ॐ तारे तुत्तारे तुरे स्व */
 
 import (
-	"bytes"
 	"io"
-	"strconv"
 	"sync"
 )
 
@@ -50,42 +48,33 @@ type (
 	Output struct {
 		sync.RWMutex
 		In              chan *[]pair
-		W               io.Writer
-		format          format
+		writer          io.Writer
+		format          FormatFunc
 		paused          bool
 		closed          bool
 		positiveFilters map[string]filter
 		negativeFilters map[string]filter
 		hiddenKeys      map[string]bool
 	}
-	// Formatter hasn't used yet. Just added for future realization.
-	Formatter interface {
-		Format(*Output)
-	}
-	format uint8
-)
-
-// current output formats
-const (
-	Logfmt format = iota
-	JSON
+	FormatFunc func([]pair) []byte
 )
 
 // UseOutput creates a new output for an arbitrary number of loggers.
 // There are any number of outputs may be created for saving incoming log
 // records to different places.
-func UseOutput(w io.Writer, logFormat format) *Output {
+func UseOutput(w io.Writer, fn FormatFunc) *Output {
 	for _, output := range outputs {
-		if output.W == w {
+		if output.writer == w {
 			return output
 		}
 	}
 	output := &Output{
 		In:              make(chan *[]pair, 16),
-		W:               w,
+		writer:          w,
 		positiveFilters: make(map[string]filter),
 		negativeFilters: make(map[string]filter),
-		format:          logFormat}
+		format:          fn,
+	}
 	outputs = append(outputs, output)
 	go processOutput(output)
 	return output
@@ -296,52 +285,23 @@ func processOutput(o *Output) {
 			}
 		}
 		o.RUnlock()
-		o.filter(record)
+		o.writer.Write(o.format(o.filter(record)))
+		o.writer.Write([]byte{'\n'})
 		continue
 	skipRecord:
 		o.RUnlock()
 	}
 }
 
-// TODO separate filter from formatter
-func (o *Output) filter(record *[]pair) {
-	var logLine bytes.Buffer
-	switch o.format {
-	case JSON:
-		logLine.WriteRune('{')
-		o.RLock()
-		for _, pair := range *record {
-			if ok := o.hiddenKeys[pair.Key]; ok {
-				continue
-			}
-			logLine.WriteRune('"')
-			logLine.WriteString(pair.Key)
-			logLine.WriteString("\":")
-			if pair.Val.Quoted {
-				logLine.WriteString(strconv.Quote(pair.Val.Strv))
-			} else {
-				logLine.WriteString(pair.Val.Strv)
-			}
-			logLine.WriteString(", ")
+func (o *Output) filter(record *[]pair) []pair {
+	var filteredRecord []pair
+	o.RLock()
+	for _, pair := range *record {
+		if ok := o.hiddenKeys[pair.Key]; ok {
+			continue
 		}
-		logLine.WriteRune('}')
-	case Logfmt:
-		o.RLock()
-		for _, pair := range *record {
-			if ok := o.hiddenKeys[pair.Key]; ok {
-				continue
-			}
-			logLine.WriteString(pair.Key)
-			logLine.WriteRune('=')
-			if pair.Val.Quoted {
-				logLine.WriteString(strconv.Quote(pair.Val.Strv))
-			} else {
-				logLine.WriteString(pair.Val.Strv)
-			}
-			logLine.WriteRune(' ')
-		}
+		filteredRecord = append(filteredRecord, pair)
 	}
 	o.RUnlock()
-	logLine.WriteRune('\n')
-	logLine.WriteTo(o.W)
+	return filteredRecord
 }
