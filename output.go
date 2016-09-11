@@ -1,7 +1,10 @@
 package kiwi
 
-/*
-Copyright (c) 2016, Alexander I.Grafov aka Axel
+// This file consists of Output related structures and functions.
+// Outputs accepts incoming log records from Loggers, check them with filters
+// and write to output streams if checks passed.
+
+/* Copyright (c) 2016, Alexander I.Grafov aka Axel
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -29,8 +32,7 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-ॐ तारे तुत्तारे तुरे स्व
-*/
+ॐ तारे तुत्तारे तुरे स्व */
 
 import (
 	"bytes"
@@ -275,15 +277,18 @@ func processOutput(o *Output) {
 		}
 		o.RLock()
 		for i, pair := range *record {
+			// Flush came
 			if i == 0 && pair.Deleted {
 				pair.Val.Func.(chan struct{}) <- struct{}{}
 				goto skipRecord
 			}
+			// Negative conditions have highest priority
 			if filter, ok := o.negativeFilters[pair.Key]; ok {
 				if filter.Check(pair.Key, pair.Val.Strv) {
 					goto skipRecord
 				}
 			}
+			// At last check for positive conditions
 			if filter, ok := o.positiveFilters[pair.Key]; ok {
 				if !filter.Check(pair.Key, pair.Val.Strv) {
 					goto skipRecord
