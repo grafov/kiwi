@@ -28,7 +28,8 @@
 //
 // ॐ तारे तुत्तारे तुरे स्व
 
-/* Package kiwi is a library with an odd logic that log your application' data in its own strange way.
+/*
+Package kiwi is a library with an odd logic that log your application' data in its own strange way.
 
 WIP. API and features is subject of changes. Don't use it yet!
 
