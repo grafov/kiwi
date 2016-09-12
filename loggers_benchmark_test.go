@@ -57,7 +57,7 @@ func BenchmarkLevelsKiwiTyped(b *testing.B) {
 	l.With("_n", "bench", "_p", pid)
 	l.WithTimestamp(time.RFC3339)
 	kiwi.LevelName = "l"
-	out := kiwi.UseOutput(buf, kiwi.FormatJSON)
+	out := kiwi.UseOutput(buf, kiwi.UseJSON())
 	defer out.Close()
 	for i := 0; i < b.N; i++ {
 		l.AddInt("key", 1).AddFloat64("key2", 3.141592).AddString("key3", "string").AddBool("key4", false).Debug()
@@ -76,7 +76,7 @@ func BenchmarkLevelsKiwiTypedComplex(b *testing.B) {
 	l.With("_n", "bench", "_p", pid)
 	l.WithTimestamp(time.RFC3339)
 	kiwi.LevelName = "l"
-	out := kiwi.UseOutput(buf, kiwi.FormatJSON)
+	out := kiwi.UseOutput(buf, kiwi.UseJSON())
 	defer out.Close()
 	for i := 0; i < b.N; i++ {
 		l.AddInt("key", 1).AddStringer("obj", testObject).Debug()
@@ -95,7 +95,7 @@ func BenchmarkLevelsKiwiTypedHelpers(b *testing.B) {
 	l.With("_n", "bench", "_p", pid)
 	l.WithTimestamp(time.RFC3339)
 	kiwi.LevelName = "l"
-	out := kiwi.UseOutput(buf, kiwi.FormatJSON)
+	out := kiwi.UseOutput(buf, kiwi.UseJSON())
 	defer out.Close()
 	for i := 0; i < b.N; i++ {
 		l.AddPairs(
@@ -130,7 +130,7 @@ func BenchmarkLevelsKiwiTypedHelpersComplex(b *testing.B) {
 	l.With("_n", "bench", "_p", pid)
 	l.WithTimestamp(time.RFC3339)
 	kiwi.LevelName = "l"
-	out := kiwi.UseOutput(buf, kiwi.FormatJSON)
+	out := kiwi.UseOutput(buf, kiwi.UseJSON())
 	defer out.Close()
 	for i := 0; i < b.N; i++ {
 		l.AddPairs(kiwi.AsInt("key", 1), kiwi.AsStringer("obj", testObject)).Debug()
@@ -149,7 +149,7 @@ func BenchmarkLevelsKiwi(b *testing.B) {
 	l.With("_n", "bench", "_p", pid)
 	l.WithTimestamp(time.RFC3339)
 	kiwi.LevelName = "l"
-	out := kiwi.UseOutput(buf, kiwi.FormatJSON)
+	out := kiwi.UseOutput(buf, kiwi.UseJSON())
 	defer out.Close()
 	for i := 0; i < b.N; i++ {
 		l.Debug("key", 1, "key2", 3.141592, "key3", "string", "key4", false)
@@ -168,7 +168,7 @@ func BenchmarkLevelsKiwiComplex(b *testing.B) {
 	l.With("_n", "bench", "_p", pid)
 	l.WithTimestamp(time.RFC3339)
 	kiwi.LevelName = "l"
-	out := kiwi.UseOutput(buf, kiwi.FormatJSON)
+	out := kiwi.UseOutput(buf, kiwi.UseJSON())
 	defer out.Close()
 	for i := 0; i < b.N; i++ {
 		l.Debug("key", 1, "obj", testObject)

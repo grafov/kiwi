@@ -37,39 +37,66 @@ import (
 	"strconv"
 )
 
-// FormatLogfmt formats filtered output as Logfmt format.
-func FormatLogfmt(record []pair) []byte {
-	var line bytes.Buffer
-	for _, pair := range record {
-		line.WriteString(pair.Key)
-		line.WriteRune('=')
-		if pair.Val.Quoted {
-			line.WriteString(strconv.Quote(pair.Val.Strv))
-		} else {
-			line.WriteString(pair.Val.Strv)
-		}
-		line.WriteRune(' ')
-	}
-	return line.Bytes()
+// Formatter represents format of the output.
+type Formatter interface {
+	Begin()
+	Pair(key, val string, quoted bool)
+	Finish() []byte
 }
 
-// FormatJSON formats filtered output as JSON.
-// Function accepts slice of record pairs of Pair type.
-// The function shall not modify record pairs.
-func FormatJSON(record []pair) []byte {
-	var line bytes.Buffer
-	line.WriteRune('{')
-	for _, pair := range record {
-		line.WriteRune('"')
-		line.WriteString(pair.Key)
-		line.WriteString("\":")
-		if pair.Val.Quoted {
-			line.WriteString(strconv.Quote(pair.Val.Strv))
-		} else {
-			line.WriteString(pair.Val.Strv)
-		}
-		line.WriteString(", ")
+type formatLogfmt struct {
+	line bytes.Buffer
+}
+
+func UseLogfmt() *formatLogfmt {
+	return new(formatLogfmt)
+}
+
+func (f *formatLogfmt) Begin() {
+	f.line.Reset()
+}
+
+func (f *formatLogfmt) Pair(key, val string, quoted bool) {
+	f.line.WriteString(key)
+	f.line.WriteRune('=')
+	if quoted {
+		f.line.WriteString(strconv.Quote(val))
+	} else {
+		f.line.WriteString(val)
 	}
-	line.WriteRune('}')
-	return line.Bytes()
+	f.line.WriteRune(' ')
+}
+
+func (f *formatLogfmt) Finish() []byte {
+	return f.line.Bytes()
+}
+
+type formatJSON struct {
+	line bytes.Buffer
+}
+
+func UseJSON() *formatJSON {
+	return new(formatJSON)
+}
+
+func (f *formatJSON) Begin() {
+	f.line.Reset()
+	f.line.WriteRune('{')
+}
+
+func (f *formatJSON) Pair(key, val string, quoted bool) {
+	f.line.WriteRune('"')
+	f.line.WriteString(key)
+	f.line.WriteString("\":")
+	if quoted {
+		f.line.WriteString(strconv.Quote(val))
+	} else {
+		f.line.WriteString(val)
+	}
+	f.line.WriteString(", ")
+}
+
+func (f *formatJSON) Finish() []byte {
+	f.line.WriteRune('}')
+	return f.line.Bytes()
 }

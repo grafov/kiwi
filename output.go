@@ -49,23 +49,23 @@ type (
 		sync.RWMutex
 		In              chan *[]pair
 		writer          io.Writer
-		format          FormatFunc
+		format          Formatter
 		paused          bool
 		closed          bool
 		positiveFilters map[string]filter
 		negativeFilters map[string]filter
 		hiddenKeys      map[string]bool
 	}
-	FormatFunc func([]pair) []byte
 )
 
 // UseOutput creates a new output for an arbitrary number of loggers.
 // There are any number of outputs may be created for saving incoming log
 // records to different places.
-func UseOutput(w io.Writer, fn FormatFunc) *Output {
-	for _, output := range outputs {
+func UseOutput(w io.Writer, fn Formatter) *Output {
+	for i, output := range outputs {
 		if output.writer == w {
-			return output
+			outputs[i].format = fn
+			return outputs[i]
 		}
 	}
 	output := &Output{
@@ -141,7 +141,6 @@ func (o *Output) WithoutValues(key string, vals ...string) *Output {
 func (o *Output) WithRangeInt64(key string, from, to int64) *Output {
 	if !o.closed {
 		o.Lock()
-
 		delete(o.negativeFilters, key)
 		o.positiveFilters[key] = &rangeInt64Filter{Key: key, From: from, To: to}
 		o.Unlock()
@@ -285,23 +284,22 @@ func processOutput(o *Output) {
 			}
 		}
 		o.RUnlock()
-		o.writer.Write(o.format(o.filter(record)))
-		o.writer.Write([]byte{'\n'})
+		o.filter(record)
 		continue
 	skipRecord:
 		o.RUnlock()
 	}
 }
 
-func (o *Output) filter(record *[]pair) []pair {
-	var filteredRecord []pair
+func (o *Output) filter(record *[]pair) {
 	o.RLock()
+	o.format.Begin()
 	for _, pair := range *record {
 		if ok := o.hiddenKeys[pair.Key]; ok {
 			continue
 		}
-		filteredRecord = append(filteredRecord, pair)
+		o.format.Pair(pair.Key, pair.Val.Strv, pair.Val.Quoted)
 	}
 	o.RUnlock()
-	return filteredRecord
+	o.writer.Write(o.format.Finish())
 }
