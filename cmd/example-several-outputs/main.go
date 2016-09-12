@@ -13,9 +13,9 @@ func main() {
 	tmpFile, _ := os.Create("/tmp/something-completely-different.log")
 
 	// You can get arbitrary number of outputs.
-	info := kiwi.UseOutput(os.Stdout, kiwi.Logfmt)
-	errors := kiwi.UseOutput(os.Stderr, kiwi.Logfmt)
-	something := kiwi.UseOutput(tmpFile, kiwi.Logfmt)
+	info := kiwi.UseOutput(os.Stdout, kiwi.UseLogfmt())
+	errors := kiwi.UseOutput(os.Stderr, kiwi.UseLogfmt())
+	something := kiwi.UseOutput(tmpFile, kiwi.UseLogfmt())
 
 	// Each record by default will copied to all outputs.
 	log.Add("level", "INFO", "sample-record", 1, "key", "value")
