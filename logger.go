@@ -118,7 +118,6 @@ func (l *Logger) Log(keyVals ...interface{}) {
 			}
 		}
 	}
-	l.pairs = nil
 	for i, val := range keyVals {
 		if i%2 == 0 {
 			key = toRecordKey(val)
@@ -134,6 +133,7 @@ func (l *Logger) Log(keyVals ...interface{}) {
 		record = append(record, pair{key, value{"", nil, voidVal, false}, false})
 	}
 	passRecordToOutput(record)
+	l.pairs = nil
 }
 
 // Add a new key-value pairs to the log record. If a key already added then value will be
