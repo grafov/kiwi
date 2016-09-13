@@ -59,6 +59,8 @@ See API description and code samples in [godoc](http://godoc.org/github.com/graf
 Package have not external dependencies except standard library. So just
 
     go get github.com/grafov/kiwi
+	
+Currently it imports several other loggers in benchmarks but later benchmarks will be moved to a separate package.
 
 ## Usage examples
 
