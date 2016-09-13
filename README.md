@@ -29,19 +29,19 @@ Point 2 needs more explanations.
 Traditional way for logging is set a level of severity for each log record. 
 And check a level before passing this record to a writer.
 It is not bad way but it is not obvious.
-Especially when logger introduces many severity levels like "debug", "info", "warning", "critical", "fatal", "panic" and so on. 
+Especially when logger introduces many severity levels like these all "debug", "info", "warning", "critical", "fatal", "panic" and so on. 
 Look the internet for many guides with controversial recommendations how to distinguish all these "standard" levels and apply them to various events in your application.
 When you should use "fatal" instead of "panic" or "debug" instead of "info".
 
-There is alternative way not use severity levels at all. Structured logging does thing in this way. 
+There is alternative simple way not use severity levels at all. Structured logging does things in this way. 
 Especially it right for *logfmt* format.
-It is not required part of logfmt or structured logging but it naturally ensued from rules they offer.
+It is not a required part of logfmt or structured logging but it naturally ensued from the rules they offer.
 You just log pairs of keys and values and these pairs may be of any kind. There is not a standard list of keys.
 If you need you can use levels for log records for example set key named "level" (or any other name you want) with values INFO, WARNING, ERROR etc.
 But it is not a requirement.
 So you log just pairs of arbitrary keys and values and interprete them as you wish.
 
-Feature of kiwi logger is dynamic filtering of incoming records.
+Feature of `kiwi` logger is dynamic filtering of incoming records.
 You log all data of any severity. These log records passed to all defined outputs (log streams).
 And you restrict them by set filters for pass only records and their fields which you want to see in this log stream.
 It can be changed in any moment: `kiwi` has methods for filtering by keys, values, ranges of values.
@@ -94,14 +94,6 @@ func main() {
 	log.Log("key", 123, "key2", 1.23e3, "key3", 'u', "key4", true)
 	// Expected output:
 	// key=123 key2=1.23e3 key3="u" key4=true
-
-	// You can set permanent pairs as logger context.
-	log.With("userID", 1000, "PID", os.GetPID())
-
-	// They will be passed along pairs for each record.
-	// log.Log("msg", "details about something")
-	// Expect output:
-	// userID=1000 PID=12345 msg="details about something"
 	
 	// You need define even one output: set writer and logging format.
 	out:=kiwi.UseOutput(os.StdOut, kiwi.Logfmt)
@@ -124,12 +116,42 @@ func main() {
 
 See more ready to run samples in `cmd` subdirs.
 
+## Work with context
 
-### Thread safety
+`Kiwi` logger has ability keep some pairs during lifetime of a logger instance.
 
-TBD
+```go
+import "github.com/grafov/kiwi"
 
-### Work with context
+func main() {
+	// Creates a new logger instance.
+	log1st := kiwi.New()
+
+	// You can set permanent pairs as logger context.
+	log1st.With("userID", 1000, "PID", os.GetPID())
+
+	// They will be passed among other pairs for each record.
+	log1st.Log("msg", "details about something")
+	// Expect output:
+	// userID=1000 PID=12345 msg="details about something"
+	
+	// Context copied into a new logger instance after logger cloned.
+	log2nd := log1st.New()
+	
+	log2nd.Log("key", "value")
+	// Expect output:
+	// userID=1000 PID=12345 key="value"
+	
+	// Get previously keeped context values. Results returned as map[string]interface{}
+	appContext := log2nd.GetContext()
+	fmt.Printf("%+v\n", appContext)
+	
+	// You can reset context at any time with
+	log2nd.ResetContext()
+}
+```
+
+## Thread safety
 
 TBD
 
@@ -192,7 +214,7 @@ Briefly: it looks not bad :)
     BenchmarkLevelsLog15-4                         30000         54864 ns/op       0.04 MB/s       14998 B/op        224 allocs/op
     BenchmarkLevelsLog15Complex-4                  20000         62604 ns/op       0.03 MB/s       18340 B/op        300 allocs/op
 
-Well after oftimization kiwi runs faster. It is not the fastest logger among benchmarked but not the slowest.
+Well after oftimization `kiwi` runs faster. It is not the fastest logger among benchmarked but not the slowest.
 It much faster than `logrus` and `log15` but slower than `logxi`.
 
 ## Origins
