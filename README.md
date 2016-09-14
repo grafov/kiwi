@@ -153,7 +153,24 @@ func main() {
 
 ## Thread safety
 
-TBD
+It is unsafe by design. Firstly I have used version for safe work in multiple goroutines.
+And it was not only slow but in just not need in many cases. 
+If you need a new logger in another execution thread you will create another instanse. Better is clone old instance to a new one for passing the context to a subroutine. It is all.
+
+```go
+	// Creates a new logger instance.
+	log1st := kiwi.New()
+
+	// Just clone old instance to a new one with keeping of context.
+	log2nd := log1st.New()
+
+	// So other concurrent routines may accept logger with the same context.
+	go subroutine(log2nd, otherArgs...)
+```
+
+There are many small applications where only one thing required: fast and short logger syntax
+and no matter how slow it is. So for which case I think it is sense have only global instance (like singleton)
+with package level methods. TBD SafeLogger
 
 ### Evaluating rules of record values
 
