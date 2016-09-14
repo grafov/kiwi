@@ -204,6 +204,7 @@ Hence value of `lazy-sample` from the example above will be evaluated only on `L
 1. Ideas of key-value format very near to JSON output but with orientation on readability for humans without additional tools for log parsing.
 2. Yes, it was architectured and developed to be a standard number 15 that competing with others. It is not pretend to be log format for everything.
 3. No, it is not related to `log15` logger though `kiwi` shares the same logfmt format and some ideas with him.
+4. It did not offer "Logger" interface because IMO interface is useless for loggers. It offers interfaces for the parts of logger like formatters.
 
 ## Similar works for structured logging
 
