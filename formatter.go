@@ -58,6 +58,10 @@ func (f *formatLogfmt) Begin() {
 
 func (f *formatLogfmt) Pair(key, val string, quoted bool) {
 	f.line.WriteString(key)
+	if val == "" && !quoted {
+		f.line.WriteRune(' ')
+		return
+	}
 	f.line.WriteRune('=')
 	if quoted {
 		f.line.WriteString(strconv.Quote(val))
