@@ -1,0 +1,27 @@
+#+TODO: WIP(s) STOPPED(p) | DONE(d) CANCELED(c@)
+* For realization
+** DONE check that loggers works ok without any output
+   случай неправильного порядка инита
+   или закрытие всех имеющихся выводов
+** DONE check artifical output names, use writers for distinction
+   переименовать getoutput в getwriter?
+** DONE custom formatters
+** DONE add encoding.TextMarshaller
+** DONE fix odd args logic: odd key showed as is without a value
+** STOPPED mode: drop duplicate records in an output
+** add tests for output filters
+** add tests for formatters
+** add tests for logger add/log for different input types
+** add tests for logger context
+** add tests for logger timestamps
+** move examples from README to example_ functions then add single short usage example to README
+** add time.Time into convertors
+** singleton global logger											 :roadmap:
+** colour format for the console (formatter or decorator)			:roadmap:
+** log write throttling mode										:roadmap:
+** ability to use custom filters									:roadmap:
+* Ideas
+** move typed helpers into a separated package or
+** remove typed helpers - it seems as preferable way as it make API shorter
+   Test results shows not many benefit from them. Need more tests.
+** decorators for formatters
