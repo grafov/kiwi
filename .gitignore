@@ -22,3 +22,6 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+# Ignore wikipages that keeped locally inside the project repo
+/kiwi.wiki
