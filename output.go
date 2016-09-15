@@ -283,7 +283,6 @@ func processOutput(o *Output) {
 				}
 			}
 		}
-		o.RUnlock()
 		o.filter(record)
 		continue
 	skipRecord:
@@ -292,7 +291,6 @@ func processOutput(o *Output) {
 }
 
 func (o *Output) filter(record *[]pair) {
-	o.RLock()
 	o.format.Begin()
 	for _, pair := range *record {
 		if ok := o.hiddenKeys[pair.Key]; ok {
