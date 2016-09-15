@@ -236,6 +236,13 @@ Briefly: it looks not bad :)
 Well after oftimization `kiwi` runs faster. It is not the fastest logger among benchmarked but not the slowest.
 It much faster than `logrus` and `log15` but slower than `logxi`.
 
+## Roadmap
+
+* custom filters
+* global thread-safe logger for simple apps
+* optional colour formatter for the console
+* throttling mode for outputs
+
 ## Origins
 
 * logfmt description [brandur.org/logfmt](https://brandur.org/logfmt)
