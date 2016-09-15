@@ -51,8 +51,9 @@ For example increase verbosity for a specific module or a single handler and dec
 
 ## Docs [![GoDoc](https://godoc.org/github.com/grafov/kiwi?status.svg)](https://godoc.org/github.com/grafov/kiwi)
 
+See documentation in [the wiki](https://github.com/grafov/kiwi/wiki). 
 Examples of logger usage see at [cmd/*](cmd) subfolders.
-See API description and code samples in [godoc](http://godoc.org/github.com/grafov/kiwi).
+And of course for API description look at [godoc](http://godoc.org/github.com/grafov/kiwi).
 
 ## Installation [![Build Status](https://travis-ci.org/grafov/kiwi.svg?branch=master)](https://travis-ci.org/grafov/kiwi)
 
