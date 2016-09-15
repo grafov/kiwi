@@ -1,6 +1,8 @@
 package kiwi
 
 // This file consists of helpers for adding pairs with strongly typed values.
+// I not sure about this part of API yet. It should be moved into a separate
+// package or removed.
 
 /* Copyright (c) 2016, Alexander I.Grafov aka Axel
 All rights reserved.
@@ -38,36 +40,46 @@ import (
 )
 
 // AsString formats pair for string.
+// Note: type helpers are experimental part of API and may be removed.
 func AsString(key string, val string) pair {
 	return pair{key, value{val, nil, stringVal, true}, false}
 }
 
 // AsStringes formats pair for string with Stringer interface (the same as fmt.Stringer).
+// Note: type helpers are experimental part of API and may be removed.
 func AsStringer(key string, val Stringer) pair {
 	return pair{key, value{val.String(), nil, stringVal, true}, false}
 }
 
-// AsInt formats pair for int value.
+// AsInt formats pair for int value. If you need add integer of specific size just
+// convert it to int, int64 or uint64 and use AddInt(), AddInt64() or AddUint64()
+// respectively.
+// Note: type helpers are experimental part of API and may be removed.
 func AsInt(key string, val int) pair {
 	return pair{key, value{strconv.Itoa(val), nil, integerVal, true}, false}
 }
 
 // AsInt64 formats pair for int64 value.
+// Note: type helpers are experimental part of API and may be removed.
 func AsInt64(key string, val int64) pair {
 	return pair{key, value{strconv.FormatInt(val, 10), nil, integerVal, true}, false}
 }
 
 // AsUint64 formats pair for uint64 value.
+// Note: type helpers are experimental part of API and may be removed.
 func AsUint64(key string, val uint64) pair {
 	return pair{key, value{strconv.FormatUint(val, 10), nil, integerVal, true}, false}
 }
 
-// AsFloat64 formats pair for float64 value.
+// AsFloat64 formats pair for float64 value. If you need add float of other size just
+// convert it to float64.
+// Note: type helpers are experimental part of API and may be removed.
 func AsFloat64(key string, val float64) pair {
 	return pair{key, value{strconv.FormatFloat(val, 'e', -1, 64), nil, floatVal, true}, false}
 }
 
 // AsBool formats pair for bool value.
+// Note: type helpers are experimental part of API and may be removed.
 func AsBool(key string, val bool) pair {
 	if val {
 		return pair{key, value{"true", nil, booleanVal, false}, false}
@@ -76,6 +88,7 @@ func AsBool(key string, val bool) pair {
 }
 
 // AsTime formats pair for time.Time value.
+// Note: type helpers are experimental part of API and may be removed.
 func AsTime(key string, val time.Time, layout string) pair {
 	return pair{key, value{val.Format(layout), nil, stringVal, false}, false}
 }
