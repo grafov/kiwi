@@ -33,6 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ॐ तारे तुत्तारे तुरे स्व */
 
 import (
+	"encoding"
 	"fmt"
 	"strconv"
 )
@@ -60,6 +61,12 @@ func toRecordKey(val interface{}) string {
 		return string(val.([]byte))
 	case fmt.Stringer:
 		return val.(fmt.Stringer).String()
+	case encoding.TextMarshaler:
+		data, err := val.(encoding.TextMarshaler).MarshalText()
+		if err != nil {
+			return fmt.Sprintf("%s", err)
+		}
+		return string(data)
 	case bool:
 		if val.(bool) {
 			return "true"
@@ -142,6 +149,12 @@ func toRecordValue(val interface{}) value {
 		return value{val.(Valuer).String(), nil, stringVal, true}
 	case Stringer:
 		return value{val.(Stringer).String(), nil, stringVal, true}
+	case encoding.TextMarshaler:
+		data, err := val.(encoding.TextMarshaler).MarshalText()
+		if err != nil {
+			return value{fmt.Sprintf("%s", err), nil, stringVal, true}
+		}
+		return value{string(data), nil, stringVal, true}
 	case func() string:
 		return value{"", val, stringVal, true}
 	case func() bool:
