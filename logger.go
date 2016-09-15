@@ -136,6 +136,15 @@ func (l *Logger) Log(keyVals ...interface{}) {
 	l.pairs = nil
 }
 
+// A new record passed to all outputs. Each output routine decides n
+func passRecordToOutput(record []pair) {
+	for _, o := range outputs {
+		if !o.closed && !o.paused {
+			o.In <- &record
+		}
+	}
+}
+
 // Add a new key-value pairs to the log record. If a key already added then value will be
 // updated. If a key already exists in a contextSrc then it will be overridden by a new
 // value for a current record only. After flushing a record with Log() old context value

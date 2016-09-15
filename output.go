@@ -242,15 +242,6 @@ func (o *Output) Flush() {
 	<-flush
 }
 
-// A new record passed to all outputs. Each output routine decides n
-func passRecordToOutput(record []pair) {
-	for _, o := range outputs {
-		if !o.closed && !o.paused {
-			o.In <- &record
-		}
-	}
-}
-
 func processOutput(o *Output) {
 	for {
 		record, ok := <-o.In
