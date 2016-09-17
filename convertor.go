@@ -53,6 +53,7 @@ const (
 // It is second parameter passed to strconv.FormatFloat()
 var FloatFormat byte = 'e'
 
+// TimeLayout used in time.Time to String conversion.
 var TimeLayout = time.RFC3339
 
 // it applicable for all scalar types and for strings
