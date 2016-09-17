@@ -36,6 +36,7 @@ import (
 	"encoding"
 	"fmt"
 	"strconv"
+	"time"
 )
 
 const (
@@ -51,6 +52,8 @@ const (
 // FloatFormat used in Float to String conversion.
 // It is second parameter passed to strconv.FormatFloat()
 var FloatFormat byte = 'e'
+
+var TimeLayout = time.RFC3339
 
 // it applicable for all scalar types and for strings
 func toRecordKey(val interface{}) string {
@@ -100,6 +103,8 @@ func toRecordKey(val interface{}) string {
 		return fmt.Sprintf("%f", val.(complex64))
 	case complex128:
 		return fmt.Sprintf("%f", val.(complex128))
+	case time.Time:
+		return val.(time.Time).Format(TimeLayout)
 	default:
 		return fmt.Sprintf("%v", val)
 	}
@@ -145,6 +150,8 @@ func toRecordValue(val interface{}) value {
 		return value{fmt.Sprintf("%f", val.(complex64)), nil, complexVal, false}
 	case complex128:
 		return value{fmt.Sprintf("%f", val.(complex128)), nil, complexVal, false}
+	case time.Time:
+		return value{val.(time.Time).Format(TimeLayout), nil, stringVal, true}
 	case Valuer:
 		return value{val.(Valuer).String(), nil, stringVal, true}
 	case Stringer:
@@ -167,6 +174,8 @@ func toRecordValue(val interface{}) value {
 		return value{"", val, floatVal, true}
 	case func() complex64, func() complex128:
 		return value{"", val, complexVal, false}
+	case func() time.Time:
+		return value{"", val, stringVal, true}
 	case nil:
 		return value{"", nil, voidVal, false}
 	default:
@@ -207,6 +216,8 @@ func toFunc(fn interface{}) interface{} {
 		return fn.(func() complex64)()
 	case func() complex128:
 		return fn.(func() complex128)()
+	case func() time.Time:
+		return fn.(func() time.Time)()
 	}
 	return nil
 }
