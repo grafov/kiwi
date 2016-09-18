@@ -15,6 +15,7 @@
 ** add tests for logger add/log for different input types
 ** add tests for logger context
 ** add tests for logger timestamps
+** move benchmarks to a separate package
 ** move examples from README to example_ functions then add single short usage example to README
 ** singleton global logger											 :roadmap:
 ** colour format for the console (formatter or decorator)			:roadmap:
