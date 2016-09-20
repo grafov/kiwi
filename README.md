@@ -61,8 +61,6 @@ Package have not external dependencies except standard library. So just
 
     go get github.com/grafov/kiwi
 	
-Currently it imports several other loggers in benchmarks but later benchmarks will be moved to a separate package.
-
 ## Usage examples
 
 ```go
@@ -233,8 +231,9 @@ Briefly: it looks not bad :)
     BenchmarkLevelsLog15-4                         30000         54864 ns/op       0.04 MB/s       14998 B/op        224 allocs/op
     BenchmarkLevelsLog15Complex-4                  20000         62604 ns/op       0.03 MB/s       18340 B/op        300 allocs/op
 
-Well after oftimization `kiwi` runs faster. It is not the fastest logger among benchmarked but not the slowest.
+It is not the fastest logger among benchmarked but not the slowest.
 It much faster than `logrus` and `log15` but slower than `logxi`.
+See the benchmarks in the [github.com/grafov/go-loggers-comparison](https://github.com/grafov/go-loggers-comparison).
 
 ## Roadmap
 
