@@ -209,23 +209,25 @@ Hence value of `lazy-sample` from the example above will be evaluated only on `L
 Briefly: it looks not bad :)
 
     $ go test -bench=. -benchmem
-    BenchmarkLevelsKiwiTyped-4                    100000         19751 ns/op       0.10 MB/s        7130 B/op        100 allocs/op
-    BenchmarkLevelsKiwiTypedComplex-4              50000         32753 ns/op       0.06 MB/s       12841 B/op        208 allocs/op
-    BenchmarkLevelsKiwiTypedHelpers-4             100000         20086 ns/op       0.10 MB/s        6361 B/op         91 allocs/op
-    BenchmarkLevelsKiwiTypedHelpersComplex-4       50000         35239 ns/op       0.06 MB/s       12585 B/op        204 allocs/op
-    BenchmarkLevelsKiwi-4                         100000         15352 ns/op       0.13 MB/s        7599 B/op         99 allocs/op
-    BenchmarkLevelsKiwiComplex-4                   50000         33025 ns/op       0.06 MB/s       13080 B/op        200 allocs/op
-    BenchmarkLevelsStdLog-4                       100000         21517 ns/op       0.09 MB/s        7159 B/op        124 allocs/op
-    BenchmarkLevelsStdLogComplex-4                 50000         35813 ns/op       0.06 MB/s       11446 B/op        200 allocs/op
-    BenchmarkLevelsLogxi-4                        100000         14195 ns/op       0.14 MB/s        4127 B/op         74 allocs/op
-    BenchmarkLevelsLogxiComplex-4                  50000         40734 ns/op       0.05 MB/s       10747 B/op        182 allocs/op
-    BenchmarkLevelsLogrus-4                        50000         40162 ns/op       0.05 MB/s       12320 B/op        177 allocs/op
-    BenchmarkLevelsLogrusComplex-4                 30000         42664 ns/op       0.05 MB/s       13989 B/op        231 allocs/op
-    BenchmarkLevelsLog15-4                         30000         54955 ns/op       0.04 MB/s       14998 B/op        224 allocs/op
-    BenchmarkLevelsLog15Complex-4                  20000         75516 ns/op       0.03 MB/s       18337 B/op        300 allocs/op
+    BenchmarkLevelsKiwiTyped-4                    100000         19538 ns/op       0.10 MB/s        7131 B/op         99 allocs/op
+    BenchmarkLevelsKiwiTypedComplex-4              50000         33557 ns/op       0.06 MB/s       12841 B/op        207 allocs/op
+    BenchmarkLevelsKiwiTypedHelpers-4             100000         19997 ns/op       0.10 MB/s        6362 B/op         91 allocs/op
+    BenchmarkLevelsKiwiTypedHelpersComplex-4       50000         31168 ns/op       0.06 MB/s       12585 B/op        204 allocs/op
+    BenchmarkLevelsKiwi-4                         100000         15607 ns/op       0.13 MB/s        7599 B/op        100 allocs/op
+    BenchmarkLevelsKiwiComplex-4                   50000         34161 ns/op       0.06 MB/s       13080 B/op        200 allocs/op
+    BenchmarkLevelsStdLog-4                       100000         21593 ns/op       0.09 MB/s        7159 B/op        124 allocs/op
+    BenchmarkLevelsStdLogComplex-4                 50000         33517 ns/op       0.06 MB/s       11446 B/op        200 allocs/op
+    BenchmarkLevelsLogxi-4                        100000         14730 ns/op       0.14 MB/s        4127 B/op         74 allocs/op
+    BenchmarkLevelsLogxiComplex-4                  30000         42678 ns/op       0.05 MB/s       10361 B/op        182 allocs/op
+    BenchmarkLevelsLogrus-4                        50000         37325 ns/op       0.05 MB/s       12320 B/op        177 allocs/op
+    BenchmarkLevelsLogrusComplex-4                 30000         42411 ns/op       0.05 MB/s       13989 B/op        231 allocs/op
+    BenchmarkLevelsLog15-4                         30000         53028 ns/op       0.04 MB/s       14993 B/op        224 allocs/op
+    BenchmarkLevelsLog15Complex-4                  20000         65809 ns/op       0.03 MB/s       18340 B/op        300 allocs/op
+    BenchmarkLevelsGokit-4                        100000         15169 ns/op       0.13 MB/s        2865 B/op         64 allocs/op
+    BenchmarkLevelsGokitComplex-4                  30000         34780 ns/op       0.06 MB/s        8486 B/op        164 allocs/op
 
 It is not the fastest logger among benchmarked but fast enough and careful about memory allocations.
-It much faster than `logrus` and `log15` but slower than `logxi` in some tests. Need more detailed tests though.
+It much faster than `logrus` and `log15`. But slower than `logxi` and `gokit` in some tests. Need more detailed tests though.
 See the benchmarks in the [github.com/grafov/go-loggers-comparison](https://github.com/grafov/go-loggers-comparison).
 
 ## Roadmap
