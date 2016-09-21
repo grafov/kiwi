@@ -164,61 +164,11 @@ func toRecordValue(val interface{}) value {
 		}
 		return value{string(data), nil, stringVal, true}
 	case func() string:
-		return value{"", val, stringVal, true}
-	case func() bool:
-		return value{"", val, booleanVal, true}
-	case func() int, func() int8, func() int16, func() int32, func() int64:
-		return value{"", val, integerVal, true}
-	case func() uint8, func() uint16, func() uint32, func() uint64:
-		return value{"", val, integerVal, true}
-	case func() float32, func() float64:
-		return value{"", val, floatVal, true}
-	case func() complex64, func() complex128:
-		return value{"", val, complexVal, false}
-	case func() time.Time:
-		return value{"", val, stringVal, true}
+		return value{"", val.(func() string), stringVal, true}
 	case nil:
 		return value{"", nil, voidVal, false}
 	default:
+		// worst case that depends from reflection
 		return value{fmt.Sprintf("%v", val), nil, stringVal, true}
 	}
-}
-
-// calls function()T return its result as an interface
-func toFunc(fn interface{}) interface{} {
-	switch fn.(type) {
-	case func() string:
-		return fn.(func() string)()
-	case func() bool:
-		return fn.(func() bool)()
-	case func() int:
-		return fn.(func() int)()
-	case func() int8:
-		return fn.(func() int8)()
-	case func() int16:
-		return fn.(func() int16)()
-	case func() int32:
-		return fn.(func() int32)()
-	case func() int64:
-		return fn.(func() int64)()
-	case func() uint8:
-		return fn.(func() uint8)()
-	case func() uint16:
-		return fn.(func() uint16)()
-	case func() uint32:
-		return fn.(func() uint32)()
-	case func() uint64:
-		return fn.(func() uint64)()
-	case func() float32:
-		return fn.(func() float32)()
-	case func() float64:
-		return fn.(func() float64)()
-	case func() complex64:
-		return fn.(func() complex64)()
-	case func() complex128:
-		return fn.(func() complex128)()
-	case func() time.Time:
-		return fn.(func() time.Time)()
-	}
-	return nil
 }

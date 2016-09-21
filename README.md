@@ -171,30 +171,23 @@ There are many small applications where only one thing required: fast and short 
 and no matter how slow it is. So for which case I think it is sense have only global instance (like singleton)
 with package level methods. TBD SafeLogger
 
-### Evaluating rules of record values
+### Evaluating rules
 
-Obsoleted.
-
-TODO Need update!
-
-* Logged values evaluated *immediately* when they added to a record.
+* Keys and values evaluated *immediately* after they added to a record.
 * Context values evaluated *once* when they added to a logger.
-* For lazy evaluating of context and record values use workaround with functions without call them in a log record:
+* For lazy evaluating of context and record values pass them as functions:
 
-        # For lazy evaluating you need function that returns interface{} or []interface{}
+        # For lazy evaluating you need function that returns string
         func longActionForDelayedEvaluation() string {
-           // do something complex
-           return "something"
+           // Do something complex...
+		   // and got for example integer result.
+		   //
+		   // You need convert the result to a string.
+           return strconv.Itoa(result)
         }
         myLog.Add("lazy-sample", longActionForDelayedEvaluation) # but not longActionForDelayedEvaluation()
 
-Logger accepts functions without args that return any of scalar types from standard library. For example:
-
-* `func () string`
-* `func () float64`
-* `func () int8`
-* and so on.
-
+Logger accepts functions without args that returns a string: `func () string`.
 Hence value of `lazy-sample` from the example above will be evaluated only on `Log()` call.
 
 ## Instead of FAQ

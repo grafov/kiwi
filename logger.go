@@ -103,7 +103,8 @@ func (l *Logger) Log(keyVals ...interface{}) {
 		if !p.Deleted {
 			if p.Val.Func != nil {
 				// evaluate delayed context values
-				record = append(record, pair{p.Key, toRecordValue(toFunc(p.Val.Func)), false})
+				p.Val.Strv = p.Val.Func.(func() string)()
+				record = append(record, pair{p.Key, p.Val, false})
 			} else {
 				record = append(record, p)
 			}
@@ -112,7 +113,8 @@ func (l *Logger) Log(keyVals ...interface{}) {
 	for _, p := range l.pairs {
 		if !p.Deleted {
 			if p.Val.Func != nil {
-				record = append(record, pair{p.Key, toRecordValue(toFunc(p.Val.Func)), false})
+				p.Val.Strv = p.Val.Func.(func() string)()
+				record = append(record, pair{p.Key, p.Val, false})
 			} else {
 				record = append(record, p)
 			}
@@ -124,7 +126,8 @@ func (l *Logger) Log(keyVals ...interface{}) {
 			continue
 		}
 		if value := toRecordValue(val); value.Func != nil {
-			record = append(record, pair{key, toRecordValue(toFunc(value.Func)), false})
+			value.Strv = value.Func.(func() string)()
+			record = append(record, pair{key, value, false})
 		} else {
 			record = append(record, pair{key, value, false})
 		}
