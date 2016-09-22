@@ -170,7 +170,7 @@ func TestLogger_Add_Chained(t *testing.T) {
 	log.Add("key", "value2").Log()
 }
 
-func TestLogger_IntValues(t *testing.T) {
+func TestLogger_IntValuesInLogfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
 	out := UseOutput(output, UseLogfmt())
@@ -179,7 +179,21 @@ func TestLogger_IntValues(t *testing.T) {
 	log.Log("k", 123)
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != "k=123" { // XXX
+	if strings.TrimSpace(output.String()) != "k=123" {
+		t.Fail()
+	}
+}
+
+func TestLogger_FloatValuesInLogfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := UseOutput(output, UseLogfmt())
+	defer out.Close()
+
+	log.Log("k", 3.1415)
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != "k=3.1415e+00" {
 		t.Fail()
 	}
 }
