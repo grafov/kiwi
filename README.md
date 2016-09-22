@@ -234,7 +234,6 @@ See the benchmarks in the [github.com/grafov/go-loggers-comparison](https://gith
 ## Roadmap
 
 * custom filters
-* global thread-safe logger for simple apps
 * optional colour formatter for the console
 * throttling mode for outputs
 
