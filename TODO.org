@@ -10,6 +10,7 @@
 ** DONE fix odd args logic: odd key showed as is without a value
 ** DONE add time.Time into convertors
 ** DONE move benchmarks to a separate package
+** DONE global logger										:roadmap:
 ** STOPPED mode: drop duplicate records in an output
 ** add tests for output filters
 ** add tests for formatters
@@ -17,7 +18,6 @@
 ** add tests for logger context
 ** add tests for logger timestamps
 ** move examples from README to example_ functions then add single short usage example to README
-** singleton global logger											 :roadmap:
 ** colour format for the console (formatter or decorator)			:roadmap:
 ** log write throttling mode										:roadmap:
 ** ability to use custom filters									:roadmap:

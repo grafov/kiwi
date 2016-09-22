@@ -37,11 +37,11 @@ import (
 	"time"
 )
 
-// TODO offer second way of logging in safe manner with lesser speed but with a guarantee for thread-safe
 type (
 	// Logger keeps context and log record. There are many loggers initialized
-	// in different places of application. Loggers are safe for
-	// concurrent usage.
+	// in different places of application. Loggers are not safe for
+	// concurrent usage so then you need logger for another goroutine you will need clone existing instance.
+	// See Logger.New() method below for details.
 	Logger struct {
 		contextSrc map[string]interface{}
 		context    []pair

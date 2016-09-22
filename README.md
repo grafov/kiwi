@@ -167,9 +167,10 @@ If you need a new logger in another execution thread you will create another ins
 	go subroutine(log2nd, otherArgs...)
 ```
 
-There are many small applications where only one thing required: fast and short logger syntax
-and no matter how slow it is. So for which case I think it is sense have only global instance (like singleton)
-with package level methods. TBD SafeLogger
+For the small apps where you won't init all these instances you would like use global kiwi.Log() method.
+This method just immediately flush it's args to an outputs. And by design it is safe for concurrent usage.
+Also due design simplicity it not supports context, only regular values. If you need context then you 
+application is complex thing hence you will need initialize a new instance of kiwi.Logger().
 
 ### Evaluating rules
 
