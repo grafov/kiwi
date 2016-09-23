@@ -162,7 +162,7 @@ This method just immediately flush it's args to an outputs. And by design it is 
 Also due design simplicity it not supports context, only regular values. If you need context then you 
 application is complex thing hence you will need initialize a new instance of kiwi.Logger().
 
-### Evaluating rules
+## Evaluating rules
 
 * Keys and values evaluated *immediately* after they added to a record.
 * Context values evaluated *once* when they added to a logger.
