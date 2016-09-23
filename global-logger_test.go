@@ -42,13 +42,26 @@ import (
 
 func TestGlobalLog_IntValuesInLogfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
-	out := kiwi.UseOutput(output, kiwi.UseLogfmt())
+	out := kiwi.SinkTo(output, kiwi.UseLogfmt())
 	defer out.Close()
 
 	kiwi.Log("k", 123)
 
 	out.Flush()
 	if strings.TrimSpace(output.String()) != "k=123" {
+		t.Fail()
+	}
+}
+
+func TestGlobalLog_StringValuesInLogfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	out := kiwi.SinkTo(output, kiwi.UseLogfmt())
+	defer out.Close()
+
+	kiwi.Log("k", "value")
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != "k=\"value\"" {
 		t.Fail()
 	}
 }

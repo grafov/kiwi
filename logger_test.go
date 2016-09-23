@@ -173,7 +173,7 @@ func TestLogger_Add_Chained(t *testing.T) {
 func TestLogger_IntValuesInLogfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := UseOutput(output, UseLogfmt())
+	out := SinkTo(output, UseLogfmt())
 	defer out.Close()
 
 	log.Log("k", 123)
@@ -187,7 +187,7 @@ func TestLogger_IntValuesInLogfmt(t *testing.T) {
 func TestLogger_FloatValuesInLogfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := UseOutput(output, UseLogfmt())
+	out := SinkTo(output, UseLogfmt())
 	defer out.Close()
 
 	log.Log("k", 3.1415)

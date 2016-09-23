@@ -1,6 +1,6 @@
 package kiwi
 
-// This file consists of Output related structures and functions.
+// This file consists of Sink related structures and functions.
 // Outputs accepts incoming log records from Loggers, check them with filters
 // and write to output streams if checks passed.
 
@@ -39,13 +39,13 @@ import (
 	"sync"
 )
 
-var outputs []*Output
+var sinks []*Sink
 
 type (
-	// Output used for filtering incoming log records from all logger instances
+	// Sink used for filtering incoming log records from all logger instances
 	// and decides how to filter them. Each output wraps its own io.Writer.
-	// Output methods are safe for concurrent usage.
-	Output struct {
+	// Sink methods are safe for concurrent usage.
+	Sink struct {
 		sync.RWMutex
 		In              chan *[]pair
 		writer          io.Writer
@@ -58,31 +58,31 @@ type (
 	}
 )
 
-// UseOutput creates a new output for an arbitrary number of loggers.
-// There are any number of outputs may be created for saving incoming log
+// SinkTo creates a new sink for an arbitrary number of loggers.
+// There are any number of sinks may be created for saving incoming log
 // records to different places.
-func UseOutput(w io.Writer, fn Formatter) *Output {
-	for i, output := range outputs {
+func SinkTo(w io.Writer, fn Formatter) *Sink {
+	for i, output := range sinks {
 		if output.writer == w {
-			outputs[i].format = fn
-			return outputs[i]
+			sinks[i].format = fn
+			return sinks[i]
 		}
 	}
-	output := &Output{
+	output := &Sink{
 		In:              make(chan *[]pair, 16),
 		writer:          w,
 		positiveFilters: make(map[string]filter),
 		negativeFilters: make(map[string]filter),
 		format:          fn,
 	}
-	outputs = append(outputs, output)
+	sinks = append(sinks, output)
 	go processOutput(output)
 	return output
 }
 
 // With sets restriction for records output.
 // Only the records WITH any of the keys will be passed to output.
-func (o *Output) With(keys ...string) *Output {
+func (o *Sink) With(keys ...string) *Sink {
 	if !o.closed {
 		o.Lock()
 		for _, tag := range keys {
@@ -96,7 +96,7 @@ func (o *Output) With(keys ...string) *Output {
 
 // Without sets restriction for records output.
 // Only the records WITHOUT any of the keys will be passed to output.
-func (o *Output) Without(keys ...string) *Output {
+func (o *Sink) Without(keys ...string) *Sink {
 	if !o.closed {
 		o.Lock()
 		for _, tag := range keys {
@@ -110,7 +110,7 @@ func (o *Output) Without(keys ...string) *Output {
 
 // WithValues sets restriction for records output.
 // A record passed to output if the key equal one of any of the listed values.
-func (o *Output) WithValues(key string, vals ...string) *Output {
+func (o *Sink) WithValues(key string, vals ...string) *Sink {
 	if len(vals) == 0 {
 		return o.With(key)
 	}
@@ -124,7 +124,7 @@ func (o *Output) WithValues(key string, vals ...string) *Output {
 }
 
 // WithoutValues sets restriction for records output.
-func (o *Output) WithoutValues(key string, vals ...string) *Output {
+func (o *Sink) WithoutValues(key string, vals ...string) *Sink {
 	if len(vals) == 0 {
 		return o.Without(key)
 	}
@@ -138,7 +138,7 @@ func (o *Output) WithoutValues(key string, vals ...string) *Output {
 }
 
 // WithRangeInt64 sets restriction for records output.
-func (o *Output) WithRangeInt64(key string, from, to int64) *Output {
+func (o *Sink) WithRangeInt64(key string, from, to int64) *Sink {
 	if !o.closed {
 		o.Lock()
 		delete(o.negativeFilters, key)
@@ -149,7 +149,7 @@ func (o *Output) WithRangeInt64(key string, from, to int64) *Output {
 }
 
 // WithRangeFloat64 sets restriction for records output.
-func (o *Output) WithoutRangeInt64(key string, from, to int64) *Output {
+func (o *Sink) WithoutRangeInt64(key string, from, to int64) *Sink {
 	o.Lock()
 	if !o.closed {
 		delete(o.positiveFilters, key)
@@ -160,7 +160,7 @@ func (o *Output) WithoutRangeInt64(key string, from, to int64) *Output {
 }
 
 // WithRangeFloat64 sets restriction for records output.
-func (o *Output) WithRangeFloat64(key string, from, to float64) *Output {
+func (o *Sink) WithRangeFloat64(key string, from, to float64) *Sink {
 	o.Lock()
 	delete(o.negativeFilters, key)
 	o.positiveFilters[key] = &rangeFloat64Filter{Key: key, From: from, To: to}
@@ -169,7 +169,7 @@ func (o *Output) WithRangeFloat64(key string, from, to float64) *Output {
 }
 
 // WithoutRangeFloat64  sets restriction for records output.
-func (o *Output) WithoutRangeFloat64(key string, from, to float64) *Output {
+func (o *Sink) WithoutRangeFloat64(key string, from, to float64) *Sink {
 	if !o.closed {
 		o.Lock()
 		delete(o.positiveFilters, key)
@@ -180,7 +180,7 @@ func (o *Output) WithoutRangeFloat64(key string, from, to float64) *Output {
 }
 
 // Reset all filters for the keys for the output.
-func (o *Output) Reset(keys ...string) *Output {
+func (o *Sink) Reset(keys ...string) *Sink {
 	o.Lock()
 	for _, tag := range keys {
 		delete(o.positiveFilters, tag)
@@ -192,7 +192,7 @@ func (o *Output) Reset(keys ...string) *Output {
 
 // Hide keys from the output. Other keys in record will be displayed
 // but not hidden keys.
-func (o *Output) Hide(keys ...string) *Output {
+func (o *Sink) Hide(keys ...string) *Sink {
 	o.Lock()
 	if !o.closed {
 		for _, tag := range keys {
@@ -204,7 +204,7 @@ func (o *Output) Hide(keys ...string) *Output {
 }
 
 // Unhide previously hidden keys. They will be displayed in the output again.
-func (o *Output) Unhide(keys ...string) *Output {
+func (o *Sink) Unhide(keys ...string) *Sink {
 	o.Lock()
 	if !o.closed {
 		for _, tag := range keys {
@@ -216,16 +216,16 @@ func (o *Output) Unhide(keys ...string) *Output {
 }
 
 // Pause stops writing to the output.
-func (o *Output) Pause() {
+func (o *Sink) Pause() {
 	o.paused = true
 }
 
 // Contiunue writing to the output.
-func (o *Output) Continue() {
+func (o *Sink) Continue() {
 	o.paused = false
 }
 
-func (o *Output) Close() {
+func (o *Sink) Close() {
 	o.Lock()
 	o.closed = true
 	o.Unlock()
@@ -233,7 +233,7 @@ func (o *Output) Close() {
 }
 
 // Flush waits that all previously sent to the output records worked.
-func (o *Output) Flush() {
+func (o *Sink) Flush() {
 	var flush = make(chan struct{})
 	// Well, it uses some kind of lifehack instead of dedicated flag.
 	// It send "deleted" record with unbuffered channel in the value.
@@ -242,7 +242,7 @@ func (o *Output) Flush() {
 	<-flush
 }
 
-func processOutput(o *Output) {
+func processOutput(o *Sink) {
 	for {
 		record, ok := <-o.In
 		if !ok {
@@ -281,7 +281,7 @@ func processOutput(o *Output) {
 	}
 }
 
-func (o *Output) filter(record *[]pair) {
+func (o *Sink) filter(record *[]pair) {
 	o.format.Begin()
 	for _, pair := range *record {
 		if ok := o.hiddenKeys[pair.Key]; ok {
