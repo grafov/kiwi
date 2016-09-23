@@ -48,6 +48,7 @@ type formatLogfmt struct {
 	line bytes.Buffer
 }
 
+// UseLogfmt says that a sink uses Logfmt format for records output.
 func UseLogfmt() *formatLogfmt {
 	return new(formatLogfmt)
 }
@@ -79,6 +80,7 @@ type formatJSON struct {
 	line bytes.Buffer
 }
 
+// UseJSON says that a sink uses JSON format for records output.
 func UseJSON() *formatJSON {
 	return new(formatJSON)
 }
