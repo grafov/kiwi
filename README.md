@@ -25,29 +25,15 @@ Kiwi logger has two primary design goals:
 1. Convenient structured logging syntax: logfmt as default format, method chaining.
 2. Separation of logging flow from control flow: you log everything without conditions but output filtering really select what and where will be saved.
 
-Point 2 needs more explanations. 
-Traditional way for logging is set a level of severity for each log record. 
-And check a level before passing this record to a writer.
-It is not bad way but it is not obvious.
-Especially when logger introduces many severity levels like these all "debug", "info", "warning", "critical", "fatal", "panic" and so on. 
-Look the internet for many guides with controversial recommendations how to distinguish all these "standard" levels and apply them to various events in your application.
-When you should use "fatal" instead of "panic" or "debug" instead of "info".
+![Kiwi vs other loggers](kiwi-vs-other.png)
 
-There is alternative simple way not use severity levels at all. Structured logging does things in this way. 
-Especially it right for *logfmt* format.
-It is not a required part of logfmt or structured logging but it naturally ensued from the rules they offer.
-You just log pairs of keys and values and these pairs may be of any kind. There is not a standard list of keys.
-If you need you can use levels for log records for example set key named "level" (or any other name you want) with values INFO, WARNING, ERROR etc.
-But it is not a requirement.
-So you log just pairs of arbitrary keys and values and interprete them as you wish.
-
-Feature of `kiwi` logger is dynamic filtering of incoming records.
-You log all data of any severity. These log records passed to all defined outputs (log streams).
-And you restrict them by set filters for pass only records and their fields which you want to see in this log stream.
-It can be changed in any moment: `kiwi` has methods for filtering by keys, values, ranges of values.
-Recipe: export the handler or setup any kind of client for setting these filters in your app.
-Then you got ability for dynamically change flow and verbosity of logs. 
-For example increase verbosity for a specific module or a single handler and decrease them for the rest of the application.
+Key feature of `kiwi` logger is dynamic filtering of incoming records. 
+Instead of checking severety level for decide about pass or not the record to the output,
+`kiwi` passes all records to the *all* outputs (they called *sinks* in `kiwi` terminology).
+But before actual writing each record filtered. Each sink has its own filter set. 
+It takes into account record keys, values, ranges of values. 
+So each sink decides pass the record to a writer or filter it out.
+Also any pairs in the record may be hidden: so different sinks may output different parts of the same record.
 
 ## Docs [![GoDoc](https://godoc.org/github.com/grafov/kiwi?status.svg)](https://godoc.org/github.com/grafov/kiwi)
 
@@ -190,6 +176,26 @@ application is complex thing hence you will need initialize a new instance of ki
 
 Logger accepts functions without args that returns a string: `func () string`.
 Hence value of `lazy-sample` from the example above will be evaluated only on `Log()` call.
+
+## Warning about evil severity levels
+
+Traditional way for logging is set a level of severity for each log record. 
+Then check the level before passing this record to a writer.
+This is not a bad way but it is not obvious.
+Especially when logger introduces many severity levels like "debug", "info", "warning", "critical", "fatal", "panic" and so on. 
+Look the internet for many guides with controversial recommendations how to distinguish all these "standard" levels and try map them to various events in your application.
+For example when you should use "fatal" instead of "panic" or use "debug" instead of "info".
+Severity levels obstruct understanding of logs.
+
+Like many loggers with structured output `kiwi` not recommends using of severity levels.
+Though you can may use them (see helper functions in `imitate-levels.go`) and interprete them as you wish.
+Severity levels in `kiwi` don't play any role in deciding how to output the record. 
+Any records with any level will pass to all sinks. 
+Filters in each sink will decide how to actually display the record or filter it out completely.
+
+Recipe: export the handler or setup any kind of client for setting these filters in your app.
+Then you got ability for dynamically change flow and verbosity of logs. 
+For example increase verbosity for a specific module or a single handler and decrease them for the rest of the application.
 
 ## Instead of FAQ
 
