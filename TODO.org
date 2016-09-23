@@ -21,6 +21,7 @@
 ** colour format for the console (formatter or decorator)			:roadmap:
 ** log write throttling mode										:roadmap:
 ** ability to use custom filters									:roadmap:
+** demo application
 * Ideas
 ** move typed helpers into a separated package or
 ** remove typed helpers - it seems as preferable way as it make API shorter
