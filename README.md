@@ -187,11 +187,11 @@ Hence value of `lazy-sample` from the example above will be evaluated only on `L
 
 Traditional way for logging is set a level of severity for each log record. 
 Then check the level before passing this record to a writer.
-This is not a bad way but it is not obvious.
+This is not the worst way but it is not obvious in many cases.
 Especially when logger introduces many severity levels like "debug", "info", "warning", "critical", "fatal", "panic" and so on. 
 Look the internet for many guides with controversial recommendations how to distinguish all these "standard" levels and try map them to various events in your application.
 For example when you should use "fatal" instead of "panic" or use "debug" instead of "info".
-Severity levels obstruct understanding of logs.
+Maybe not for all cases but very often severity levels obstruct understanding of logs.
 
 Like many loggers with structured output `kiwi` not recommends using of severity levels.
 Though you can may use them (see helper functions in `imitate-levels.go`) and interprete them as you wish.
