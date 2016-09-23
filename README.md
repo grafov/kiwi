@@ -29,7 +29,8 @@ Kiwi logger has built around the idea:
 Key feature of `kiwi` logger is dynamic filtering of incoming records. 
 Instead of checking severety level for decide about pass or not the record to the output,
 `kiwi` passes all records to *all* the outputs (they called *sinks* in `kiwi` terminology).
-But before actual writing each record filtered. Each sink has its own filter set. 
+But before actual writing each record checked with a set of filters. 
+Each sink has its own filter set. 
 It takes into account record keys, values, ranges of values. 
 So each sink decides pass the record to a writer or filter it out.
 Also any pairs in the record may be hidden: so different sinks may display different parts of the same record.
