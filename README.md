@@ -194,7 +194,7 @@ For example when you should use "fatal" instead of "panic" or use "debug" instea
 Maybe not for all cases but very often severity levels obstruct understanding of logs.
 
 Like many loggers with structured output `kiwi` not recommends using of severity levels.
-Though you can may use them (see helper functions in `imitate-levels.go`) and interprete them as you wish.
+Though you can use them in `kiwi` too (see helper functions in `imitate-levels.go`) and interprete them as you wish.
 Severity levels in `kiwi` don't play any role in deciding how to output the record. 
 Any records with any level will pass to all sinks. 
 Filters in each sink will decide how to actually display the record or filter it out completely.
