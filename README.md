@@ -14,26 +14,29 @@ Shortly: both humans and robots will love it!
 
 Briefly:
 
-* structured logging in *logfmt* for high readability by humans
-* optional JSON format that liked by machines
-* dynamically selectable outputs (changing log verbosity on the fly)
+* simple format with explicit key for each log message (*logfmt* like) - for high readability by humans
+* optional JSON format that so liked by machines
 * there are not nailed levels, not hardcoded fields in the format
+* output dynamic filtering (change log verbosity on the fly)
 * can keep context of application
 
-Kiwi logger has two primary design goals:
+Kiwi logger has built around the idea:
 
-1. Convenient structured logging syntax: logfmt as default format, method chaining.
-2. Separation of logging flow from control flow: you log everything without conditions but output filtering really select what and where will be saved.
+*Log everything in the code with as much details as possible. But actually write only that you need in the moment.*
 
 ![Kiwi vs other loggers](kiwi-vs-other.png)
 
 Key feature of `kiwi` logger is dynamic filtering of incoming records. 
 Instead of checking severety level for decide about pass or not the record to the output,
-`kiwi` passes all records to the *all* outputs (they called *sinks* in `kiwi` terminology).
+`kiwi` passes all records to *all* the outputs (they called *sinks* in `kiwi` terminology).
 But before actual writing each record filtered. Each sink has its own filter set. 
 It takes into account record keys, values, ranges of values. 
 So each sink decides pass the record to a writer or filter it out.
-Also any pairs in the record may be hidden: so different sinks may output different parts of the same record.
+Also any pairs in the record may be hidden: so different sinks may display different parts of the same record.
+Other effect is: any record may be written to any number of outputs. 
+
+For example you can pass details of the record to a full debug logfile. 
+But only important information with error message and status to stderr.
 
 ## Docs [![GoDoc](https://godoc.org/github.com/grafov/kiwi?status.svg)](https://godoc.org/github.com/grafov/kiwi)
 
