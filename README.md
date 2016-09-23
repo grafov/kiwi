@@ -39,6 +39,10 @@ Other effect is: any record may be written to any number of outputs.
 For example you can pass details of the record to a full debug logfile. 
 But only important information with error message and status to stderr.
 
+Recipe: export the handler or setup any kind of client for setting these filters in your app.
+Then you got ability for dynamically change the flow and the verbosity of logs.
+For example increase verbosity for a specific module or a single handler and decrease them for the rest of the application.
+
 ## Docs [![GoDoc](https://godoc.org/github.com/grafov/kiwi?status.svg)](https://godoc.org/github.com/grafov/kiwi)
 
 See documentation in [the wiki](https://github.com/grafov/kiwi/wiki). 
@@ -198,10 +202,6 @@ Though you can use them in `kiwi` too (see helper functions in `imitate-levels.g
 Severity levels in `kiwi` don't play any role in deciding how to output the record. 
 Any records with any level will pass to all sinks. 
 Filters in each sink will decide how to actually display the record or filter it out completely.
-
-Recipe: export the handler or setup any kind of client for setting these filters in your app.
-Then you got ability for dynamically change flow and verbosity of logs. 
-For example increase verbosity for a specific module or a single handler and decrease them for the rest of the application.
 
 ## Instead of FAQ
 
