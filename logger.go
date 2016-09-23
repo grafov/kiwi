@@ -141,7 +141,7 @@ func (l *Logger) Log(keyVals ...interface{}) {
 
 // A new record passed to all outputs. Each output routine decides n
 func passRecordToOutput(record []pair) {
-	for _, o := range outputs {
+	for _, o := range sinks {
 		if !o.closed && !o.paused {
 			o.In <- &record
 		}
