@@ -168,15 +168,17 @@ application is complex thing hence you will need initialize a new instance of ki
 * Context values evaluated *once* when they added to a logger.
 * For lazy evaluating of context and record values pass them as functions:
 
-        # For lazy evaluating you need function that returns string
-        func longActionForDelayedEvaluation() string {
-           // Do something complex...
-		   // and got for example integer result.
-		   //
-		   // You need convert the result to a string.
-           return strconv.Itoa(result)
-        }
-        myLog.Add("lazy-sample", longActionForDelayedEvaluation) # but not longActionForDelayedEvaluation()
+```go
+    # For lazy evaluating you need function that returns string
+    func longActionForDelayedEvaluation() string {
+        // Do something complex...
+        // and got for example integer result.
+		//
+		// You need convert the result to a string.
+        return strconv.Itoa(result)
+    }
+    myLog.Add("lazy-sample", longActionForDelayedEvaluation) # but not longActionForDelayedEvaluation()
+```
 
 Logger accepts functions without args that returns a string: `func () string`.
 Hence value of `lazy-sample` from the example above will be evaluated only on `Log()` call.
