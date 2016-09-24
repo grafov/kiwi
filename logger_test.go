@@ -207,7 +207,6 @@ func TestLogger_LogTimeValue_Logfmt(t *testing.T) {
 	log.Log("k", value)
 
 	out.Flush()
-	println(output.String())
 	if strings.TrimSpace(output.String()) != fmt.Sprintf("k=%s", valueString) {
 		t.Fail()
 	}

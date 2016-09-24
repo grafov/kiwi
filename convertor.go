@@ -152,7 +152,7 @@ func toRecordValue(val interface{}) value {
 	case complex128:
 		return value{fmt.Sprintf("%f", val.(complex128)), nil, complexVal, false}
 	case time.Time:
-		return value{val.(time.Time).Format(TimeLayout), nil, stringVal, true}
+		return value{val.(time.Time).Format(TimeLayout), nil, stringVal, false}
 	case Valuer:
 		return value{val.(Valuer).String(), nil, stringVal, true}
 	case Stringer:
