@@ -45,12 +45,12 @@ import (
 - act on testing object
 - check and assert on results
 
-These parts separated by empty line in each test function.
+These parts separated by empty lines in each test function.
 */
 
 var (
-	sampleContext = []interface{}{"context1", "value", "context2", 1, "common", []string{"the", "same"}}
-	sampleRecord  = []interface{}{"key1", "value", "key2", 2, 3, 4, "common", []string{"the", "same"}}
+	sampleMixContext = []interface{}{"context1", "value", "context2", 1, "context3", 0.1, "context4", []string{"the", "sample"}}
+	sampleMixRecord  = []interface{}{"key1", "value", "key2", 2, 3, 4, "common", []string{"the", "sample"}}
 )
 
 // Get records from logger. Helper for testing.
@@ -71,100 +71,8 @@ func TestNewLogger(t *testing.T) {
 	}
 }
 
-// XXX
-func TestLogger_With(t *testing.T) {
-
-}
-
-// func TestLogger_Add(t *testing.T) {
-// 	l := New()
-
-// 	l.Add(sampleRecord...)
-
-// 	records := l.getRecords()
-// 	var key string
-// 	for i, sampleVal := range sampleRecord {
-// 		if i%2 == 0 {
-// 			key = toRecordKey(sampleVal)
-// 			continue
-// 		}
-// 		if savedVal, ok := records[key]; ok {
-// 			if reflect.DeepEqual(savedVal, sampleVal) {
-// 				t.Fatalf("values not equal %v %v", savedVal, sampleVal)
-// 			}
-// 		} else {
-// 			t.Fatalf("key %v not found", key)
-// 		}
-// 	}
-// }
-
-// // //
-// // func TestLogger_Get_RecordsOnly(t *testing.T) {
-// // 	l := New()
-// // 	l.Add(sampleRecord...)
-
-// // 	records := l.GetRecord()
-// // 	for key, sampleV := range sampleRecord {
-// // 		if savedVal, ok := records[key]; ok {
-// // 			if savedVal != sampleV {
-// // 				t.Fatalf("values not equal %v %v", savedVal, sampleV)
-// // 			}
-// // 		} else {
-// // 			t.Fatalf("key %v not found", key)
-// // 		}
-// // 	}
-// // }
-
-// // // XXX
-// // func TestLogger_GetLog_ContextOnly(t *testing.T) {
-// // 	l := New()
-
-// // 	l.With(sampleContext...)
-
-// // 	context := l.GetRecord()
-// // 	for key, sampleV := range sampleContext {
-// // 		if savedVal, ok := context[key]; ok {
-// // 			if savedVal != sampleV {
-// // 				t.Fatalf("values not equal %v %v", savedVal, sampleV)
-// // 			}
-// // 		} else {
-// // 			t.Fatalf("key %v not found", key)
-// // 		}
-// // 	}
-// // }
-
-// // // XXX
-// // func TestLogger_GetLog_ContextOverridenByRecords(t *testing.T) {
-// // 	l := New()
-
-// // 	l.With(sampleContext...).Add(sampleRecord...)
-
-// // 	records := l.getRecords()
-// // 	// XXX context := l.getContext()
-// // 	for key, sampleV := range sampleRecord {
-// // 		if savedVal, ok := records[key]; ok {
-// // 			if savedVal != sampleV {
-// // 				t.Fatalf("values not equal %v %v", savedVal, sampleV)
-// // 			}
-// // 		} else {
-// // 			t.Fatalf("key %v not found", key)
-// // 		}
-// // 	}
-// // }
-
-// // func TestLogger_Reset(t *testing.T) {
-// // 	l := New()
-// // 	l.Add(sampleRecord...)
-
-// // 	l.Reset()
-
-// // 	if len(l.GetRecord()) > 0 {
-// // 		t.Fatal("reset doesn't works")
-// // 	}
-// // }
-
 func TestLogger_Add_Chained(t *testing.T) {
-	log := New().With(sampleContext...).Add(sampleRecord...)
+	log := New().With(sampleMixContext...).Add(sampleMixRecord...)
 
 	log.Log()
 	log.Add("key", "value2").Log()

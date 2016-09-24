@@ -12,9 +12,9 @@
 ** DONE move benchmarks to a separate package
 ** DONE global logger										:roadmap:
 ** STOPPED mode: drop duplicate records in an output
+** WIP add tests for logger add/log for different input types
 ** add tests for output filters
 ** add tests for formatters
-** add tests for logger add/log for different input types
 ** add tests for logger context
 ** add tests for logger timestamps
 ** move examples from README to example_ functions then add single short usage example to README
