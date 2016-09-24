@@ -34,9 +34,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import (
 	"bytes"
-	//	"reflect"
+	"fmt"
 	"strings"
 	"testing"
+	"time"
 )
 
 /* All tests consists of three parts:
@@ -175,6 +176,39 @@ func TestLogger_LogBoolValue_Logfmt(t *testing.T) {
 
 	out.Flush()
 	if strings.TrimSpace(output.String()) != "k=true k2=false" {
+		t.Fail()
+	}
+}
+
+// Test logging of complex number.
+func TestLogger_LogComplexValue_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt())
+	defer out.Close()
+
+	log.Log("k", .12345E+5i, "k2", 1.e+0i)
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != "k=(0.000000+12345.000000i) k2=(0.000000+1.000000i)" {
+		t.Fail()
+	}
+}
+
+// Test logging of time literal.
+func TestLogger_LogTimeValue_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt())
+	value := time.Now()
+	valueString := value.Format(TimeLayout)
+	defer out.Close()
+
+	log.Log("k", value)
+
+	out.Flush()
+	println(output.String())
+	if strings.TrimSpace(output.String()) != fmt.Sprintf("k=%s", valueString) {
 		t.Fail()
 	}
 }
