@@ -45,7 +45,7 @@ func AsString(key string, val string) pair {
 	return pair{key, value{val, nil, stringVal, true}, false}
 }
 
-// AsStringes formats pair for string with Stringer interface (the same as fmt.Stringer).
+// AsStringer formats pair for string with Stringer interface (the same as fmt.Stringer).
 // Note: type helpers are experimental part of API and may be removed.
 func AsStringer(key string, val Stringer) pair {
 	return pair{key, value{val.String(), nil, stringVal, true}, false}
