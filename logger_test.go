@@ -71,24 +71,38 @@ func TestNewLogger(t *testing.T) {
 	}
 }
 
-// Test chaining for Add()
-func TestLogger_AddMixChained_Logfmt(t *testing.T) {
+// Test logging of string value.
+func TestLogger_LogStringValue_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
 	out := SinkTo(output, UseLogfmt())
 	defer out.Close()
 
-	log.Add("k", "value2").Add("k2", 123).Add("k3", 3.14159265359).Log()
+	log.Log("k", "The sample string with a lot of spaces.")
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != "k=\"value2\" k2=123 k3=3.14159265359e+00" {
+	if strings.TrimSpace(output.String()) != "k=\"The sample string with a lot of spaces.\"" {
 		t.Fail()
 	}
+}
 
+// Test logging of byte array.
+func TestLogger_LogBytesValue_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt())
+	defer out.Close()
+
+	log.Log("k", []byte("The sample string with a lot of spaces."))
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != "k=\"The sample string with a lot of spaces.\"" {
+		t.Fail()
+	}
 }
 
 // Test logging of integer value.
-func TestLogger_LogIntValueIn_Logfmt(t *testing.T) {
+func TestLogger_LogIntValue_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
 	out := SinkTo(output, UseLogfmt())
@@ -103,7 +117,7 @@ func TestLogger_LogIntValueIn_Logfmt(t *testing.T) {
 }
 
 // Test logging of negative integer value.
-func TestLogger_LogNegativeIntValueIn_Logfmt(t *testing.T) {
+func TestLogger_LogNegativeIntValue_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
 	out := SinkTo(output, UseLogfmt())
@@ -148,4 +162,35 @@ func TestLogger_LogFixedFloatValue_Logfmt(t *testing.T) {
 	}
 	// Turn back to default format.
 	FloatFormat = 'e'
+}
+
+// Test logging of boolean value.
+func TestLogger_LogBoolValue_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt())
+	defer out.Close()
+
+	log.Log("k", true, "k2", false)
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != "k=true k2=false" {
+		t.Fail()
+	}
+}
+
+// Test chaining for Add()
+func TestLogger_AddMixChained_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt())
+	defer out.Close()
+
+	log.Add("k", "value2").Add("k2", 123).Add("k3", 3.14159265359).Log()
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != "k=\"value2\" k2=123 k3=3.14159265359e+00" {
+		t.Fail()
+	}
+
 }
