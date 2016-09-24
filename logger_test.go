@@ -71,14 +71,24 @@ func TestNewLogger(t *testing.T) {
 	}
 }
 
-func TestLogger_Add_Chained(t *testing.T) {
-	log := New().With(sampleMixContext...).Add(sampleMixRecord...)
+// Test chaining for Add()
+func TestLogger_AddMixChained_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt())
+	defer out.Close()
 
-	log.Log()
-	log.Add("key", "value2").Log()
+	log.Add("k", "value2").Add("k2", 123).Add("k3", 3.14159265359).Log()
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != "k=\"value2\" k2=123 k3=3.14159265359e+00" {
+		t.Fail()
+	}
+
 }
 
-func TestLogger_IntValuesInLogfmt(t *testing.T) {
+// Test logging of integer value.
+func TestLogger_LogIntValueIn_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
 	out := SinkTo(output, UseLogfmt())
@@ -92,16 +102,50 @@ func TestLogger_IntValuesInLogfmt(t *testing.T) {
 	}
 }
 
-func TestLogger_FloatValuesInLogfmt(t *testing.T) {
+// Test logging of negative integer value.
+func TestLogger_LogNegativeIntValueIn_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
 	out := SinkTo(output, UseLogfmt())
 	defer out.Close()
 
-	log.Log("k", 3.1415)
+	log.Log("k", 123)
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != "k=3.1415e+00" {
+	if strings.TrimSpace(output.String()) != "k=123" {
 		t.Fail()
 	}
+}
+
+// Test logging of float value in default (scientific) format.
+func TestLogger_LogFloatValue_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt())
+	defer out.Close()
+
+	log.Log("k", 3.14159265359)
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != "k=3.14159265359e+00" {
+		t.Fail()
+	}
+}
+
+// Test logging of float value in fixed format.
+func TestLogger_LogFixedFloatValue_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt())
+	defer out.Close()
+
+	FloatFormat = 'f'
+	log.Log("k", 3.14159265359)
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != "k=3.14159265359" {
+		t.Fail()
+	}
+	// Turn back to default format.
+	FloatFormat = 'e'
 }
