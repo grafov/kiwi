@@ -31,24 +31,28 @@
 /*
 Package kiwi is a library with an odd logic that log your application' data in its own strange way.
 
-WIP. API and features is subject of changes. Don't use it yet!
+WIP. API and features is subject of changes. Use it carefully!
 
 Features briefly:
 
- * structured logging in `logfmt` for high readability by humans
+ * simple format with explicit key for each log message (*logfmt* like) - for high readability by humans
 
- * optional JSON format that liked by machines
-
- * dynamically selectable outputs (changing log verbosity on the fly)
+ * optional JSON format that so liked by machines
 
  * there are not nailed levels, not hardcoded fields in the format
 
+ * output dynamic filtering (change log verbosity on the fly)
+
  * can keep context of application
 
-Kiwi logger has two primary design goals:
-
- 1. Convenient structured logging syntax: logfmt as default format, method chaining.
-
- 2. Separation of logging flow from control flow: you log everything without conditions but output filtering really select what and where will be saved.
+Key feature of `kiwi` logger is dynamic filtering of incoming records.
+Instead of checking severety level for decide about pass or not the record to the output,
+`kiwi` passes all records to *all* the outputs (they called *sinks* in `kiwi` terminology).
+But before actual writing each record checked with a set of filters.
+Each sink has its own filter set.
+It takes into account record keys, values, ranges of values.
+So each sink decides pass the record to a writer or filter it out.
+Also any pairs in the record may be hidden: so different sinks may display different parts of the same record.
+Other effect is: any record may be written to any number of outputs.
 */
 package kiwi
