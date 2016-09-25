@@ -12,7 +12,7 @@
 ** DONE move benchmarks to a separate package
 ** DONE global logger										:roadmap:
 ** STOPPED mode: drop duplicate records in an output
-** start any sink paused
+** DONE start any sink paused
    It will help set filters before the sink got a lot of log messages and passes them by default.
 ** WIP add tests for logger add/log for different input types
 ** add tests for output filters

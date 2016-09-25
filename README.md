@@ -90,18 +90,18 @@ func main() {
 	// key=123 key2=1.23e3 key3="u" key4=true
 	
 	// You need define even one output: set writer and logging format.
-	out:=kiwi.SinkTo(os.StdOut, kiwi.Logfmt)
-
 	// Until the output defined log records just saved nowhere.
 	// You can define arbitrary number of outputs. Each output has its own set of filters.
-	// Filters decide pass or not incoming log record to this output.	
+	out:=kiwi.SinkTo(os.StdOut, kiwi.Logfmt).Start()
+
+	// Filters fdecide pass or not incoming log record to this output.	
 	// Example filters below will pass only records which has key "userID" and has value of level="FATAL".	
 	out.With("userID").WithValues("level", "FATAL")
 	
 	// So in this manner you can fan out log record to several outputs.
 	// For example write separate log of critical errors and common log with all errors.
 	// By default without any filters any output accepts any incoming log records.
-	out2 := kiwi.SinkTo(os.StdErr, kiwi.JSON)
+	out2 := kiwi.SinkTo(os.StdErr, kiwi.JSON).Start()
 
 	// Kiwi offers various filters for set conditions for outputs.
 	out2.WithInt64Range("userID", 100, 500).WithoutValues("label", "debug")

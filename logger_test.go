@@ -76,7 +76,7 @@ func TestNewLogger(t *testing.T) {
 func TestLogger_LogStringValue_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt())
+	out := SinkTo(output, UseLogfmt()).Start()
 	defer out.Close()
 
 	log.Log("k", "The sample string with a lot of spaces.")
@@ -91,7 +91,7 @@ func TestLogger_LogStringValue_Logfmt(t *testing.T) {
 func TestLogger_LogBytesValue_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt())
+	out := SinkTo(output, UseLogfmt()).Start()
 	defer out.Close()
 
 	log.Log("k", []byte("The sample string with a lot of spaces."))
@@ -106,7 +106,7 @@ func TestLogger_LogBytesValue_Logfmt(t *testing.T) {
 func TestLogger_LogIntValue_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt())
+	out := SinkTo(output, UseLogfmt()).Start()
 	defer out.Close()
 
 	log.Log("k", 123)
@@ -121,7 +121,7 @@ func TestLogger_LogIntValue_Logfmt(t *testing.T) {
 func TestLogger_LogNegativeIntValue_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt())
+	out := SinkTo(output, UseLogfmt()).Start()
 	defer out.Close()
 
 	log.Log("k", 123)
@@ -136,7 +136,7 @@ func TestLogger_LogNegativeIntValue_Logfmt(t *testing.T) {
 func TestLogger_LogFloatValue_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt())
+	out := SinkTo(output, UseLogfmt()).Start()
 	defer out.Close()
 
 	log.Log("k", 3.14159265359)
@@ -151,7 +151,7 @@ func TestLogger_LogFloatValue_Logfmt(t *testing.T) {
 func TestLogger_LogFixedFloatValue_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt())
+	out := SinkTo(output, UseLogfmt()).Start()
 	defer out.Close()
 
 	FloatFormat = 'f'
@@ -169,7 +169,7 @@ func TestLogger_LogFixedFloatValue_Logfmt(t *testing.T) {
 func TestLogger_LogBoolValue_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt())
+	out := SinkTo(output, UseLogfmt()).Start()
 	defer out.Close()
 
 	log.Log("k", true, "k2", false)
@@ -184,7 +184,7 @@ func TestLogger_LogBoolValue_Logfmt(t *testing.T) {
 func TestLogger_LogComplexValue_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt())
+	out := SinkTo(output, UseLogfmt()).Start()
 	defer out.Close()
 
 	log.Log("k", .12345E+5i, "k2", 1.e+0i)
@@ -199,7 +199,7 @@ func TestLogger_LogComplexValue_Logfmt(t *testing.T) {
 func TestLogger_LogTimeValue_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt())
+	out := SinkTo(output, UseLogfmt()).Start()
 	value := time.Now()
 	valueString := value.Format(TimeLayout)
 	defer out.Close()
@@ -216,7 +216,7 @@ func TestLogger_LogTimeValue_Logfmt(t *testing.T) {
 func TestLogger_AddMixChained_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt())
+	out := SinkTo(output, UseLogfmt()).Start()
 	defer out.Close()
 
 	log.Add("k", "value2").Add("k2", 123).Add("k3", 3.14159265359).Log()

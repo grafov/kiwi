@@ -1,4 +1,4 @@
-package kiwi_test
+package kiwi
 
 /*
 Copyright (c) 2016, Alexander I.Grafov aka Axel
@@ -36,32 +36,28 @@ import (
 	"bytes"
 	"strings"
 	"testing"
-
-	"github.com/grafov/kiwi"
 )
 
-func TestGlobalLog_IntValuesInLogfmt(t *testing.T) {
+/* All tests consists of three parts:
+
+- arrange structures and initialize objects for use in tests
+- act on testing object
+- check and assert on results
+
+These parts separated by empty lines in each test function.
+*/
+
+// Test of log to the stopped sink.
+func TestSink_LogToStoppedSink_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
-	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
+	log := New()
+	out := SinkTo(output, UseLogfmt())
 	defer out.Close()
 
-	kiwi.Log("k", 123)
+	log.Log("k", "The sample string that should be ignored.")
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != "k=123" {
-		t.Fail()
-	}
-}
-
-func TestGlobalLog_StringValuesInLogfmt(t *testing.T) {
-	output := bytes.NewBufferString("")
-	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
-	defer out.Close()
-
-	kiwi.Log("k", "value")
-
-	out.Flush()
-	if strings.TrimSpace(output.String()) != "k=\"value\"" {
+	if strings.TrimSpace(output.String()) != "" {
 		t.Fail()
 	}
 }

@@ -11,7 +11,7 @@ func main() {
 	log := kiwi.New()
 
 	// For starting write log records to some writer output should be initialized.
-	output := kiwi.SinkTo(os.Stdout, kiwi.UseLogfmt())
+	output := kiwi.SinkTo(os.Stdout, kiwi.UseLogfmt()).Start()
 
 	log.Add("sample-record", 1, "key", "value")
 	log.Log()
@@ -20,9 +20,9 @@ func main() {
 	log.Add("sample-record", 2, "key", "value", "key2", 123).Log()
 
 	// On pause output will drop any incoming records.
-	output.Pause()
+	output.Stop()
 	log.Add("this record will be dropped because single output we declared is on pause")
-	output.Continue()
+	output.Start()
 
 	// You can explicitly remove output but it will automatically closed on application exit.
 	output.Close()

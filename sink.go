@@ -39,6 +39,8 @@ import (
 	"sync"
 )
 
+// Sinks accepts records through the chanels.
+// Each sink has its own channel.
 var sinks []*Sink
 
 type (
@@ -74,6 +76,7 @@ func SinkTo(w io.Writer, fn Formatter) *Sink {
 		positiveFilters: make(map[string]filter),
 		negativeFilters: make(map[string]filter),
 		format:          fn,
+		paused:          true, // it started paused because not pass records until the filters set
 	}
 	sinks = append(sinks, output)
 	go processOutput(output)
@@ -215,14 +218,17 @@ func (o *Sink) Unhide(keys ...string) *Sink {
 	return o
 }
 
-// Pause stops writing to the output.
-func (o *Sink) Pause() {
+// Stop stops writing to the output.
+func (o *Sink) Stop() *Sink {
 	o.paused = true
+	return o
 }
 
-// Continue writing to the output.
-func (o *Sink) Continue() {
+// Start writing to the output.
+// After creation of a new sink it will paused and you need explicitly start it.
+func (o *Sink) Start() *Sink {
 	o.paused = false
+	return o
 }
 
 // Close the sink. Flush all records that came before.
@@ -234,13 +240,16 @@ func (o *Sink) Close() {
 }
 
 // Flush waits that all previously sent to the output records worked.
-func (o *Sink) Flush() {
-	var flush = make(chan struct{})
-	// Well, it uses some kind of lifehack instead of dedicated flag.
-	// It send "deleted" record with unbuffered channel in the value.
-	// Then just wait for the value from this channel.
-	o.In <- &[]pair{{Deleted: true, Val: value{Func: flush}}}
-	<-flush
+func (o *Sink) Flush() *Sink {
+	if !o.paused && !o.closed {
+		var flush = make(chan struct{})
+		// Well, it uses some kind of lifehack instead of dedicated flag.
+		// It send "deleted" record with unbuffered channel in the value.
+		// Then just wait for the value from this channel.
+		o.In <- &[]pair{{Deleted: true, Val: value{Func: flush}}}
+		<-flush
+	}
+	return o
 }
 
 func processOutput(o *Sink) {
@@ -250,9 +259,10 @@ func processOutput(o *Sink) {
 			o.positiveFilters = nil
 			o.negativeFilters = nil
 			o.hiddenKeys = nil
+			o.closed = true
 			return
 		}
-		if o.closed || o.paused {
+		if o.paused || o.closed {
 			continue
 		}
 		o.RLock()

@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	kiwi.SinkTo(os.Stdout, kiwi.UseLogfmt())
+	kiwi.SinkTo(os.Stdout, kiwi.UseLogfmt()).Start()
 	l := kiwi.New()
 	l.Add("sample-record", 1).Log()
 }
