@@ -284,36 +284,44 @@ func (l *Logger) GetRecord() map[string]string {
 	return merged
 }
 
+// AddString adds key with a string value to a record.
 func (l *Logger) AddString(key string, val string) *Logger {
 	l.pairs = append(l.pairs, pair{key, value{val, nil, stringVal, true}, false})
 	return l
 }
 
+// AddStringer adds key with a string value to a record.
+// It using Stringer interface that is the same as fmt.Stringer.
 func (l *Logger) AddStringer(key string, val Stringer) *Logger {
 	l.pairs = append(l.pairs, pair{key, value{val.String(), nil, stringVal, true}, false})
 	return l
 }
 
+// AddInt adds key with a int value to a record.
 func (l *Logger) AddInt(key string, val int) *Logger {
 	l.pairs = append(l.pairs, pair{key, value{strconv.Itoa(val), nil, integerVal, true}, false})
 	return l
 }
 
+// AddInt64 adds key with a int64 value to a record.
 func (l *Logger) AddInt64(key string, val int64) *Logger {
 	l.pairs = append(l.pairs, pair{key, value{strconv.FormatInt(val, 10), nil, integerVal, true}, false})
 	return l
 }
 
+// AddUint64 adds key with a uint64 value to a record.
 func (l *Logger) AddUint64(key string, val uint64) *Logger {
 	l.pairs = append(l.pairs, pair{key, value{strconv.FormatUint(val, 10), nil, integerVal, true}, false})
 	return l
 }
 
+// AddFloat64 adds key with a float64 value to a record.
 func (l *Logger) AddFloat64(key string, val float64) *Logger {
 	l.pairs = append(l.pairs, pair{key, value{strconv.FormatFloat(val, 'e', -1, 64), nil, floatVal, true}, false})
 	return l
 }
 
+// AddBool adds key with a boolean value to a record.
 func (l *Logger) AddBool(key string, val bool) *Logger {
 	if val {
 		l.pairs = append(l.pairs, pair{key, value{"true", nil, booleanVal, false}, false})
@@ -323,6 +331,7 @@ func (l *Logger) AddBool(key string, val bool) *Logger {
 	return l
 }
 
+// AddPairs adds pairs to a record. Each pair represent a key with with a value of strict type.
 func (l *Logger) AddPairs(pairs ...pair) *Logger {
 	l.pairs = append(l.pairs, pairs...)
 	return l
