@@ -55,5 +55,9 @@ func Log(keyVals ...interface{}) {
 	if len(keyVals)%2 == 1 {
 		record = append(record, pair{key, value{"", nil, voidVal, false}, false})
 	}
-	passRecordToOutput(record)
+	for _, o := range sinks {
+		if !o.closed && !o.paused {
+			o.In <- &record
+		}
+	}
 }

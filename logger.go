@@ -135,17 +135,12 @@ func (l *Logger) Log(keyVals ...interface{}) {
 	if len(keyVals)%2 == 1 {
 		record = append(record, pair{key, value{"", nil, voidVal, false}, false})
 	}
-	passRecordToOutput(record)
-	l.pairs = nil
-}
-
-// A new record passed to all outputs. Each output routine decides n
-func passRecordToOutput(record []pair) {
 	for _, o := range sinks {
 		if !o.closed && !o.paused {
 			o.In <- &record
 		}
 	}
+	l.pairs = nil
 }
 
 // Add a new key-value pairs to the log record. If a key already added then value will be

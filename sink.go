@@ -171,7 +171,7 @@ func (o *Sink) WithRangeFloat64(key string, from, to float64) *Sink {
 	return o
 }
 
-// WithoutRangeFloat64  sets restriction for records output.
+// WithoutRangeFloat64 sets restriction for records output.
 func (o *Sink) WithoutRangeFloat64(key string, from, to float64) *Sink {
 	if !o.closed {
 		o.Lock()
