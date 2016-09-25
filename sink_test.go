@@ -62,21 +62,22 @@ func TestSink_LogToStoppedSink_Logfmt(t *testing.T) {
 	}
 }
 
-// Test of log to the stopped sink.
+// Test of log to the stopped sink. It should not crash logger.
 func TestSink_StopTwice(t *testing.T) {
 	out := SinkTo(bytes.NewBufferString(""), UseLogfmt())
 	out.Stop()
 	out.Close()
 }
 
-// Test of log to the stopped sink.
+// Test of the close already closed sink. It should not crash logger.
 func TestSink_CloseTwice(t *testing.T) {
 	out := SinkTo(bytes.NewBufferString(""), UseLogfmt())
 	out.Close()
 	out.Close()
 }
 
-func TestSink_WithFilterPass(t *testing.T) {
+// Test of WithKey filter. It should pass record to the output.
+func TestSink_WithKeyFilterPass(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
 	out := SinkTo(output, UseLogfmt()).WithKey("Gandalf").Start()
@@ -91,7 +92,8 @@ func TestSink_WithFilterPass(t *testing.T) {
 
 }
 
-func TestSink_WithoutFilterOut(t *testing.T) {
+// Test of WithoutKey filter. It should not pass record to the output.
+func TestSink_WithoutKeyFilterOut(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
 	out := SinkTo(output, UseLogfmt()).WithoutKey("Gandalf").Start()
