@@ -15,7 +15,7 @@
 ** DONE start any sink paused
    It will help set filters before the sink got a lot of log messages and passes them by default.
 ** WIP add tests for logger add/log for different input types
-** add tests for output filters
+** WIP add tests for output filters
 ** add tests for formatters
 ** add tests for logger context
 ** add tests for logger timestamps
