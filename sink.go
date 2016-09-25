@@ -148,7 +148,7 @@ func (o *Sink) WithRangeInt64(key string, from, to int64) *Sink {
 	return o
 }
 
-// WithoutRangeFloat64 sets restriction for records output.
+// WithoutRangeInt64 sets restriction for records output.
 func (o *Sink) WithoutRangeInt64(key string, from, to int64) *Sink {
 	o.Lock()
 	if !o.closed {
@@ -220,7 +220,7 @@ func (o *Sink) Pause() {
 	o.paused = true
 }
 
-// Contiunue writing to the output.
+// Continue writing to the output.
 func (o *Sink) Continue() {
 	o.paused = false
 }
