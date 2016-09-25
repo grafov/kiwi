@@ -250,7 +250,7 @@ See the benchmarks in the [github.com/grafov/go-loggers-comparison](https://gith
 * optional colour formatter for the console
 * throttling mode for outputs
 
-Also unit tests coverage should be increased for > 75% of the code and all bugs must be fixed :)
+Also unit [tests coverage](https://gocover.io/github.com/grafov/kiwi) should be increased for > 50% of the code and all bugs must be fixed :)
 See details about tasks and ideas in `TODO.org` (orgmode format).
 
 ## Origins
