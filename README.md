@@ -89,12 +89,12 @@ func main() {
 	// Expected output:
 	// key=123 key2=1.23e3 key3="u" key4=true
 	
-	// You need define even one output: set writer and logging format.
-	// Until the output defined log records just saved nowhere.
-	// You can define arbitrary number of outputs. Each output has its own set of filters.
+	// You need define even one sink: set writer and logging format.
+	// Until the sink defined log records just saved nowhere.
+	// You can define arbitrary number of sinks. Each sink has its own set of filters.
 	out:=kiwi.SinkTo(os.StdOut, kiwi.Logfmt).Start()
 
-	// Filters fdecide pass or not incoming log record to this output.	
+	// Filters decide pass or not incoming log record to this output.	
 	// Example filters below will pass only records which has key "userID" and has value of level="FATAL".	
 	out.WithKey("userID").WithValue("level", "FATAL")
 	
