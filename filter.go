@@ -45,7 +45,7 @@ type keyFilter struct {
 }
 
 func (k *keyFilter) Check(key, val string) bool {
-	return k.Key == val
+	return k.Key == key
 }
 
 type valsFilter struct {

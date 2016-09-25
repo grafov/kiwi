@@ -83,58 +83,58 @@ func SinkTo(w io.Writer, fn Formatter) *Sink {
 	return output
 }
 
-// With sets restriction for records output.
+// WithKey sets restriction for records output.
 // Only the records WITH any of the keys will be passed to output.
-func (o *Sink) With(keys ...string) *Sink {
+func (o *Sink) WithKey(keys ...string) *Sink {
 	if !o.closed {
 		o.Lock()
-		for _, tag := range keys {
-			delete(o.negativeFilters, tag)
-			o.positiveFilters[tag] = &keyFilter{Key: tag}
+		for _, key := range keys {
+			o.positiveFilters[key] = &keyFilter{Key: key}
+			delete(o.negativeFilters, key)
 		}
 		o.Unlock()
 	}
 	return o
 }
 
-// Without sets restriction for records output.
+// WithoutKey sets restriction for records output.
 // Only the records WITHOUT any of the keys will be passed to output.
-func (o *Sink) Without(keys ...string) *Sink {
+func (o *Sink) WithoutKey(keys ...string) *Sink {
 	if !o.closed {
 		o.Lock()
-		for _, tag := range keys {
-			o.negativeFilters[tag] = &keyFilter{Key: tag}
-			delete(o.positiveFilters, tag)
+		for _, key := range keys {
+			o.negativeFilters[key] = &keyFilter{Key: key}
+			delete(o.positiveFilters, key)
 		}
 		o.Unlock()
 	}
 	return o
 }
 
-// WithValues sets restriction for records output.
+// WithValue sets restriction for records output.
 // A record passed to output if the key equal one of any of the listed values.
-func (o *Sink) WithValues(key string, vals ...string) *Sink {
+func (o *Sink) WithValue(key string, vals ...string) *Sink {
 	if len(vals) == 0 {
-		return o.With(key)
+		return o.WithKey(key)
 	}
 	if !o.closed {
 		o.Lock()
-		delete(o.negativeFilters, key)
 		o.positiveFilters[key] = &valsFilter{Key: key, Vals: vals}
+		delete(o.negativeFilters, key)
 		o.Unlock()
 	}
 	return o
 }
 
-// WithoutValues sets restriction for records output.
-func (o *Sink) WithoutValues(key string, vals ...string) *Sink {
+// WithoutValue sets restriction for records output.
+func (o *Sink) WithoutValue(key string, vals ...string) *Sink {
 	if len(vals) == 0 {
-		return o.Without(key)
+		return o.WithoutKey(key)
 	}
 	if !o.closed {
 		o.Lock()
-		delete(o.positiveFilters, key)
 		o.negativeFilters[key] = &valsFilter{Key: key, Vals: vals}
+		delete(o.positiveFilters, key)
 		o.Unlock()
 	}
 	return o
@@ -185,9 +185,9 @@ func (o *Sink) WithoutRangeFloat64(key string, from, to float64) *Sink {
 // Reset all filters for the keys for the output.
 func (o *Sink) Reset(keys ...string) *Sink {
 	o.Lock()
-	for _, tag := range keys {
-		delete(o.positiveFilters, tag)
-		delete(o.negativeFilters, tag)
+	for _, key := range keys {
+		delete(o.positiveFilters, key)
+		delete(o.negativeFilters, key)
 	}
 	o.Unlock()
 	return o
@@ -198,8 +198,8 @@ func (o *Sink) Reset(keys ...string) *Sink {
 func (o *Sink) Hide(keys ...string) *Sink {
 	o.Lock()
 	if !o.closed {
-		for _, tag := range keys {
-			o.hiddenKeys[tag] = true
+		for _, key := range keys {
+			o.hiddenKeys[key] = true
 		}
 	}
 	o.Unlock()
@@ -210,8 +210,8 @@ func (o *Sink) Hide(keys ...string) *Sink {
 func (o *Sink) Unhide(keys ...string) *Sink {
 	o.Lock()
 	if !o.closed {
-		for _, tag := range keys {
-			delete(o.hiddenKeys, tag)
+		for _, key := range keys {
+			delete(o.hiddenKeys, key)
 		}
 	}
 	o.Unlock()

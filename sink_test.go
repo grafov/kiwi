@@ -75,3 +75,32 @@ func TestSink_CloseTwice(t *testing.T) {
 	out.Close()
 	out.Close()
 }
+
+func TestSink_WithFilterPass(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt()).WithKey("Gandalf").Start()
+	defer out.Close()
+
+	log.Log("Gandalf", "You shall not pass!") // from the movie
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != "Gandalf=\"You shall not pass!\"" {
+		t.Fail()
+	}
+
+}
+
+func TestSink_WithoutFilterOut(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt()).WithKey("Ballrog").Start()
+	defer out.Close()
+
+	log.Log("Gandalf", "You cannot pass!") // from the book
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != "" {
+		t.Fail()
+	}
+}
