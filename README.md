@@ -19,6 +19,7 @@ Briefly:
 * there are not nailed levels, not hardcoded fields in the format
 * output dynamic filtering (change log verbosity on the fly)
 * can keep context of application
+* it fast enough and careful about memory allocs
 
 Kiwi logger has built around the idea:
 

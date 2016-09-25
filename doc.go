@@ -45,6 +45,8 @@ Features briefly:
 
  * can keep context of application
 
+ * it fast enough and careful about memory allocs
+
 Key feature of `kiwi` logger is dynamic filtering of incoming records.
 Instead of checking severety level for decide about pass or not the record to the output,
 `kiwi` passes all records to *all* the outputs (they called *sinks* in `kiwi` terminology).
