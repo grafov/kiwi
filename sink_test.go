@@ -61,3 +61,17 @@ func TestSink_LogToStoppedSink_Logfmt(t *testing.T) {
 		t.Fail()
 	}
 }
+
+// Test of log to the stopped sink.
+func TestSink_StopTwice(t *testing.T) {
+	out := SinkTo(bytes.NewBufferString(""), UseLogfmt())
+	out.Stop()
+	out.Close()
+}
+
+// Test of log to the stopped sink.
+func TestSink_CloseTwice(t *testing.T) {
+	out := SinkTo(bytes.NewBufferString(""), UseLogfmt())
+	out.Close()
+	out.Close()
+}

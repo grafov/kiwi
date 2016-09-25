@@ -233,6 +233,9 @@ func (o *Sink) Start() *Sink {
 
 // Close the sink. Flush all records that came before.
 func (o *Sink) Close() {
+	if o.closed {
+		return
+	}
 	o.Lock()
 	o.closed = true
 	o.Unlock()
