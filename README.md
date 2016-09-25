@@ -153,17 +153,20 @@ If you need a new logger in another execution thread you will create another ins
 
 ```go
 	// Creates a new logger instance.
-	log1st := kiwi.New()
+	log1st := kiwi.New().With("context key", "context value")
 
-	// Just clone old instance to a new one with keeping of context.
+	// Just clone old instance to a new one. It will keep the context of the first instance.
 	log2nd := log1st.New()
+	
+	// And you can extend context for cloned instance.
+	log2nd.With("another key", "another value")
 
 	// So other concurrent routines may accept logger with the same context.
 	go subroutine(log2nd, otherArgs...)
 ```
 
-For the small apps where you won't init all these instances you would like use global kiwi.Log() method.
-This method just immediately flush it's args to an outputs. And by design it is safe for concurrent usage.
+For the small apps where you won't init all these instances you would like use global `kiwi.Log()` method.
+This method just immediately flush it's args to the sinks. And by design it is safe for concurrent usage.
 Also due design simplicity it not supports context, only regular values. If you need context then you 
 application is complex thing hence you will need initialize a new instance of kiwi.Logger().
 
