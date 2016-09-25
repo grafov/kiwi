@@ -94,7 +94,7 @@ func TestSink_WithFilterPass(t *testing.T) {
 func TestSink_WithoutFilterOut(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).WithKey("Ballrog").Start()
+	out := SinkTo(output, UseLogfmt()).WithoutKey("Gandalf").Start()
 	defer out.Close()
 
 	log.Log("Gandalf", "You cannot pass!") // from the book

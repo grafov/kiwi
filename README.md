@@ -96,7 +96,7 @@ func main() {
 
 	// Filters fdecide pass or not incoming log record to this output.	
 	// Example filters below will pass only records which has key "userID" and has value of level="FATAL".	
-	out.With("userID").WithValues("level", "FATAL")
+	out.WithKey("userID").WithValue("level", "FATAL")
 	
 	// So in this manner you can fan out log record to several outputs.
 	// For example write separate log of critical errors and common log with all errors.
@@ -104,7 +104,7 @@ func main() {
 	out2 := kiwi.SinkTo(os.StdErr, kiwi.JSON).Start()
 
 	// Kiwi offers various filters for set conditions for outputs.
-	out2.WithInt64Range("userID", 100, 500).WithoutValues("label", "debug")
+	out2.WithInt64Range("userID", 100, 500).WithoutValue("label", "debug")
 }
 ```
 

@@ -25,21 +25,21 @@ func main() {
 	// Each output allows filter out any records and write any other.
 	// You specify filter for the keys (key filter).
 	// Each of these keys should be presented in the record.
-	errors.With("error", "msg")
+	errors.WithKey("error", "msg")
 	// The filter may take into account key values. So only records with levels
 	// ERROR and FATAL will be passed filter and written to stderr.
-	errors.WithValues("level", "ERROR", "FATAL").Start()
+	errors.WithValue("level", "ERROR", "FATAL").Start()
 
 	// Vice versa you can filter out some keys.
-	info.Without("error")
+	info.WithoutKey("error")
 	// And define another set of key-val pairs for distinguish outputs.
-	info.WithValues("level", "INFO", "WARNING").Start()
+	info.WithValue("level", "INFO", "WARNING").Start()
 
 	// It will output all records from outputs above if they have key "something".
 	// So you can duplicate some records to several log files based on some criteria.
-	something.With("something").Start()
+	something.WithKey("something").Start()
 
-	// So if you not define any clauses (With/Without/WithValues/WithoutValues)
+	// So if you not define any clauses (WithKey/WithoutKey/WithValue/WithoutValues)
 	// then all records will copied to an output.
 
 	// Let's go!
