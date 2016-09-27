@@ -107,17 +107,17 @@ func TestSink_WithoutKeyFilterOut(t *testing.T) {
 	}
 }
 
-// Test of WithValue filter. It should filter out the record from the output.
-func TestSink_WithValueFilterNotPass(t *testing.T) {
+// Test of WithValue filter. It should pass the record to the output because the key missed.
+func TestSink_WithValueFilterMissedKeyPass(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
 	out := SinkTo(output, UseLogfmt()).WithValue("Gandalf", "You cannot pass!").Start()
 	defer out.Close()
 
-	log.Log("Balrog", "...")
+	log.Log("Balrog", "Boo!")
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != "" {
+	if strings.TrimSpace(output.String()) != "Balrog=\"Boo!\"" {
 		t.Fail()
 	}
 
