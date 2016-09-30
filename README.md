@@ -108,7 +108,7 @@ func main() {
 }
 ```
 
-See more ready to run samples in `cmd` subdirs.
+See more ready to run samples in `cmd` subdirs. Filters described in the wiki: [Filtering](https://github.com/grafov/kiwi/wiki/Filtering).
 
 ## Work with context
 
