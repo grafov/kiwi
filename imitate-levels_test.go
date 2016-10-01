@@ -45,6 +45,22 @@ import (
 	"testing"
 )
 
+// Test of log with fatal level with empty value. Useless but function allow it.
+func TestLoggerLevels_LogFatalEmpty_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt()).Start()
+	defer out.Close()
+
+	log.Fatal()
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != "level=\"fatal\"" {
+		println(output.String())
+		t.Fail()
+	}
+}
+
 // Test of log with fatal level without a key.
 func TestLoggerLevels_LogFatal_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
@@ -55,7 +71,6 @@ func TestLoggerLevels_LogFatal_Logfmt(t *testing.T) {
 	log.Fatal("The sample message.")
 
 	out.Flush()
-	println(output.String())
 	if strings.TrimSpace(output.String()) != "level=\"fatal\" \"The sample message.\"" {
 		println(output.String())
 		t.Fail()
@@ -77,7 +92,7 @@ func TestLoggerLevels_LogFatalWKey_Logfmt(t *testing.T) {
 	}
 }
 
-// Test of log with fatal level without a key.
+// Test of log with critical level without a key.
 func TestLoggerLevels_LogCrit_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
@@ -93,7 +108,7 @@ func TestLoggerLevels_LogCrit_Logfmt(t *testing.T) {
 	}
 }
 
-// Test of log with fatal level with a key.
+// Test of log with critical level with a key.
 func TestLoggerLevels_LogCritWKey_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
@@ -104,6 +119,70 @@ func TestLoggerLevels_LogCritWKey_Logfmt(t *testing.T) {
 
 	out.Flush()
 	if strings.TrimSpace(output.String()) != "msg=\"The sample message.\" level=\"critical\"" {
+		println(output.String())
+		t.Fail()
+	}
+}
+
+// Test of log with error level without a key.
+func TestLoggerLevels_LogError_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt()).Start()
+	defer out.Close()
+
+	log.Error("The sample message.")
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != "\"The sample message.\" level=\"error\"" {
+		println(output.String())
+		t.Fail()
+	}
+}
+
+// Test of log with error level with a key.
+func TestLoggerLevels_LogErrorWKey_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt()).Start()
+	defer out.Close()
+
+	log.Error("msg", "The sample message.")
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != "msg=\"The sample message.\" level=\"error\"" {
+		println(output.String())
+		t.Fail()
+	}
+}
+
+// Test of log with warning level without a key.
+func TestLoggerLevels_LogWarn_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt()).Start()
+	defer out.Close()
+
+	log.Warn("The sample message.")
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != "\"The sample message.\" level=\"warning\"" {
+		println(output.String())
+		t.Fail()
+	}
+}
+
+// Test of log with warning level with a key.
+func TestLoggerLevels_LogWarnWKey_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt()).Start()
+	defer out.Close()
+
+	log.Warn("msg", "The sample message.")
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != "msg=\"The sample message.\" level=\"warning\"" {
 		println(output.String())
 		t.Fail()
 	}
