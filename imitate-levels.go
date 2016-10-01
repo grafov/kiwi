@@ -41,7 +41,11 @@ var LevelName = "level"
 // globally for all package with UseLevelName(). There is nothing special in "level"
 // key so it may be overrided with any value what you want.
 func (l *Logger) Fatal(keyVals ...interface{}) {
-	l.Log(append(keyVals, LevelName, "fatal")...)
+	if len(keyVals) == 1 {
+		l.Log(LevelName, "fatal", keyVals[0])
+	} else {
+		l.Log(append(keyVals, LevelName, "fatal")...)
+	}
 }
 
 // Crit imitates behaviour of common loggers with severity levels. It adds a record
@@ -49,7 +53,11 @@ func (l *Logger) Fatal(keyVals ...interface{}) {
 // globally for all package with UseLevelName(). There is nothing special in "level"
 // key so it may be overrided with any value what you want.
 func (l *Logger) Crit(keyVals ...interface{}) {
-	l.Log(append(keyVals, LevelName, "critical")...)
+	if len(keyVals) == 1 {
+		l.Log(LevelName, "critical", keyVals[0])
+	} else {
+		l.Log(append(keyVals, LevelName, "critical")...)
+	}
 }
 
 // Error imitates behaviour of common loggers with severity levels. It adds a record
@@ -57,7 +65,11 @@ func (l *Logger) Crit(keyVals ...interface{}) {
 // globally for all package with UseLevelName(). There is nothing special in "level"
 // key so it may be overrided with any recVal you want.
 func (l *Logger) Error(keyVals ...interface{}) {
-	l.Log(append(keyVals, LevelName, "error")...)
+	if len(keyVals) == 1 {
+		l.Log(LevelName, "error", keyVals[0])
+	} else {
+		l.Log(append(keyVals, LevelName, "error")...)
+	}
 }
 
 // Warn imitates behaviour of common loggers with severity levels. It adds a record
@@ -65,7 +77,11 @@ func (l *Logger) Error(keyVals ...interface{}) {
 // globally for all package with UseLevelName(). There is nothing special in "level"
 // key so it may be overrided with any recVal you want.
 func (l *Logger) Warn(keyVals ...interface{}) {
-	l.Log(append(keyVals, LevelName, "warning")...)
+	if len(keyVals) == 1 {
+		l.Log(LevelName, "warning", keyVals[0])
+	} else {
+		l.Log(append(keyVals, LevelName, "warning")...)
+	}
 }
 
 // Info imitates behaviour of common loggers with severity levels. It adds a record
@@ -73,7 +89,11 @@ func (l *Logger) Warn(keyVals ...interface{}) {
 // globally for all package with UseLevelName(). There is nothing special in "level"
 // key so it may be overrided with any value what you want.
 func (l *Logger) Info(keyVals ...interface{}) {
-	l.Log(append(keyVals, LevelName, "info")...)
+	if len(keyVals) == 1 {
+		l.Log(LevelName, "info", keyVals[0])
+	} else {
+		l.Log(append(keyVals, LevelName, "info")...)
+	}
 }
 
 // Debug imitates behaviour of common loggers with severity levels. It adds a record
@@ -81,5 +101,9 @@ func (l *Logger) Info(keyVals ...interface{}) {
 // globally for all package with UseLevelName(). There is nothing special in "level"
 // key so it may be overrided with any value what you want.
 func (l *Logger) Debug(keyVals ...interface{}) {
-	l.Log(append(keyVals, LevelName, "debug")...)
+	if len(keyVals) == 1 {
+		l.Log(LevelName, "debug", keyVals[0])
+	} else {
+		l.Log(append(keyVals, LevelName, "debug")...)
+	}
 }
