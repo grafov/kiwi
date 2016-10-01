@@ -1,7 +1,6 @@
 package kiwi
 
-/*
-Copyright (c) 2016, Alexander I.Grafov aka Axel
+/* Copyright (c) 2016, Alexander I.Grafov aka Axel
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -46,78 +45,34 @@ import (
 	"testing"
 )
 
-// Test of log to the stopped sink.
-func TestSink_LogToStoppedSink_Logfmt(t *testing.T) {
+// Test of log with fatal level without a key.
+func TestLoggerLevels_LogFatal_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt())
+	out := SinkTo(output, UseLogfmt()).Start()
 	defer out.Close()
 
-	log.Log("k", "The sample string that should be ignored.")
+	log.Fatal("The sample message.")
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != "" {
+	println(output.String())
+	if strings.TrimSpace(output.String()) != "level=\"fatal\" \"The sample message.\"" {
 		t.Fail()
 	}
 }
 
-// Test of log to the stopped sink. It should not crash logger.
-func TestSink_StopTwice(t *testing.T) {
-	out := SinkTo(bytes.NewBufferString(""), UseLogfmt())
-	out.Stop()
-	out.Close()
-}
-
-// Test of the close already closed sink. It should not crash logger.
-func TestSink_CloseTwice(t *testing.T) {
-	out := SinkTo(bytes.NewBufferString(""), UseLogfmt())
-	out.Close()
-	out.Close()
-}
-
-// Test of WithKey filter. It should pass record to the output.
-func TestSink_WithKeyFilterPass(t *testing.T) {
+// Test of log with fatal level with a key.
+func TestLoggerLevels_LogFatalWKey_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).WithKey("Gandalf").Start()
+	out := SinkTo(output, UseLogfmt()).Start()
 	defer out.Close()
 
-	log.Log("Gandalf", "You shall not pass!") // from the movie
+	log.Fatal("msg", "The sample message.")
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != "Gandalf=\"You shall not pass!\"" {
+	println(output.String())
+	if strings.TrimSpace(output.String()) != "msg=\"The sample message.\" level=\"fatal\"" {
 		t.Fail()
 	}
-
-}
-
-// Test of WithoutKey filter. It should not pass record to the output.
-func TestSink_WithoutKeyFilterOut(t *testing.T) {
-	output := bytes.NewBufferString("")
-	log := New()
-	out := SinkTo(output, UseLogfmt()).WithoutKey("Gandalf").Start()
-	defer out.Close()
-
-	log.Log("Gandalf", "You cannot pass!") // from the book
-
-	out.Flush()
-	if strings.TrimSpace(output.String()) != "" {
-		t.Fail()
-	}
-}
-
-// Test of WithValue filter. It should pass the record to the output because the key missed.
-func TestSink_WithValueFilterMissedKeyPass(t *testing.T) {
-	output := bytes.NewBufferString("")
-	log := New()
-	out := SinkTo(output, UseLogfmt()).WithValue("Gandalf", "You cannot pass!").Start()
-	defer out.Close()
-
-	log.Log("Balrog", "Boo!")
-
-	out.Flush()
-	if strings.TrimSpace(output.String()) != "Balrog=\"Boo!\"" {
-		t.Fail()
-	}
-
 }
