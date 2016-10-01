@@ -25,6 +25,7 @@
 ** ability to use custom filters									:roadmap:
 ** demo application
 ** research solutions for multiline logging especially for go traces in other loggers
+** clarify logic of sanitation for quoted keys and quoted values		:bug:
 * Ideas
 ** move typed helpers into a separated package or
 ** remove typed helpers - it seems as preferable way as it make API shorter
