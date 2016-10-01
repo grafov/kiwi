@@ -52,6 +52,7 @@ func TestGlobalLogger_LogStringValue_Logfmt(t *testing.T) {
 
 	out.Flush()
 	if strings.TrimSpace(output.String()) != "k=\"The sample string with a lot of spaces.\"" {
+		println(output.String())
 		t.Fail()
 	}
 }
@@ -66,6 +67,7 @@ func TestGlobalLogger_LogBytesValue_Logfmt(t *testing.T) {
 
 	out.Flush()
 	if strings.TrimSpace(output.String()) != "k=\"The sample string with a lot of spaces.\"" {
+		println(output.String())
 		t.Fail()
 	}
 }
@@ -80,6 +82,7 @@ func TestGlobalLogger_LogIntValue_Logfmt(t *testing.T) {
 
 	out.Flush()
 	if strings.TrimSpace(output.String()) != "k=123" {
+		println(output.String())
 		t.Fail()
 	}
 }
@@ -94,6 +97,7 @@ func TestGlobalLogger_LogNegativeIntValue_Logfmt(t *testing.T) {
 
 	out.Flush()
 	if strings.TrimSpace(output.String()) != "k=123" {
+		println(output.String())
 		t.Fail()
 	}
 }
@@ -108,6 +112,7 @@ func TestGlobalLogger_LogFloatValue_Logfmt(t *testing.T) {
 
 	out.Flush()
 	if strings.TrimSpace(output.String()) != "k=3.14159265359e+00" {
+		println(output.String())
 		t.Fail()
 	}
 }
@@ -123,6 +128,7 @@ func TestGlobalLogger_LogFixedFloatValue_Logfmt(t *testing.T) {
 
 	out.Flush()
 	if strings.TrimSpace(output.String()) != "k=3.14159265359" {
+		println(output.String())
 		t.Fail()
 	}
 	// Turn back to default format.
@@ -139,6 +145,7 @@ func TestGlobalLogger_LogBoolValue_Logfmt(t *testing.T) {
 
 	out.Flush()
 	if strings.TrimSpace(output.String()) != "k=true k2=false" {
+		println(output.String())
 		t.Fail()
 	}
 }
@@ -153,6 +160,7 @@ func TestGlobalLogger_LogComplexValue_Logfmt(t *testing.T) {
 
 	out.Flush()
 	if strings.TrimSpace(output.String()) != "k=(0.000000+12345.000000i) k2=(0.000000+1.000000i)" {
+		println(output.String())
 		t.Fail()
 	}
 }
@@ -169,6 +177,22 @@ func TestGlobalLogger_LogTimeValue_Logfmt(t *testing.T) {
 
 	out.Flush()
 	if strings.TrimSpace(output.String()) != fmt.Sprintf("k=%s", valueString) {
+		println(output.String())
+		t.Fail()
+	}
+}
+
+// Test logging
+func TestGlobalLogger_LogKeyWithSpaces_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
+	defer out.Close()
+
+	kiwi.Log("key with spaces", "The sample value.")
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != "\"key with spaces\"=\"The sample value.\"" {
+		println(output.String())
 		t.Fail()
 	}
 }
