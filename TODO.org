@@ -14,6 +14,7 @@
 ** STOPPED mode: drop duplicate records in an output
 ** DONE start any sink paused
    It will help set filters before the sink got a lot of log messages and passes them by default.
+** DONE clarify logic of sanitation for quoted keys and quoted values	:bug:
 ** WIP add tests for logger add/log for different input types
 ** WIP add tests for output filters
 ** add tests for formatters
@@ -25,7 +26,6 @@
 ** ability to use custom filters									:roadmap:
 ** demo application
 ** research solutions for multiline logging especially for go traces in other loggers
-** WIP clarify logic of sanitation for quoted keys and quoted values	:bug:
 ** WIP clarify logic of odd keys
    maybe treat them as values?
 * Ideas

@@ -35,6 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import (
 	"bytes"
 	"strconv"
+	"strings"
 )
 
 // Formatter represents format of the output.
@@ -58,7 +59,12 @@ func (f *formatLogfmt) Begin() {
 }
 
 func (f *formatLogfmt) Pair(key, val string, quoted bool) {
-	f.line.WriteString(key)
+	// TODO extend check for all non printable chars, so it need just check for each byte>space
+	if strings.ContainsAny(key, " \n\r\t") {
+		f.line.WriteString(strconv.Quote(key))
+	} else {
+		f.line.WriteString(key)
+	}
 	if val == "" && !quoted {
 		f.line.WriteRune(' ')
 		return
@@ -91,9 +97,8 @@ func (f *formatJSON) Begin() {
 }
 
 func (f *formatJSON) Pair(key, val string, quoted bool) {
-	f.line.WriteRune('"')
-	f.line.WriteString(key)
-	f.line.WriteString("\":")
+	f.line.WriteString(strconv.Quote(key))
+	f.line.WriteRune(':')
 	if quoted {
 		f.line.WriteString(strconv.Quote(val))
 	} else {
