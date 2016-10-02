@@ -102,7 +102,7 @@ func TestLoggerLevels_LogCrit_Logfmt(t *testing.T) {
 	log.Crit("The sample message.")
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != "\"The sample message.\" level=\"critical\"" {
+	if strings.TrimSpace(output.String()) != "level=\"critical\" \"The sample message.\"" {
 		println(output.String())
 		t.Fail()
 	}
@@ -134,7 +134,7 @@ func TestLoggerLevels_LogError_Logfmt(t *testing.T) {
 	log.Error("The sample message.")
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != "\"The sample message.\" level=\"error\"" {
+	if strings.TrimSpace(output.String()) != "level=\"error\" \"The sample message.\"" {
 		println(output.String())
 		t.Fail()
 	}
@@ -166,7 +166,7 @@ func TestLoggerLevels_LogWarn_Logfmt(t *testing.T) {
 	log.Warn("The sample message.")
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != "\"The sample message.\" level=\"warning\"" {
+	if strings.TrimSpace(output.String()) != "level=\"warning\" \"The sample message.\"" {
 		println(output.String())
 		t.Fail()
 	}
