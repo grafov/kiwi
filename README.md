@@ -249,12 +249,20 @@ See the benchmarks in the [github.com/grafov/go-loggers-comparison](https://gith
 
 ## Roadmap
 
-* custom filters
-* optional colour formatter for the console
-* throttling mode for outputs
+What should be done before the first release:
 
-Also unit [tests coverage](https://gocover.io/github.com/grafov/kiwi) should be increased for > 50% of the code and all bugs must be fixed :)
+* test behaviour of all the filters and fix possible bugs
+* test JSON output and fix possible bugs
+* realize API for custom filters
+
+Future plans:
+
+* optional colour formatter for the console
+* throttling mode for sinks
+* increase tests coverage up to 50%
+
 See details about tasks and ideas in `TODO.org` (orgmode format).
+See current [tests coverage](https://gocover.io/github.com/grafov/kiwi).
 
 ## Origins
 
