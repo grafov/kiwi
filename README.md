@@ -260,4 +260,5 @@ See details about tasks and ideas in `TODO.org` (orgmode format).
 
 * logfmt description [brandur.org/logfmt](https://brandur.org/logfmt)
 * logfmt realization in Go and specs [godoc.org/github.com/kr/logfmt](https://godoc.org/github.com/kr/logfmt)
+* see also logfmt realization [github.com/go-logfmt/logfmt](https://github.com/go-logfmt/logfmt)
 * picture used for logo [openclipart.org/detail/4416/kiwi-bird](https://openclipart.org/detail/4416/kiwi-bird)
