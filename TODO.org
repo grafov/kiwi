@@ -28,6 +28,7 @@
 ** research solutions for multiline logging especially for go traces in other loggers
 ** WIP clarify logic of odd keys
    maybe treat them as values?
+** add more predefined filters for stdlib types (string, time.Time)
 * Ideas
 ** move typed helpers into a separated package or
 ** remove typed helpers - it seems as preferable way as it make API shorter

@@ -257,6 +257,7 @@ What should be done before the first release:
 
 Future plans:
 
+* extend the predefined filters
 * optional colour formatter for the console
 * throttling mode for sinks
 * increase tests coverage up to 50%
