@@ -209,8 +209,8 @@ Filters in each sink will decide how to actually display the record or filter it
 
 ## Instead of FAQ
 
-0. Kiwi logger not strictly follow logfmt specs.
-1. Ideas of key-value format very near to JSON output but with orientation on readability for humans without additional tools for log parsing.
+0. Kiwi logger not strictly follows logfmt specs.
+1. Ideas of key-value format are like JSON format but with orientation on readability for humans first.
 2. Yes, it was architectured and developed to be a standard number 15 that competing with others. It is not pretend to be log format for everything.
 3. No, it is not related to `log15` logger though `kiwi` shares the same logfmt format and some ideas with him.
 4. It did not offer "Logger" interface because IMO interface is useless for loggers. It offers interfaces for the parts of logger like formatters.
