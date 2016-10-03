@@ -15,8 +15,8 @@
 ** DONE start any sink paused
    It will help set filters before the sink got a lot of log messages and passes them by default.
 ** DONE clarify logic of sanitation for quoted keys and quoted values	:bug:
+** DONE add tests for output filters								:roadmap:
 ** WIP add tests for logger add/log for different input types
-** WIP add tests for output filters
 ** add tests for formatters
 ** add tests for logger context
 ** add tests for logger timestamps
@@ -28,7 +28,7 @@
 ** research solutions for multiline logging especially for go traces in other loggers
 ** WIP clarify logic of odd keys
    maybe treat them as values?
-** add more predefined filters for stdlib types (string, time.Time)
+** add more predefined filters for stdlib types (string, time.Time) :roadmap:
 * Ideas
 ** move typed helpers into a separated package or
 ** remove typed helpers - it seems as preferable way as it make API shorter

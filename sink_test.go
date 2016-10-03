@@ -53,10 +53,11 @@ func TestSink_LogToStoppedSink_Logfmt(t *testing.T) {
 	out := SinkTo(output, UseLogfmt())
 	defer out.Close()
 
-	log.Log("k", "The sample string that should be ignored.")
+	log.Log("key", "The sample string that should be ignored.")
 
 	out.Flush()
 	if strings.TrimSpace(output.String()) != "" {
+		println(output.String())
 		t.Fail()
 	}
 }
@@ -82,10 +83,11 @@ func TestSink_WithKeyFilterPass(t *testing.T) {
 	out := SinkTo(output, UseLogfmt()).WithKey("Gandalf").Start()
 	defer out.Close()
 
-	log.Log("Gandalf", "You shall not pass!") // from the movie
+	log.Log("Gandalf", "You shall not pass!") // cite from the movie
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != "Gandalf=\"You shall not pass!\"" {
+	if strings.TrimSpace(output.String()) != `Gandalf="You shall not pass!"` {
+		println(output.String())
 		t.Fail()
 	}
 
@@ -98,10 +100,11 @@ func TestSink_WithoutKeyFilterOut(t *testing.T) {
 	out := SinkTo(output, UseLogfmt()).WithoutKey("Gandalf").Start()
 	defer out.Close()
 
-	log.Log("Gandalf", "You cannot pass!") // from the book
+	log.Log("Gandalf", "You cannot pass!") // cite from the book
 
 	out.Flush()
 	if strings.TrimSpace(output.String()) != "" {
+		println(output.String())
 		t.Fail()
 	}
 }
@@ -110,14 +113,143 @@ func TestSink_WithoutKeyFilterOut(t *testing.T) {
 func TestSink_WithValueFilterMissedKeyPass(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).WithValue("Gandalf", "You cannot pass!").Start()
+	out := SinkTo(output, UseLogfmt()).WithValue("key", "passed").Start()
 	defer out.Close()
 
-	log.Log("Balrog", "Boo!")
+	log.Log("key", "passed")
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != "Balrog=\"Boo!\"" {
+	if strings.TrimSpace(output.String()) != `key="passed"` {
+		println(output.String())
 		t.Fail()
 	}
 
+}
+
+// Test of WithValue filter. It should pass the record to the output because the value matched.
+func TestSink_WithValueFilterPass(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt()).WithValue("key", "passed", "and this passed too").Start()
+	defer out.Close()
+
+	log.Log("key", "passed", "key", "and this passed too")
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != `key="passed" key="and this passed too"` {
+		println(output.String())
+		t.Fail()
+	}
+}
+
+// Test of WithValue filter. It should filter out the record because no one value matched.
+func TestSink_WithValueFilterOut(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt()).WithValue("key", "filtered", "out").Start()
+	defer out.Close()
+
+	log.Log("key", "try it")
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != "" {
+		println(output.String())
+		t.Fail()
+	}
+}
+
+// Test of WithRangeInt filter. It should pass the record to the output because the key missed.
+func TestSink_WithRangeIntFilterMissedKeyPass(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt()).WithRangeInt64("key", 1, 2).Start()
+	defer out.Close()
+
+	log.Log("another key", 3)
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != `"another key"=3` {
+		println(output.String())
+		t.Fail()
+	}
+}
+
+// Test of WithRangeInt filter. It should pass the record to the output because the value in the range.
+func TestSink_WithRangeIntFilterPass(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt()).WithRangeInt64("key", 1, 3).Start()
+	defer out.Close()
+
+	log.Log("key", 2)
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != `key=2` {
+		println(output.String())
+		t.Fail()
+	}
+}
+
+// Test of WithRangeInt filter. It should filter out the record because the value not in the range.
+func TestSink_WithRangeIntFilterFilterOut(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt()).WithRangeInt64("key", 1, 3).Start()
+	defer out.Close()
+
+	log.Log("key", 4)
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != "" {
+		println(output.String())
+		t.Fail()
+	}
+}
+
+// Test of WithRangeFloat filter. It should pass the record to the output because the key missed.
+func TestSink_WithRangeFloatFilterMissedKeyPass(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt()).WithRangeFloat64("key", 1.0, 2.0).Start()
+	defer out.Close()
+
+	log.Log("another key", 3)
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != `"another key"=3` {
+		println(output.String())
+		t.Fail()
+	}
+}
+
+// Test of WithRangeFloat filter. It should pass the record to the output because the value in the range.
+func TestSink_WithRangeFloatFilterPass(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt()).WithRangeFloat64("key", 1.0, 3.0).Start()
+	defer out.Close()
+
+	log.Log("key", 2.0)
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != `key=2e+00` {
+		println(output.String())
+		t.Fail()
+	}
+}
+
+// Test of WithRangeFloat filter. It should filter out the record because the value not in the range.
+func TestSink_WithRangeFloatFilterFilterOut(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt()).WithRangeFloat64("key", 1.0, 3.0).Start()
+	defer out.Close()
+
+	log.Log("key", 4.0)
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != "" {
+		println(output.String())
+		t.Fail()
+	}
 }
