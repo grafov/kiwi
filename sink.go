@@ -89,7 +89,7 @@ func (o *Sink) WithKey(keys ...string) *Sink {
 	if !o.closed {
 		o.Lock()
 		for _, key := range keys {
-			o.positiveFilters[key] = &keyFilter{Key: key}
+			o.positiveFilters[key] = &keyFilter{}
 			delete(o.negativeFilters, key)
 		}
 		o.Unlock()
@@ -103,7 +103,7 @@ func (o *Sink) WithoutKey(keys ...string) *Sink {
 	if !o.closed {
 		o.Lock()
 		for _, key := range keys {
-			o.negativeFilters[key] = &keyFilter{Key: key}
+			o.negativeFilters[key] = &keyFilter{}
 			delete(o.positiveFilters, key)
 		}
 		o.Unlock()
@@ -119,7 +119,7 @@ func (o *Sink) WithValue(key string, vals ...string) *Sink {
 	}
 	if !o.closed {
 		o.Lock()
-		o.positiveFilters[key] = &valsFilter{Key: key, Vals: vals}
+		o.positiveFilters[key] = &valsFilter{Vals: vals}
 		delete(o.negativeFilters, key)
 		o.Unlock()
 	}
@@ -133,7 +133,7 @@ func (o *Sink) WithoutValue(key string, vals ...string) *Sink {
 	}
 	if !o.closed {
 		o.Lock()
-		o.negativeFilters[key] = &valsFilter{Key: key, Vals: vals}
+		o.negativeFilters[key] = &valsFilter{Vals: vals}
 		delete(o.positiveFilters, key)
 		o.Unlock()
 	}
@@ -145,7 +145,7 @@ func (o *Sink) WithRangeInt64(key string, from, to int64) *Sink {
 	if !o.closed {
 		o.Lock()
 		delete(o.negativeFilters, key)
-		o.positiveFilters[key] = &rangeInt64Filter{Key: key, From: from, To: to}
+		o.positiveFilters[key] = &rangeInt64Filter{From: from, To: to}
 		o.Unlock()
 	}
 	return o
@@ -156,7 +156,7 @@ func (o *Sink) WithoutRangeInt64(key string, from, to int64) *Sink {
 	o.Lock()
 	if !o.closed {
 		delete(o.positiveFilters, key)
-		o.negativeFilters[key] = &rangeInt64Filter{Key: key, From: from, To: to}
+		o.negativeFilters[key] = &rangeInt64Filter{From: from, To: to}
 	}
 	o.Unlock()
 	return o
@@ -166,7 +166,7 @@ func (o *Sink) WithoutRangeInt64(key string, from, to int64) *Sink {
 func (o *Sink) WithRangeFloat64(key string, from, to float64) *Sink {
 	o.Lock()
 	delete(o.negativeFilters, key)
-	o.positiveFilters[key] = &rangeFloat64Filter{Key: key, From: from, To: to}
+	o.positiveFilters[key] = &rangeFloat64Filter{From: from, To: to}
 	o.Unlock()
 	return o
 }
@@ -176,10 +176,20 @@ func (o *Sink) WithoutRangeFloat64(key string, from, to float64) *Sink {
 	if !o.closed {
 		o.Lock()
 		delete(o.positiveFilters, key)
-		o.negativeFilters[key] = &rangeFloat64Filter{Key: key, From: from, To: to}
+		o.negativeFilters[key] = &rangeFloat64Filter{From: from, To: to}
 		o.Unlock()
 	}
 	return o
+}
+
+// FilterKey setup custom filtering function for keys.
+func (o *Sink) FilterKey(func(string) filter) {
+
+}
+
+// FilterValue setup custom filtering function for values for a specific key.
+func (o *Sink) FilterValue(func(string, ...interface{}) filter) {
+
 }
 
 // Reset all filters for the keys for the output.

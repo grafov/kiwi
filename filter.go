@@ -41,22 +41,17 @@ type filter interface {
 }
 
 type keyFilter struct {
-	Key string
 }
 
-func (k *keyFilter) Check(key, val string) bool {
-	return k.Key == key
+func (*keyFilter) Check(key, val string) bool {
+	return true
 }
 
 type valsFilter struct {
-	Key  string
 	Vals []string
 }
 
 func (k *valsFilter) Check(key, val string) bool {
-	if key != k.Key {
-		return false
-	}
 	for _, v := range k.Vals {
 		if v == val {
 			return true
@@ -66,14 +61,10 @@ func (k *valsFilter) Check(key, val string) bool {
 }
 
 type rangeInt64Filter struct {
-	Key      string
 	From, To int64
 }
 
 func (k *rangeInt64Filter) Check(key, val string) bool {
-	if key != k.Key {
-		return false
-	}
 	var (
 		intVal int64
 		err    error
@@ -85,14 +76,10 @@ func (k *rangeInt64Filter) Check(key, val string) bool {
 }
 
 type rangeFloat64Filter struct {
-	Key      string
 	From, To float64
 }
 
 func (k *rangeFloat64Filter) Check(key, val string) bool {
-	if key != k.Key {
-		return false
-	}
 	var (
 		floatVal float64
 		err      error
