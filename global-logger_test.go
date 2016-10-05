@@ -182,7 +182,22 @@ func TestGlobalLogger_LogTimeValue_Logfmt(t *testing.T) {
 	}
 }
 
-// Test logging
+// Test logging of the numeric key.
+func TestGlobalLogger_LogNumericKey_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
+	defer out.Close()
+
+	kiwi.Log(123, "The sample value.")
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != "123=\"The sample value.\"" {
+		println(output.String())
+		t.Fail()
+	}
+}
+
+// Test logging of the key with spaces.
 func TestGlobalLogger_LogKeyWithSpaces_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
