@@ -16,6 +16,8 @@
    It will help set filters before the sink got a lot of log messages and passes them by default.
 ** DONE clarify logic of sanitation for quoted keys and quoted values	:bug:
 ** DONE add tests for output filters								:roadmap:
+** DONE clarify logic of odd keys
+   maybe treat them as values?
 ** WIP add tests for logger add/log for different input types
 ** add tests for formatters
 ** add tests for logger context
@@ -26,8 +28,6 @@
 ** ability to use custom filters									:roadmap:
 ** demo application
 ** research solutions for multiline logging especially for go traces in other loggers
-** WIP clarify logic of odd keys
-   maybe treat them as values?
 ** add more predefined filters for stdlib types (string, time.Time) :roadmap:
 * Ideas
 ** move typed helpers into a separated package or
