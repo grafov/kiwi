@@ -36,7 +36,7 @@ import (
 	"strconv"
 )
 
-type filter interface {
+type Filter interface {
 	Check(string, string) bool
 }
 

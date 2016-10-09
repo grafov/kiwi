@@ -54,8 +54,8 @@ type (
 		format          Formatter
 		paused          bool
 		closed          bool
-		positiveFilters map[string]filter
-		negativeFilters map[string]filter
+		positiveFilters map[string]Filter
+		negativeFilters map[string]Filter
 		hiddenKeys      map[string]bool
 	}
 )
@@ -73,8 +73,8 @@ func SinkTo(w io.Writer, fn Formatter) *Sink {
 	output := &Sink{
 		In:              make(chan *[]pair, 16),
 		writer:          w,
-		positiveFilters: make(map[string]filter),
-		negativeFilters: make(map[string]filter),
+		positiveFilters: make(map[string]Filter),
+		negativeFilters: make(map[string]Filter),
 		format:          fn,
 		paused:          true, // it started paused because not pass records until the filters set
 	}
@@ -182,14 +182,16 @@ func (o *Sink) WithoutRangeFloat64(key string, from, to float64) *Sink {
 	return o
 }
 
-// FilterKey setup custom filtering function for keys.
-func (o *Sink) FilterKey(func(string) filter) {
-
-}
-
-// FilterValue setup custom filtering function for values for a specific key.
-func (o *Sink) FilterValue(func(string, ...interface{}) filter) {
-
+// WithFilter setup custom filtering function for values for a specific key.
+// Custom filter should realize Filter interface. All custom filters treated
+// as positive filters. So if the filter returns true then it will be passed.
+func (o *Sink) WithFilter(key string, customFilter Filter) *Sink {
+	if !o.closed {
+		o.Lock()
+		o.positiveFilters[key] = customFilter
+		o.Unlock()
+	}
+	return o
 }
 
 // Reset all filters for the keys for the output.
