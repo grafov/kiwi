@@ -19,13 +19,13 @@
 ** DONE clarify logic of odd keys
    maybe treat them as values?
 ** WIP add tests for logger add/log for different input types
+** WIP ability to use custom filters								:roadmap:
 ** add tests for formatters
 ** add tests for logger context
 ** add tests for logger timestamps
 ** move examples from README to example_ functions then add single short usage example to README
 ** colour format for the console (formatter or decorator)			:roadmap:
 ** log write throttling mode										:roadmap:
-** ability to use custom filters									:roadmap:
 ** demo application
 ** research solutions for multiline logging especially for go traces in other loggers
 ** add more predefined filters for stdlib types (string, time.Time) :roadmap:
