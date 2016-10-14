@@ -61,11 +61,11 @@ func (k *valsFilter) Check(key, val string) bool {
 	return false
 }
 
-type rangeInt64Filter struct {
+type int64RangeFilter struct {
 	From, To int64
 }
 
-func (k *rangeInt64Filter) Check(key, val string) bool {
+func (k *int64RangeFilter) Check(key, val string) bool {
 	var (
 		intVal int64
 		err    error
@@ -76,11 +76,11 @@ func (k *rangeInt64Filter) Check(key, val string) bool {
 	return intVal > k.From && intVal <= k.To
 }
 
-type rangeFloat64Filter struct {
+type float64RangeFilter struct {
 	From, To float64
 }
 
-func (k *rangeFloat64Filter) Check(key, val string) bool {
+func (k *float64RangeFilter) Check(key, val string) bool {
 	var (
 		floatVal float64
 		err      error
