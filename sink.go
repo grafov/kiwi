@@ -140,8 +140,8 @@ func (o *Sink) WithoutValue(key string, vals ...string) *Sink {
 	return o
 }
 
-// WithRangeInt64 sets restriction for records output.
-func (o *Sink) WithRangeInt64(key string, from, to int64) *Sink {
+// WithInt64Range sets restriction for records output.
+func (o *Sink) WithInt64Range(key string, from, to int64) *Sink {
 	if !o.closed {
 		o.Lock()
 		delete(o.negativeFilters, key)
@@ -151,8 +151,8 @@ func (o *Sink) WithRangeInt64(key string, from, to int64) *Sink {
 	return o
 }
 
-// WithoutRangeInt64 sets restriction for records output.
-func (o *Sink) WithoutRangeInt64(key string, from, to int64) *Sink {
+// WithoutInt64Range sets restriction for records output.
+func (o *Sink) WithoutInt64Range(key string, from, to int64) *Sink {
 	o.Lock()
 	if !o.closed {
 		delete(o.positiveFilters, key)
@@ -162,8 +162,8 @@ func (o *Sink) WithoutRangeInt64(key string, from, to int64) *Sink {
 	return o
 }
 
-// WithRangeFloat64 sets restriction for records output.
-func (o *Sink) WithRangeFloat64(key string, from, to float64) *Sink {
+// WithFloat64Range sets restriction for records output.
+func (o *Sink) WithFloat64Range(key string, from, to float64) *Sink {
 	o.Lock()
 	delete(o.negativeFilters, key)
 	o.positiveFilters[key] = &rangeFloat64Filter{From: from, To: to}
@@ -171,8 +171,8 @@ func (o *Sink) WithRangeFloat64(key string, from, to float64) *Sink {
 	return o
 }
 
-// WithoutRangeFloat64 sets restriction for records output.
-func (o *Sink) WithoutRangeFloat64(key string, from, to float64) *Sink {
+// WithoutFloat64Range sets restriction for records output.
+func (o *Sink) WithoutFloat64Range(key string, from, to float64) *Sink {
 	if !o.closed {
 		o.Lock()
 		delete(o.positiveFilters, key)

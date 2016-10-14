@@ -158,11 +158,11 @@ func TestSink_WithValueFilterOut(t *testing.T) {
 	}
 }
 
-// Test of WithRangeInt filter. It should pass the record to the output because the key missed.
-func TestSink_WithRangeIntFilterMissedKeyPass(t *testing.T) {
+// Test of WithIntRange filter. It should pass the record to the output because the key missed.
+func TestSink_WithIntRangeFilterMissedKeyPass(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).WithRangeInt64("key", 1, 2).Start()
+	out := SinkTo(output, UseLogfmt()).WithInt64Range("key", 1, 2).Start()
 	defer out.Close()
 
 	log.Log("another key", 3)
@@ -174,11 +174,11 @@ func TestSink_WithRangeIntFilterMissedKeyPass(t *testing.T) {
 	}
 }
 
-// Test of WithRangeInt filter. It should pass the record to the output because the value in the range.
-func TestSink_WithRangeIntFilterPass(t *testing.T) {
+// Test of WithIntRange filter. It should pass the record to the output because the value in the range.
+func TestSink_WithIntRangeFilterPass(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).WithRangeInt64("key", 1, 3).Start()
+	out := SinkTo(output, UseLogfmt()).WithInt64Range("key", 1, 3).Start()
 	defer out.Close()
 
 	log.Log("key", 2)
@@ -190,11 +190,11 @@ func TestSink_WithRangeIntFilterPass(t *testing.T) {
 	}
 }
 
-// Test of WithRangeInt filter. It should filter out the record because the value not in the range.
-func TestSink_WithRangeIntFilterFilterOut(t *testing.T) {
+// Test of WithIntRange filter. It should filter out the record because the value not in the range.
+func TestSink_WithIntRangeFilterFilterOut(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).WithRangeInt64("key", 1, 3).Start()
+	out := SinkTo(output, UseLogfmt()).WithInt64Range("key", 1, 3).Start()
 	defer out.Close()
 
 	log.Log("key", 4)
@@ -206,11 +206,11 @@ func TestSink_WithRangeIntFilterFilterOut(t *testing.T) {
 	}
 }
 
-// Test of WithRangeFloat filter. It should pass the record to the output because the key missed.
-func TestSink_WithRangeFloatFilterMissedKeyPass(t *testing.T) {
+// Test of WithFloatRange filter. It should pass the record to the output because the key missed.
+func TestSink_WithFloatRangeFilterMissedKeyPass(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).WithRangeFloat64("key", 1.0, 2.0).Start()
+	out := SinkTo(output, UseLogfmt()).WithFloat64Range("key", 1.0, 2.0).Start()
 	defer out.Close()
 
 	log.Log("another key", 3)
@@ -222,11 +222,11 @@ func TestSink_WithRangeFloatFilterMissedKeyPass(t *testing.T) {
 	}
 }
 
-// Test of WithRangeFloat filter. It should pass the record to the output because the value in the range.
-func TestSink_WithRangeFloatFilterPass(t *testing.T) {
+// Test of WithFloatRange filter. It should pass the record to the output because the value in the range.
+func TestSink_WithFloatRangeFilterPass(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).WithRangeFloat64("key", 1.0, 3.0).Start()
+	out := SinkTo(output, UseLogfmt()).WithFloat64Range("key", 1.0, 3.0).Start()
 	defer out.Close()
 
 	log.Log("key", 2.0)
@@ -238,11 +238,11 @@ func TestSink_WithRangeFloatFilterPass(t *testing.T) {
 	}
 }
 
-// Test of WithRangeFloat filter. It should filter out the record because the value not in the range.
-func TestSink_WithRangeFloatFilterOut(t *testing.T) {
+// Test of WithFloatRange filter. It should filter out the record because the value not in the range.
+func TestSink_WithFloatRangeFilterOut(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).WithRangeFloat64("key", 1.0, 3.0).Start()
+	out := SinkTo(output, UseLogfmt()).WithFloat64Range("key", 1.0, 3.0).Start()
 	defer out.Close()
 
 	log.Log("key", 4.0)
