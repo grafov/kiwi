@@ -36,6 +36,7 @@ import (
 	"strconv"
 )
 
+// Filter accepts key and value. It should return true if the filter passed.
 type Filter interface {
 	Check(string, string) bool
 }

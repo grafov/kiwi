@@ -239,13 +239,76 @@ func TestSink_WithRangeFloatFilterPass(t *testing.T) {
 }
 
 // Test of WithRangeFloat filter. It should filter out the record because the value not in the range.
-func TestSink_WithRangeFloatFilterFilterOut(t *testing.T) {
+func TestSink_WithRangeFloatFilterOut(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
 	out := SinkTo(output, UseLogfmt()).WithRangeFloat64("key", 1.0, 3.0).Start()
 	defer out.Close()
 
 	log.Log("key", 4.0)
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != "" {
+		println(output.String())
+		t.Fail()
+	}
+}
+
+type customFilterThatReturnsTrue struct{}
+
+func (customFilterThatReturnsTrue) Check(key, val string) bool {
+	return true
+}
+
+// Test of WithFilter custom filter. It should pass the record to the output because the value in the range.
+func TestSink_WithCustomPass(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	var customFilter customFilterThatReturnsTrue
+	out := SinkTo(output, UseLogfmt()).WithFilter("key", customFilter).Start()
+	defer out.Close()
+
+	log.Log("key", 2)
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != `key=2` {
+		println(output.String())
+		t.Fail()
+	}
+}
+
+// Test of WithFilter custom filter. It should pass the record to the output because the key missed.
+func TestSink_WithCustomMissedKeyPass(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	var customFilter customFilterThatReturnsTrue
+	out := SinkTo(output, UseLogfmt()).WithFilter("key", customFilter).Start()
+	defer out.Close()
+
+	log.Log("another key", 3)
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != `"another key"=3` {
+		println(output.String())
+		t.Fail()
+	}
+}
+
+type customFilterThatReturnsFalse struct{}
+
+func (customFilterThatReturnsFalse) Check(key, val string) bool {
+	return false
+}
+
+// Test of WithFilter custom filter. It should pass the record to the output because the value in the range.
+func TestSink_WithCustomFilterOut(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	var customFilter customFilterThatReturnsFalse
+	out := SinkTo(output, UseLogfmt()).WithFilter("key", customFilter).Start()
+	defer out.Close()
+
+	log.Log("key", 2)
 
 	out.Flush()
 	if strings.TrimSpace(output.String()) != "" {
