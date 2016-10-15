@@ -37,6 +37,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import (
 	"io"
 	"sync"
+	"time"
 )
 
 // Sinks accepts records through the chanels.
@@ -145,7 +146,7 @@ func (o *Sink) WithInt64Range(key string, from, to int64) *Sink {
 	if !o.closed {
 		o.Lock()
 		delete(o.negativeFilters, key)
-		o.positiveFilters[key] = &rangeInt64Filter{From: from, To: to}
+		o.positiveFilters[key] = &int64RangeFilter{From: from, To: to}
 		o.Unlock()
 	}
 	return o
@@ -156,7 +157,7 @@ func (o *Sink) WithoutInt64Range(key string, from, to int64) *Sink {
 	o.Lock()
 	if !o.closed {
 		delete(o.positiveFilters, key)
-		o.negativeFilters[key] = &rangeInt64Filter{From: from, To: to}
+		o.negativeFilters[key] = &int64RangeFilter{From: from, To: to}
 	}
 	o.Unlock()
 	return o
@@ -166,7 +167,7 @@ func (o *Sink) WithoutInt64Range(key string, from, to int64) *Sink {
 func (o *Sink) WithFloat64Range(key string, from, to float64) *Sink {
 	o.Lock()
 	delete(o.negativeFilters, key)
-	o.positiveFilters[key] = &rangeFloat64Filter{From: from, To: to}
+	o.positiveFilters[key] = &float64RangeFilter{From: from, To: to}
 	o.Unlock()
 	return o
 }
@@ -176,7 +177,27 @@ func (o *Sink) WithoutFloat64Range(key string, from, to float64) *Sink {
 	if !o.closed {
 		o.Lock()
 		delete(o.positiveFilters, key)
-		o.negativeFilters[key] = &rangeFloat64Filter{From: from, To: to}
+		o.negativeFilters[key] = &float64RangeFilter{From: from, To: to}
+		o.Unlock()
+	}
+	return o
+}
+
+// WithTimeRange sets restriction for records output.
+func (o *Sink) WithTimeRange(key string, from, to time.Time) *Sink {
+	o.Lock()
+	delete(o.negativeFilters, key)
+	o.positiveFilters[key] = &timeRangeFilter{From: from, To: to}
+	o.Unlock()
+	return o
+}
+
+// WithoutTimeRange sets restriction for records output.
+func (o *Sink) WithoutTimeRange(key string, from, to time.Time) *Sink {
+	if !o.closed {
+		o.Lock()
+		delete(o.positiveFilters, key)
+		o.negativeFilters[key] = &timeRangeFilter{From: from, To: to}
 		o.Unlock()
 	}
 	return o

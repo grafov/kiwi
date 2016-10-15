@@ -44,6 +44,7 @@ import (
 	"bytes"
 	"strings"
 	"testing"
+	"time"
 )
 
 // Test of log to the stopped sink.
@@ -246,6 +247,45 @@ func TestSink_WithFloatRangeFilterOut(t *testing.T) {
 	defer out.Close()
 
 	log.Log("key", 4.0)
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != "" {
+		println(output.String())
+		t.Fail()
+	}
+}
+
+// Test of WithTimeRange filter. It should pass the record to the output because the value in the range.
+func TestSink_WithTimeRangeFilterPass(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	now := time.Now()
+	hourAfterNow := now.Add(1 * time.Hour)
+	halfHourAfterNow := now.Add(30 * time.Minute)
+	halfHourAsString := halfHourAfterNow.Format(TimeLayout)
+	out := SinkTo(output, UseLogfmt()).WithTimeRange("key", now, hourAfterNow).Start()
+	defer out.Close()
+
+	log.Log("key", halfHourAfterNow)
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != `key=`+halfHourAsString {
+		println(output.String())
+		t.Fail()
+	}
+}
+
+// Test of WithTimeRange filter. It should filter out the record because the value not in the range.
+func TestSink_WithTimeRangeFilterOut(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	now := time.Now()
+	hourAfterNow := now.Add(1 * time.Hour)
+	halfHourAfterNow := now.Add(30 * time.Minute)
+	out := SinkTo(output, UseLogfmt()).WithTimeRange("key", now, halfHourAfterNow).Start()
+	defer out.Close()
+
+	log.Log("key", hourAfterNow)
 
 	out.Flush()
 	if strings.TrimSpace(output.String()) != "" {
