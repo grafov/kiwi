@@ -253,7 +253,7 @@ What should be done before the first release:
 
 * test behaviour of all the filters and fix possible bugs
 * test JSON output and fix possible bugs
-* realize API for custom filters
+* ~~realize API for custom filters~~
 
 Future plans:
 
@@ -263,7 +263,7 @@ Future plans:
 * increase tests coverage up to 50%
 
 See details about tasks and ideas in `TODO.org` (orgmode format).
-See current [tests coverage](https://gocover.io/github.com/grafov/kiwi).
+See current [tests coverage](http://gocover.io/github.com/grafov/kiwi).
 
 ## Origins
 
