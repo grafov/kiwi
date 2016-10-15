@@ -34,6 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import (
 	"strconv"
+	"time"
 )
 
 // Filter accepts key and value. It should return true if the filter passed.
@@ -52,8 +53,8 @@ type valsFilter struct {
 	Vals []string
 }
 
-func (k *valsFilter) Check(key, val string) bool {
-	for _, v := range k.Vals {
+func (f *valsFilter) Check(key, val string) bool {
+	for _, v := range f.Vals {
 		if v == val {
 			return true
 		}
@@ -65,7 +66,7 @@ type int64RangeFilter struct {
 	From, To int64
 }
 
-func (k *int64RangeFilter) Check(key, val string) bool {
+func (f *int64RangeFilter) Check(key, val string) bool {
 	var (
 		intVal int64
 		err    error
@@ -73,14 +74,14 @@ func (k *int64RangeFilter) Check(key, val string) bool {
 	if intVal, err = strconv.ParseInt(val, 10, 64); err != nil {
 		return false
 	}
-	return intVal > k.From && intVal <= k.To
+	return intVal > f.From && intVal <= f.To
 }
 
 type float64RangeFilter struct {
 	From, To float64
 }
 
-func (k *float64RangeFilter) Check(key, val string) bool {
+func (f *float64RangeFilter) Check(key, val string) bool {
 	var (
 		floatVal float64
 		err      error
@@ -88,5 +89,23 @@ func (k *float64RangeFilter) Check(key, val string) bool {
 	if floatVal, err = strconv.ParseFloat(val, 64); err != nil {
 		return false
 	}
-	return floatVal > k.From && floatVal <= k.To
+	return floatVal > f.From && floatVal <= f.To
+}
+
+type timeRangeFilter struct {
+	From, To time.Time
+}
+
+func (f *timeRangeFilter) Check(key, val string) bool {
+	var (
+		valTime time.Time
+		err     error
+	)
+	if valTime, err = time.Parse(TimeLayout, val); err != nil {
+		return false
+	}
+	if f.From.Before(valTime) && f.To.After(valTime) {
+		return true
+	}
+	return false
 }

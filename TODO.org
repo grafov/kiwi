@@ -18,8 +18,8 @@
 ** DONE add tests for output filters								:roadmap:
 ** DONE clarify logic of odd keys
    maybe treat them as values?
+** DONE ability to use custom filters				    :roadmap:
 ** WIP add tests for logger add/log for different input types
-** WIP ability to use custom filters								:roadmap:
 ** add tests for formatters
 ** add tests for logger context
 ** add tests for logger timestamps
