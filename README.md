@@ -257,10 +257,11 @@ What should be done before the first release:
 
 Future plans:
 
-* extend the predefined filters
+* ~~extend the predefined filters~~ (cancelled)
 * optional colour formatter for the console
 * throttling mode for sinks
-* increase tests coverage up to 50%
+* ~~increase tests coverage up to 50%~~
+* add tests for concurrent execution use cases
 
 See details about tasks and ideas in `TODO.org` (orgmode format).
 See current [tests coverage](http://gocover.io/github.com/grafov/kiwi).

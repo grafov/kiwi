@@ -106,6 +106,8 @@ func toRecordKey(val interface{}) string {
 		return fmt.Sprintf("%f", val.(complex128))
 	case time.Time:
 		return val.(time.Time).Format(TimeLayout)
+	case nil:
+		return ""
 	default:
 		return fmt.Sprintf("%v", val)
 	}

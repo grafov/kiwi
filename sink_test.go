@@ -63,10 +63,33 @@ func TestSink_LogToStoppedSink_Logfmt(t *testing.T) {
 	}
 }
 
+// Test of log to the stopped sink.
+func TestSink_LogToStoppedSink_JSON(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseJSON())
+	defer out.Close()
+
+	log.Log("key", "The sample string that should be ignored.")
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != "" {
+		println(output.String())
+		t.Fail()
+	}
+}
+
 // Test of log to the stopped sink. It should not crash logger.
 func TestSink_StopTwice(t *testing.T) {
 	out := SinkTo(bytes.NewBufferString(""), UseLogfmt())
 	out.Stop()
+	out.Close()
+}
+
+// Test of start already started sink. It should not crash logger.
+func TestSink_StartTwice(t *testing.T) {
+	out := SinkTo(bytes.NewBufferString(""), UseLogfmt()).Start()
+	out.Start()
 	out.Close()
 }
 
