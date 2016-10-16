@@ -1,4 +1,4 @@
-# Kiwi logger & context keeper [![Go Report Card](https://goreportcard.com/badge/grafov/kiwi)](https://goreportcard.com/report/grafov/kiwi)
+# Kiwi logger & context keeper [![Go Report Card](https://goreportcard.com/badge/grafov/kiwi)](https://goreportcard.com/report/grafov/kiwi) [![Coverage Status](https://coveralls.io/repos/github/grafov/kiwi/badge.svg?branch=master)](https://coveralls.io/github/grafov/kiwi?branch=master)
 
 *WIP. API and features is subject of changes. Use it carefully!*
 
@@ -262,6 +262,7 @@ Future plans:
 * throttling mode for sinks
 * ~~increase tests coverage up to 50%~~
 * add tests for concurrent execution use cases
+* increase tests coverage up to 75%
 
 See details about tasks and ideas in `TODO.org` (orgmode format).
 See current [tests coverage](http://gocover.io/github.com/grafov/kiwi).
