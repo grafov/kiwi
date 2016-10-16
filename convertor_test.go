@@ -239,6 +239,21 @@ func TestConvertor_LogUint32Type_Logfmt(t *testing.T) {
 	}
 }
 
+func TestConvertor_LogUintType_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt()).Start()
+	defer out.Close()
+
+	log.Log(uint(1), uint(2))
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != `1=2` {
+		println(output.String())
+		t.Fail()
+	}
+}
+
 func TestConvertor_LogUint64Type_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
@@ -249,6 +264,36 @@ func TestConvertor_LogUint64Type_Logfmt(t *testing.T) {
 
 	out.Flush()
 	if strings.TrimSpace(output.String()) != `1=2` {
+		println(output.String())
+		t.Fail()
+	}
+}
+
+func TestConvertor_LogFloat32Type_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt()).Start()
+	defer out.Close()
+
+	log.Log(float32(3.14159265), float32(3.14159265))
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != `3.1415927e+00=3.1415927e+00` {
+		println(output.String())
+		t.Fail()
+	}
+}
+
+func TestConvertor_LogFloat64Type_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt()).Start()
+	defer out.Close()
+
+	log.Log(3.14159265, 3.14159265)
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != `3.14159265e+00=3.14159265e+00` {
 		println(output.String())
 		t.Fail()
 	}

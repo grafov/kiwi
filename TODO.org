@@ -20,6 +20,7 @@
    maybe treat them as values?
 ** DONE ability to use custom filters				    :roadmap:
 ** WIP add tests for logger add/log for different input types
+** WIP research solutions for multiline logging especially for go traces in other loggers
 ** add tests for formatters
 ** add tests for logger context
 ** add tests for logger timestamps
@@ -27,7 +28,6 @@
 ** colour format for the console (formatter or decorator)			:roadmap:
 ** log write throttling mode										:roadmap:
 ** demo application
-** research solutions for multiline logging especially for go traces in other loggers
 ** add more predefined filters for stdlib types (string, time.Time) :roadmap:
 * Ideas
 ** move typed helpers into a separated package or
