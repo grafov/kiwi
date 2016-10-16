@@ -40,8 +40,16 @@ import (
 
 // Formatter represents format of the output.
 type Formatter interface {
+	// Begin function allows to add prefix string for the output
+	// or make some preparations before the output.
 	Begin()
+	// Pair function called for each key-value pair of the record.
+	// It accepts `quoted` for notify when value should be displayed in qoutes.
+	// Real look depends of the format so `quoted` hint may be ignored.
 	Pair(key, val string, quoted bool)
+	// Finish function allows to add suffix string for the output.
+	// Also it returns result string for the displaying of the single record.
+	// It may be multiline if you wish. Result has no restrictions for you imagination :)
 	Finish() []byte
 }
 
@@ -86,7 +94,7 @@ type formatJSON struct {
 	line bytes.Buffer
 }
 
-// UseJSON says that a sink uses JSON format for records output.
+// UseJSON says that a sink uses JSON (RFC-7159) format for records output.
 func UseJSON() *formatJSON {
 	return new(formatJSON)
 }

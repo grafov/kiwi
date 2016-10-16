@@ -37,7 +37,8 @@ import (
 	"time"
 )
 
-// Filter accepts key and value. It should return true if the filter passed.
+// Filter accepts key and value. If the filter passed it should return true.
+// Custom filters must conform the interface.
 type Filter interface {
 	Check(string, string) bool
 }
@@ -45,6 +46,8 @@ type Filter interface {
 type keyFilter struct {
 }
 
+// Check for the key filter needs only for conforming with Filter interface.
+// It always returns true because check for the key already made in sink.
 func (*keyFilter) Check(key, val string) bool {
 	return true
 }

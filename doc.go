@@ -37,7 +37,9 @@ Features briefly:
 
  * simple format with explicit key for each log message (*logfmt* like) - for high readability by humans
 
- * optional JSON format that so liked by machines
+ * JSON format that so liked by machines
+
+ * ability to define own custom format of the output
 
  * there are not nailed levels, not hardcoded fields in the format
 
