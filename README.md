@@ -56,7 +56,7 @@ Package have not external dependencies except standard library. So just
 
     go get github.com/grafov/kiwi
 	
-The library builds tested with go 1.4-1.7 and with current development version.
+The library builds tested with go versions 1.4, 1.5, 1.6, 1.7 and with the current development version.
 
 ## Usage examples
 
