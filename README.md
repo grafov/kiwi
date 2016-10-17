@@ -1,6 +1,6 @@
 # Kiwi logger & context keeper [![Go Report Card](https://goreportcard.com/badge/grafov/kiwi)](https://goreportcard.com/report/grafov/kiwi) [![Coverage Status](https://coveralls.io/repos/github/grafov/kiwi/badge.svg?branch=master)](https://coveralls.io/github/grafov/kiwi?branch=master)
 
-*WIP. API and features is subject of changes. Use it carefully!*
+*Beta version. API still is subject of changes. Use it carefully!*
 
 ![Kiwi bird](flomar-kiwi-bird-300px.png)
 
