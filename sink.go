@@ -49,12 +49,13 @@ type (
 	// and decides how to filter them. Each output wraps its own io.Writer.
 	// Sink methods are safe for concurrent usage.
 	Sink struct {
+		In     chan *[]pair
+		closed bool
+		paused bool
+		writer io.Writer
+		format Formatter
+
 		sync.RWMutex
-		In              chan *[]pair
-		writer          io.Writer
-		format          Formatter
-		paused          bool
-		closed          bool
 		positiveFilters map[string]Filter
 		negativeFilters map[string]Filter
 		hiddenKeys      map[string]bool
@@ -64,6 +65,8 @@ type (
 // SinkTo creates a new sink for an arbitrary number of loggers.
 // There are any number of sinks may be created for saving incoming log
 // records to different places.
+// The sink requires explicit start with Start() before usage.
+// That allows firstly setup filters before sink will really accept any records.
 func SinkTo(w io.Writer, fn Formatter) *Sink {
 	for i, output := range sinks {
 		if output.writer == w {
@@ -72,12 +75,13 @@ func SinkTo(w io.Writer, fn Formatter) *Sink {
 		}
 	}
 	output := &Sink{
+		format:          fn,
+		paused:          true,
 		In:              make(chan *[]pair, 16),
 		writer:          w,
 		positiveFilters: make(map[string]Filter),
 		negativeFilters: make(map[string]Filter),
-		format:          fn,
-		paused:          true, // it started paused because not pass records until the filters set
+		hiddenKeys:      make(map[string]bool),
 	}
 	sinks = append(sinks, output)
 	go processOutput(output)
@@ -154,21 +158,23 @@ func (o *Sink) WithInt64Range(key string, from, to int64) *Sink {
 
 // WithoutInt64Range sets restriction for records output.
 func (o *Sink) WithoutInt64Range(key string, from, to int64) *Sink {
-	o.Lock()
 	if !o.closed {
+		o.Lock()
 		delete(o.positiveFilters, key)
 		o.negativeFilters[key] = &int64RangeFilter{From: from, To: to}
+		o.Unlock()
 	}
-	o.Unlock()
 	return o
 }
 
 // WithFloat64Range sets restriction for records output.
 func (o *Sink) WithFloat64Range(key string, from, to float64) *Sink {
-	o.Lock()
-	delete(o.negativeFilters, key)
-	o.positiveFilters[key] = &float64RangeFilter{From: from, To: to}
-	o.Unlock()
+	if !o.closed {
+		o.Lock()
+		delete(o.negativeFilters, key)
+		o.positiveFilters[key] = &float64RangeFilter{From: from, To: to}
+		o.Unlock()
+	}
 	return o
 }
 
@@ -185,10 +191,12 @@ func (o *Sink) WithoutFloat64Range(key string, from, to float64) *Sink {
 
 // WithTimeRange sets restriction for records output.
 func (o *Sink) WithTimeRange(key string, from, to time.Time) *Sink {
-	o.Lock()
-	delete(o.negativeFilters, key)
-	o.positiveFilters[key] = &timeRangeFilter{From: from, To: to}
-	o.Unlock()
+	if !o.closed {
+		o.Lock()
+		delete(o.negativeFilters, key)
+		o.positiveFilters[key] = &timeRangeFilter{From: from, To: to}
+		o.Unlock()
+	}
 	return o
 }
 
@@ -217,37 +225,39 @@ func (o *Sink) WithFilter(key string, customFilter Filter) *Sink {
 
 // Reset all filters for the keys for the output.
 func (o *Sink) Reset(keys ...string) *Sink {
-	o.Lock()
-	for _, key := range keys {
-		delete(o.positiveFilters, key)
-		delete(o.negativeFilters, key)
+	if !o.closed {
+		o.Lock()
+		for _, key := range keys {
+			delete(o.positiveFilters, key)
+			delete(o.negativeFilters, key)
+		}
+		o.Unlock()
 	}
-	o.Unlock()
 	return o
 }
 
 // Hide keys from the output. Other keys in record will be displayed
 // but not hidden keys.
 func (o *Sink) Hide(keys ...string) *Sink {
-	o.Lock()
 	if !o.closed {
+		o.Lock()
 		for _, key := range keys {
 			o.hiddenKeys[key] = true
 		}
+		o.Unlock()
 	}
-	o.Unlock()
 	return o
 }
 
 // Unhide previously hidden keys. They will be displayed in the output again.
 func (o *Sink) Unhide(keys ...string) *Sink {
-	o.Lock()
 	if !o.closed {
+		o.Lock()
 		for _, key := range keys {
 			delete(o.hiddenKeys, key)
 		}
+		o.Unlock()
 	}
-	o.Unlock()
 	return o
 }
 
@@ -259,6 +269,7 @@ func (o *Sink) Stop() *Sink {
 
 // Start writing to the output.
 // After creation of a new sink it will paused and you need explicitly start it.
+// It allows setup the filters before the sink will accepts any records.
 func (o *Sink) Start() *Sink {
 	o.paused = false
 	return o
@@ -289,19 +300,26 @@ func (o *Sink) Flush() *Sink {
 }
 
 func processOutput(o *Sink) {
+	var (
+		record *[]pair
+		ok     bool
+	)
 	for {
-		record, ok := <-o.In
+		record, ok = <-o.In
 		if !ok {
+			o.closed = true
 			o.positiveFilters = nil
 			o.negativeFilters = nil
 			o.hiddenKeys = nil
-			o.closed = true
 			return
 		}
 		if o.paused || o.closed {
 			continue
 		}
 		o.RLock()
+		var (
+			filter Filter
+		)
 		for i, pair := range *record {
 			// Flush came
 			if i == 0 && pair.Deleted {
@@ -309,13 +327,13 @@ func processOutput(o *Sink) {
 				goto skipRecord
 			}
 			// Negative conditions have highest priority
-			if filter, ok := o.negativeFilters[pair.Key]; ok {
+			if filter, ok = o.negativeFilters[pair.Key]; ok {
 				if filter.Check(pair.Key, pair.Val.Strv) {
 					goto skipRecord
 				}
 			}
 			// At last check for positive conditions
-			if filter, ok := o.positiveFilters[pair.Key]; ok {
+			if filter, ok = o.positiveFilters[pair.Key]; ok {
 				if !filter.Check(pair.Key, pair.Val.Strv) {
 					goto skipRecord
 				}

@@ -100,6 +100,58 @@ func TestSink_CloseTwice(t *testing.T) {
 	out.Close()
 }
 
+// Test of HideKey. It should pass record to the output.
+func TestSink_HideKey(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt())
+	defer out.Close()
+
+	out.Start().Hide("two")
+	log.Log("one", 1, "two", 2, "three", 3)
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != `one=1 three=3` {
+		println(output.String())
+		t.Fail()
+	}
+}
+
+// Test of UnhideKey. It should pass record to the output.
+func TestSink_UnhideKey(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt())
+	defer out.Close()
+
+	out.Hide("two").Start().Unhide("two")
+	log.Log("one", 1, "two", 2, "three", 3)
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != `one=1 two=2 three=3` {
+		println(output.String())
+		t.Fail()
+	}
+}
+
+// Test of unhide already unhidden key. It should pass record to the output.
+func TestSink_UnhideKeyTwice(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt())
+	defer out.Close()
+
+	out.Start().Unhide("one").Unhide("one")
+	log.Log("one", 1, "two", 2)
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != `one=1 two=2` {
+		println(output.String())
+		t.Fail()
+	}
+
+}
+
 // Test of WithKey filter. It should pass record to the output.
 func TestSink_WithKeyFilterPass(t *testing.T) {
 	output := bytes.NewBufferString("")
