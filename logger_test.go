@@ -225,5 +225,40 @@ func TestLogger_AddMixChained_Logfmt(t *testing.T) {
 	if strings.TrimSpace(output.String()) != "k=\"value2\" k2=123 k3=3.14159265359e+00" {
 		t.Fail()
 	}
+}
 
+// Test log with the context value.
+func TestLogger_WithContextPassed_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt()).Start()
+	defer out.Close()
+
+	log.With("key1", "value")
+	log.Log("key2", "value")
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != `key1="value" key2="value"` {
+		t.Fail()
+	}
+}
+
+// Test log with adding then removing the context.
+func TestLogger_WithoutContextPassed_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt()).Start()
+	defer out.Close()
+
+	// add the context
+	log.With("key1", "value")
+	// add regular pair
+	log.Add("key2", "value")
+	// remove the context and flush the record
+	log.Without("key1").Log()
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != `key2="value"` {
+		t.Fail()
+	}
 }
