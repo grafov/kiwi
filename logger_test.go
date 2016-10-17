@@ -262,3 +262,23 @@ func TestLogger_WithoutContextPassed_Logfmt(t *testing.T) {
 		t.Fail()
 	}
 }
+
+// Test log with adding then reset the context.
+func TestLogger_ResetContext_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, UseLogfmt()).Start()
+	defer out.Close()
+
+	// add the context
+	log.With("key1", "value")
+	// add regular pair
+	log.Add("key2", "value")
+	// reset the context and flush the record
+	log.ResetContext().Log()
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != `key2="value"` {
+		t.Fail()
+	}
+}
