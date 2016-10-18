@@ -262,23 +262,6 @@ func (l *Logger) GetContextValue(key string) interface{} {
 	return value
 }
 
-// GetRecord returns copy of current set of keys and values prepared for logging
-// as strings. With context key-vals included.
-// The most of Logger operations return *Logger itself but it made for operations
-// chaining only. If you need get log pairs use GelRecord() for it.
-func (l *Logger) GetRecord() map[string]string {
-	var merged = make(map[string]string)
-	for _, pair := range l.context {
-		if !pair.Deleted {
-			merged[pair.Key] = pair.Val.Strv
-		}
-	}
-	for _, pair := range l.pairs {
-		merged[pair.Key] = pair.Val.Strv
-	}
-	return merged
-}
-
 // AddString adds key with a string value to a record.
 func (l *Logger) AddString(key string, val string) *Logger {
 	l.pairs = append(l.pairs, pair{key, value{val, nil, stringVal, true}, false})
