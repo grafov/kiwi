@@ -72,6 +72,39 @@ func TestNewLogger(t *testing.T) {
 	}
 }
 
+// Test of creating a new logger from existing logger.
+func TestLogger_NewWithContext(t *testing.T) {
+	log := New().With("key", "value", "key2", 123)
+
+	sublog := log.New()
+	context := sublog.GetContext()
+
+	if context["key"] != "value" {
+		t.Fail()
+
+	}
+	if context["key2"] != 123 {
+		t.Fail()
+	}
+}
+
+// Test of creating a new logger from existing logger. Deleted values should not present in sublogger.
+func TestLogger_NewWithoutContext(t *testing.T) {
+	log := New().With("key", "value", "key2", 123)
+
+	log.Without("key")
+	sublog := log.New()
+	context := sublog.GetContext()
+
+	if context["key"] == "value" {
+		t.Fail()
+
+	}
+	if context["key2"] != 123 {
+		t.Fail()
+	}
+}
+
 // Test logging of string value.
 func TestLogger_LogStringValue_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
