@@ -194,8 +194,7 @@ func TestGlobalLogger_LogKeyWithSpaces_Logfmt(t *testing.T) {
 
 	kiwi.Log("key with spaces", "The sample value.")
 
-	out.Flush()
-	out.Close()
+	out.Flush().Close()
 	if strings.TrimSpace(output.String()) != "\"key with spaces\"=\"The sample value.\"" {
 		println(output.String())
 		t.Fail()
