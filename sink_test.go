@@ -52,11 +52,10 @@ func TestSink_LogToStoppedSink_Logfmt(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
 	out := SinkTo(stream, UseLogfmt())
-	defer out.Close()
 
 	log.Log("key", "The sample string that should be ignored.")
 
-	out.Flush()
+	out.Flush().Close()
 	if strings.TrimSpace(stream.String()) != "" {
 		println(stream.String())
 		t.Fail()
@@ -68,11 +67,10 @@ func TestSink_LogToStoppedSink_JSON(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
 	out := SinkTo(stream, UseJSON())
-	defer out.Close()
 
 	log.Log("key", "The sample string that should be ignored.")
 
-	out.Flush()
+	out.Flush().Close()
 	if strings.TrimSpace(stream.String()) != "" {
 		println(stream.String())
 		t.Fail()
@@ -116,12 +114,11 @@ func TestSink_HideKey(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
 	out := SinkTo(stream, UseLogfmt())
-	defer out.Close()
 
 	out.Start().Hide("two")
 	log.Log("one", 1, "two", 2, "three", 3)
 
-	out.Flush()
+	out.Flush().Close()
 	if strings.TrimSpace(stream.String()) != `one=1 three=3` {
 		println(stream.String())
 		t.Fail()
@@ -133,12 +130,11 @@ func TestSink_UnhideKey(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
 	out := SinkTo(stream, UseLogfmt())
-	defer out.Close()
 
 	out.Hide("two").Start().Unhide("two")
 	log.Log("one", 1, "two", 2, "three", 3)
 
-	out.Flush()
+	out.Flush().Close()
 	if strings.TrimSpace(stream.String()) != `one=1 two=2 three=3` {
 		println(stream.String())
 		t.Fail()
@@ -150,12 +146,11 @@ func TestSink_UnhideKeyTwice(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
 	out := SinkTo(stream, UseLogfmt())
-	defer out.Close()
 
 	out.Start().Unhide("one").Unhide("one")
 	log.Log("one", 1, "two", 2)
 
-	out.Flush()
+	out.Flush().Close()
 	if strings.TrimSpace(stream.String()) != `one=1 two=2` {
 		println(stream.String())
 		t.Fail()
@@ -168,11 +163,10 @@ func TestSink_WithKeyFilterPass(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
 	out := SinkTo(stream, UseLogfmt()).WithKey("Gandalf").Start()
-	defer out.Close()
 
 	log.Log("Gandalf", "You shall not pass!") // cite from the movie
 
-	out.Flush()
+	out.Flush().Close()
 	if strings.TrimSpace(stream.String()) != `Gandalf="You shall not pass!"` {
 		println(stream.String())
 		t.Fail()
@@ -185,11 +179,10 @@ func TestSink_WithoutKeyFilterOut(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
 	out := SinkTo(stream, UseLogfmt()).WithoutKey("Gandalf").Start()
-	defer out.Close()
 
 	log.Log("Gandalf", "You cannot pass!") // cite from the book
 
-	out.Flush()
+	out.Flush().Close()
 	if strings.TrimSpace(stream.String()) != "" {
 		println(stream.String())
 		t.Fail()
@@ -201,11 +194,10 @@ func TestSink_WithValueFilterMissedKeyPass(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
 	out := SinkTo(stream, UseLogfmt()).WithValue("key", "passed").Start()
-	defer out.Close()
 
 	log.Log("key", "passed")
 
-	out.Flush()
+	out.Flush().Close()
 	if strings.TrimSpace(stream.String()) != `key="passed"` {
 		println(stream.String())
 		t.Fail()
@@ -218,11 +210,10 @@ func TestSink_WithValueFilterPass(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
 	out := SinkTo(stream, UseLogfmt()).WithValue("key", "passed", "and this passed too").Start()
-	defer out.Close()
 
 	log.Log("key", "passed", "key", "and this passed too")
 
-	out.Flush()
+	out.Flush().Close()
 	if strings.TrimSpace(stream.String()) != `key="passed" key="and this passed too"` {
 		println(stream.String())
 		t.Fail()
@@ -234,11 +225,10 @@ func TestSink_WithValueFilterOut(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
 	out := SinkTo(stream, UseLogfmt()).WithValue("key", "filtered", "out").Start()
-	defer out.Close()
 
 	log.Log("key", "try it")
 
-	out.Flush()
+	out.Flush().Close()
 	if strings.TrimSpace(stream.String()) != "" {
 		println(stream.String())
 		t.Fail()
@@ -250,11 +240,10 @@ func TestSink_WithIntRangeFilterMissedKeyPass(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
 	out := SinkTo(stream, UseLogfmt()).WithInt64Range("key", 1, 2).Start()
-	defer out.Close()
 
 	log.Log("another key", 3)
 
-	out.Flush()
+	out.Flush().Close()
 	if strings.TrimSpace(stream.String()) != `"another key"=3` {
 		println(stream.String())
 		t.Fail()
@@ -266,11 +255,10 @@ func TestSink_WithIntRangeFilterPass(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
 	out := SinkTo(stream, UseLogfmt()).WithInt64Range("key", 1, 3).Start()
-	defer out.Close()
 
 	log.Log("key", 2)
 
-	out.Flush()
+	out.Flush().Close()
 	if strings.TrimSpace(stream.String()) != `key=2` {
 		println(stream.String())
 		t.Fail()
@@ -282,11 +270,10 @@ func TestSink_WithIntRangeFilterFilterOut(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
 	out := SinkTo(stream, UseLogfmt()).WithInt64Range("key", 1, 3).Start()
-	defer out.Close()
 
 	log.Log("key", 4)
 
-	out.Flush()
+	out.Flush().Close()
 	if strings.TrimSpace(stream.String()) != "" {
 		println(stream.String())
 		t.Fail()
@@ -298,11 +285,10 @@ func TestSink_WithFloatRangeFilterMissedKeyPass(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
 	out := SinkTo(stream, UseLogfmt()).WithFloat64Range("key", 1.0, 2.0).Start()
-	defer out.Close()
 
 	log.Log("another key", 3)
 
-	out.Flush()
+	out.Flush().Close()
 	if strings.TrimSpace(stream.String()) != `"another key"=3` {
 		println(stream.String())
 		t.Fail()
@@ -314,11 +300,10 @@ func TestSink_WithFloatRangeFilterPass(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
 	out := SinkTo(stream, UseLogfmt()).WithFloat64Range("key", 1.0, 3.0).Start()
-	defer out.Close()
 
 	log.Log("key", 2.0)
 
-	out.Flush()
+	out.Flush().Close()
 	if strings.TrimSpace(stream.String()) != `key=2e+00` {
 		println(stream.String())
 		t.Fail()
@@ -330,11 +315,10 @@ func TestSink_WithFloatRangeFilterOut(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
 	out := SinkTo(stream, UseLogfmt()).WithFloat64Range("key", 1.0, 3.0).Start()
-	defer out.Close()
 
 	log.Log("key", 4.0)
 
-	out.Flush()
+	out.Flush().Close()
 	if strings.TrimSpace(stream.String()) != "" {
 		println(stream.String())
 		t.Fail()
@@ -350,11 +334,10 @@ func TestSink_WithTimeRangeFilterPass(t *testing.T) {
 	halfHourAfterNow := now.Add(30 * time.Minute)
 	halfHourAsString := halfHourAfterNow.Format(TimeLayout)
 	out := SinkTo(stream, UseLogfmt()).WithTimeRange("key", now, hourAfterNow).Start()
-	defer out.Close()
 
 	log.Log("key", halfHourAfterNow)
 
-	out.Flush()
+	out.Flush().Close()
 	if strings.TrimSpace(stream.String()) != `key=`+halfHourAsString {
 		println(stream.String())
 		t.Fail()
@@ -369,11 +352,10 @@ func TestSink_WithTimeRangeFilterOut(t *testing.T) {
 	hourAfterNow := now.Add(1 * time.Hour)
 	halfHourAfterNow := now.Add(30 * time.Minute)
 	out := SinkTo(stream, UseLogfmt()).WithTimeRange("key", now, halfHourAfterNow).Start()
-	defer out.Close()
 
 	log.Log("key", hourAfterNow)
 
-	out.Flush()
+	out.Flush().Close()
 	if strings.TrimSpace(stream.String()) != "" {
 		println(stream.String())
 		t.Fail()
@@ -392,11 +374,10 @@ func TestSink_WithCustomPass(t *testing.T) {
 	log := New()
 	var customFilter customFilterThatReturnsTrue
 	out := SinkTo(stream, UseLogfmt()).WithFilter("key", customFilter).Start()
-	defer out.Close()
 
 	log.Log("key", 2)
 
-	out.Flush()
+	out.Flush().Close()
 	if strings.TrimSpace(stream.String()) != `key=2` {
 		println(stream.String())
 		t.Fail()
@@ -409,11 +390,10 @@ func TestSink_WithCustomMissedKeyPass(t *testing.T) {
 	log := New()
 	var customFilter customFilterThatReturnsTrue
 	out := SinkTo(stream, UseLogfmt()).WithFilter("key", customFilter).Start()
-	defer out.Close()
 
 	log.Log("another key", 3)
 
-	out.Flush()
+	out.Flush().Close()
 	if strings.TrimSpace(stream.String()) != `"another key"=3` {
 		println(stream.String())
 		t.Fail()
@@ -432,11 +412,10 @@ func TestSink_WithCustomFilterOut(t *testing.T) {
 	log := New()
 	var customFilter customFilterThatReturnsFalse
 	out := SinkTo(stream, UseLogfmt()).WithFilter("key", customFilter).Start()
-	defer out.Close()
 
 	log.Log("key", 2)
 
-	out.Flush()
+	out.Flush().Close()
 	if strings.TrimSpace(stream.String()) != "" {
 		println(stream.String())
 		t.Fail()
