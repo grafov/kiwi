@@ -280,6 +280,7 @@ func (o *Sink) Close() {
 	if o.closed {
 		return
 	}
+	o.Flush()
 	o.Lock()
 	o.closed = true
 	o.Unlock()
