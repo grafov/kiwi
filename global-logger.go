@@ -36,6 +36,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // It has no context. You would like use it in short applications where context and
 // initialization of logger will look too complex. Use Logger type instead.
 func Log(keyVals ...interface{}) {
+	collector.RLock()
+	collector.WaitFlush.Add(collector.Count)
 	var (
 		key    string
 		record = make([]pair, 0, len(keyVals))

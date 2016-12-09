@@ -41,9 +41,10 @@ import (
 	"time"
 )
 
+// States of the sink.
 const (
-	sinkStopped int32 = iota - 1
-	sinkPaused
+	sinkClosed int32 = iota - 1
+	sinkStopped
 	sinkActive
 )
 
@@ -51,7 +52,9 @@ const (
 // Each sink has its own channel.
 var collector struct {
 	sync.RWMutex
-	Sinks []*Sink
+	Sinks     []*Sink
+	Count     int
+	WaitFlush sync.WaitGroup
 }
 
 type (
@@ -90,20 +93,21 @@ func SinkTo(w io.Writer, fn Formatter) *Sink {
 			return collector.Sinks[i]
 		}
 	}
-	var state = sinkPaused
+	var state = sinkStopped
 	collector.RUnlock()
 	sink := &Sink{
+		In:              make(chan *box, 16),
 		format:          fn,
 		state:           &state,
-		In:              make(chan *box, 16),
 		writer:          w,
 		positiveFilters: make(map[string]Filter),
 		negativeFilters: make(map[string]Filter),
 		hiddenKeys:      make(map[string]bool),
 	}
 	collector.Lock()
-	sink.id = uint(len(collector.Sinks))
+	sink.id = uint(collector.Count)
 	collector.Sinks = append(collector.Sinks, sink)
+	collector.Count++
 	go processOutput(sink)
 	collector.Unlock()
 	return sink
@@ -112,7 +116,7 @@ func SinkTo(w io.Writer, fn Formatter) *Sink {
 // WithKey sets restriction for records output.
 // Only the records WITH any of the keys will be passed to output.
 func (s *Sink) WithKey(keys ...string) *Sink {
-	if atomic.LoadInt32(s.state) == sinkActive {
+	if atomic.LoadInt32(s.state) > sinkClosed {
 		s.Lock()
 		for _, key := range keys {
 			s.positiveFilters[key] = &keyFilter{}
@@ -126,7 +130,7 @@ func (s *Sink) WithKey(keys ...string) *Sink {
 // WithoutKey sets restriction for records output.
 // Only the records WITHOUT any of the keys will be passed to output.
 func (s *Sink) WithoutKey(keys ...string) *Sink {
-	if atomic.LoadInt32(s.state) == sinkActive {
+	if atomic.LoadInt32(s.state) > sinkClosed {
 		s.Lock()
 		for _, key := range keys {
 			s.negativeFilters[key] = &keyFilter{}
@@ -143,7 +147,7 @@ func (s *Sink) WithValue(key string, vals ...string) *Sink {
 	if len(vals) == 0 {
 		return s.WithKey(key)
 	}
-	if atomic.LoadInt32(s.state) == sinkActive {
+	if atomic.LoadInt32(s.state) > sinkClosed {
 		s.Lock()
 		s.positiveFilters[key] = &valsFilter{Vals: vals}
 		delete(s.negativeFilters, key)
@@ -157,7 +161,7 @@ func (s *Sink) WithoutValue(key string, vals ...string) *Sink {
 	if len(vals) == 0 {
 		return s.WithoutKey(key)
 	}
-	if atomic.LoadInt32(s.state) == sinkActive {
+	if atomic.LoadInt32(s.state) > sinkClosed {
 		s.Lock()
 		s.negativeFilters[key] = &valsFilter{Vals: vals}
 		delete(s.positiveFilters, key)
@@ -168,7 +172,7 @@ func (s *Sink) WithoutValue(key string, vals ...string) *Sink {
 
 // WithInt64Range sets restriction for records output.
 func (s *Sink) WithInt64Range(key string, from, to int64) *Sink {
-	if atomic.LoadInt32(s.state) == sinkActive {
+	if atomic.LoadInt32(s.state) > sinkClosed {
 		s.Lock()
 		delete(s.negativeFilters, key)
 		s.positiveFilters[key] = &int64RangeFilter{From: from, To: to}
@@ -179,7 +183,7 @@ func (s *Sink) WithInt64Range(key string, from, to int64) *Sink {
 
 // WithoutInt64Range sets restriction for records output.
 func (s *Sink) WithoutInt64Range(key string, from, to int64) *Sink {
-	if atomic.LoadInt32(s.state) == sinkActive {
+	if atomic.LoadInt32(s.state) > sinkClosed {
 		s.Lock()
 		delete(s.positiveFilters, key)
 		s.negativeFilters[key] = &int64RangeFilter{From: from, To: to}
@@ -190,7 +194,7 @@ func (s *Sink) WithoutInt64Range(key string, from, to int64) *Sink {
 
 // WithFloat64Range sets restriction for records output.
 func (s *Sink) WithFloat64Range(key string, from, to float64) *Sink {
-	if atomic.LoadInt32(s.state) == sinkActive {
+	if atomic.LoadInt32(s.state) > sinkClosed {
 		s.Lock()
 		delete(s.negativeFilters, key)
 		s.positiveFilters[key] = &float64RangeFilter{From: from, To: to}
@@ -201,7 +205,7 @@ func (s *Sink) WithFloat64Range(key string, from, to float64) *Sink {
 
 // WithoutFloat64Range sets restriction for records output.
 func (s *Sink) WithoutFloat64Range(key string, from, to float64) *Sink {
-	if atomic.LoadInt32(s.state) == sinkActive {
+	if atomic.LoadInt32(s.state) > sinkClosed {
 		s.Lock()
 		delete(s.positiveFilters, key)
 		s.negativeFilters[key] = &float64RangeFilter{From: from, To: to}
@@ -212,7 +216,7 @@ func (s *Sink) WithoutFloat64Range(key string, from, to float64) *Sink {
 
 // WithTimeRange sets restriction for records output.
 func (s *Sink) WithTimeRange(key string, from, to time.Time) *Sink {
-	if atomic.LoadInt32(s.state) == sinkActive {
+	if atomic.LoadInt32(s.state) > sinkClosed {
 		s.Lock()
 		delete(s.negativeFilters, key)
 		s.positiveFilters[key] = &timeRangeFilter{From: from, To: to}
@@ -223,7 +227,7 @@ func (s *Sink) WithTimeRange(key string, from, to time.Time) *Sink {
 
 // WithoutTimeRange sets restriction for records output.
 func (s *Sink) WithoutTimeRange(key string, from, to time.Time) *Sink {
-	if atomic.LoadInt32(s.state) == sinkActive {
+	if atomic.LoadInt32(s.state) > sinkClosed {
 		s.Lock()
 		delete(s.positiveFilters, key)
 		s.negativeFilters[key] = &timeRangeFilter{From: from, To: to}
@@ -236,8 +240,9 @@ func (s *Sink) WithoutTimeRange(key string, from, to time.Time) *Sink {
 // Custom filter should realize Filter interface. All custom filters treated
 // as positive filters. So if the filter returns true then it will be passed.
 func (s *Sink) WithFilter(key string, customFilter Filter) *Sink {
-	if atomic.LoadInt32(s.state) == sinkActive {
+	if atomic.LoadInt32(s.state) > sinkClosed {
 		s.Lock()
+		delete(s.negativeFilters, key)
 		s.positiveFilters[key] = customFilter
 		s.Unlock()
 	}
@@ -246,7 +251,7 @@ func (s *Sink) WithFilter(key string, customFilter Filter) *Sink {
 
 // Reset all filters for the keys for the output.
 func (s *Sink) Reset(keys ...string) *Sink {
-	if atomic.LoadInt32(s.state) == sinkActive {
+	if atomic.LoadInt32(s.state) > sinkClosed {
 		s.Lock()
 		for _, key := range keys {
 			delete(s.positiveFilters, key)
@@ -260,7 +265,7 @@ func (s *Sink) Reset(keys ...string) *Sink {
 // Hide keys from the output. Other keys in record will be displayed
 // but not hidden keys.
 func (s *Sink) Hide(keys ...string) *Sink {
-	if atomic.LoadInt32(s.state) == sinkActive {
+	if atomic.LoadInt32(s.state) > sinkClosed {
 		s.Lock()
 		for _, key := range keys {
 			s.hiddenKeys[key] = true
@@ -272,7 +277,7 @@ func (s *Sink) Hide(keys ...string) *Sink {
 
 // Unhide previously hidden keys. They will be displayed in the output again.
 func (s *Sink) Unhide(keys ...string) *Sink {
-	if atomic.LoadInt32(s.state) == sinkActive {
+	if atomic.LoadInt32(s.state) > sinkClosed {
 		s.Lock()
 		for _, key := range keys {
 			delete(s.hiddenKeys, key)
@@ -284,7 +289,7 @@ func (s *Sink) Unhide(keys ...string) *Sink {
 
 // Stop stops writing to the output.
 func (s *Sink) Stop() *Sink {
-	atomic.StoreInt32(s.state, sinkPaused)
+	atomic.StoreInt32(s.state, sinkStopped)
 	return s
 }
 
@@ -296,15 +301,12 @@ func (s *Sink) Start() *Sink {
 	return s
 }
 
-// Close the sink. Flush all records that came before.
+// Close the sink. It not flush records. Call Flush() explicitely.
 func (s *Sink) Close() {
-	if atomic.LoadInt32(s.state) > sinkStopped {
-		var wg sync.WaitGroup
-		wg.Add(1)
-		s.In <- &box{nil, &wg}
-		wg.Wait()
-		atomic.StoreInt32(s.state, sinkStopped)
+	if atomic.LoadInt32(s.state) > sinkClosed {
+		atomic.StoreInt32(s.state, sinkClosed)
 		collector.Lock()
+		collector.Count--
 		collector.Sinks = append(collector.Sinks[0:s.id], collector.Sinks[s.id+1:]...)
 		collector.Unlock()
 	}
@@ -312,12 +314,9 @@ func (s *Sink) Close() {
 
 // Flush waits that all previously sent to the output records worked.
 func (s *Sink) Flush() *Sink {
-	if atomic.LoadInt32(s.state) == sinkActive {
-		var wg sync.WaitGroup
-		wg.Add(1)
-		s.In <- &box{nil, &wg}
-		wg.Wait()
-		atomic.StoreInt32(s.state, sinkActive)
+	if atomic.LoadInt32(s.state) > sinkClosed {
+		//		time.Sleep(10 * time.Microsecond)
+		collector.WaitFlush.Wait()
 	}
 	return s
 }
@@ -330,7 +329,7 @@ func processOutput(s *Sink) {
 	for {
 		box, ok = <-s.In
 		if !ok {
-			atomic.StoreInt32(s.state, sinkStopped)
+			atomic.StoreInt32(s.state, sinkClosed)
 			s.Lock()
 			s.positiveFilters = nil
 			s.negativeFilters = nil
@@ -338,19 +337,15 @@ func processOutput(s *Sink) {
 			s.Unlock()
 			return
 		}
-		if atomic.LoadInt32(s.state) == sinkStopped {
+		if atomic.LoadInt32(s.state) == sinkClosed {
+			collector.WaitFlush.Done()
 			return
 		}
-		// Flush or Close arrived.
-		if box.Record == nil && box.Group != nil {
-			atomic.StoreInt32(s.state, sinkPaused)
-			box.Group.Done()
-			continue
-		}
-		if atomic.LoadInt32(s.state) == sinkPaused {
+		if atomic.LoadInt32(s.state) == sinkStopped {
 			if box.Group != nil {
 				box.Group.Done()
 			}
+			collector.WaitFlush.Done()
 			continue
 		}
 		s.RLock()
@@ -371,14 +366,15 @@ func processOutput(s *Sink) {
 				}
 			}
 		}
-		s.filterRecord(box.Record)
+		s.formatRecord(box.Record)
 	skipRecord:
-		box.Group.Done()
 		s.RUnlock()
+		box.Group.Done()
+		collector.WaitFlush.Done()
 	}
 }
 
-func (s *Sink) filterRecord(record *[]pair) {
+func (s *Sink) formatRecord(record *[]pair) {
 	s.format.Begin()
 	for _, pair := range *record {
 		if ok := s.hiddenKeys[pair.Key]; ok {
@@ -386,18 +382,19 @@ func (s *Sink) filterRecord(record *[]pair) {
 		}
 		s.format.Pair(pair.Key, pair.Val.Strv, pair.Val.Quoted)
 	}
-	if atomic.LoadInt32(s.state) > sinkStopped && s.writer != nil {
-		s.writer.Write(s.format.Finish())
-	}
+	s.writer.Write(s.format.Finish())
 }
 
 func sinkRecord(rec []pair) {
 	var wg sync.WaitGroup
-	collector.RLock()
+	// collector.RLock()
+	// collector.WaitFlush.Add(collector.Count)
 	for _, s := range collector.Sinks {
 		if atomic.LoadInt32(s.state) == sinkActive {
 			wg.Add(1)
 			s.In <- &box{&rec, &wg}
+		} else {
+			collector.WaitFlush.Done()
 		}
 	}
 	collector.RUnlock()

@@ -54,7 +54,7 @@ func BenchmarkLevelsKiwiTyped(b *testing.B) {
 	l.WithTimestamp(time.RFC3339)
 	kiwi.LevelName = "l"
 	out := kiwi.SinkTo(buf, kiwi.UseJSON()).Start()
-	defer out.Close()
+	defer out.Flush().Close()
 	for i := 0; i < b.N; i++ {
 		l.AddInt("key", 1).AddFloat64("key2", 3.141592).AddString("key3", "string").AddBool("key4", false).Debug()
 		l.AddInt("key", 1).AddFloat64("key2", 3.141592).AddString("key3", "string").AddBool("key4", false).Info()
@@ -73,7 +73,7 @@ func BenchmarkLevelsKiwiTypedComplex(b *testing.B) {
 	l.WithTimestamp(time.RFC3339)
 	kiwi.LevelName = "l"
 	out := kiwi.SinkTo(buf, kiwi.UseJSON()).Start()
-	defer out.Close()
+	defer out.Flush().Close()
 	for i := 0; i < b.N; i++ {
 		l.AddInt("key", 1).AddStringer("obj", testObject).Debug()
 		l.AddInt("key", 1).AddStringer("obj", testObject).Info()
@@ -92,7 +92,7 @@ func BenchmarkLevelsKiwiTypedHelpers(b *testing.B) {
 	l.WithTimestamp(time.RFC3339)
 	kiwi.LevelName = "l"
 	out := kiwi.SinkTo(buf, kiwi.UseJSON()).Start()
-	defer out.Close()
+	defer out.Flush().Close()
 	for i := 0; i < b.N; i++ {
 		l.AddPairs(
 			kiwi.AsInt("key", 1),
@@ -127,7 +127,7 @@ func BenchmarkLevelsKiwiTypedHelpersComplex(b *testing.B) {
 	l.WithTimestamp(time.RFC3339)
 	kiwi.LevelName = "l"
 	out := kiwi.SinkTo(buf, kiwi.UseJSON()).Start()
-	defer out.Close()
+	defer out.Flush().Close()
 	for i := 0; i < b.N; i++ {
 		l.AddPairs(kiwi.AsInt("key", 1), kiwi.AsStringer("obj", testObject)).Debug()
 		l.AddPairs(kiwi.AsInt("key", 1), kiwi.AsStringer("obj", testObject)).Info()
@@ -146,7 +146,7 @@ func BenchmarkLevelsKiwi(b *testing.B) {
 	l.WithTimestamp(time.RFC3339)
 	kiwi.LevelName = "l"
 	out := kiwi.SinkTo(buf, kiwi.UseJSON()).Start()
-	defer out.Close()
+	defer out.Flush().Close()
 	for i := 0; i < b.N; i++ {
 		l.Debug("key", 1, "key2", 3.141592, "key3", "string", "key4", false)
 		l.Info("key", 1, "key2", 3.141592, "key3", "string", "key4", false)
@@ -165,7 +165,7 @@ func BenchmarkLevelsKiwiComplex(b *testing.B) {
 	l.WithTimestamp(time.RFC3339)
 	kiwi.LevelName = "l"
 	out := kiwi.SinkTo(buf, kiwi.UseJSON()).Start()
-	defer out.Close()
+	defer out.Flush().Close()
 	for i := 0; i < b.N; i++ {
 		l.Debug("key", 1, "obj", testObject)
 		l.Info("key", 1, "obj", testObject)
@@ -180,7 +180,7 @@ func BenchmarkLevelsKiwiGlobal(b *testing.B) {
 	b.SetBytes(2)
 	b.ResetTimer()
 	out := kiwi.SinkTo(buf, kiwi.UseJSON()).Start()
-	defer out.Close()
+	defer out.Flush().Close()
 	for i := 0; i < b.N; i++ {
 		kiwi.Log("t", time.Now().Format(time.RFC3339), "l", "debug", "_n", "bench", "_p", pid, "key", 1, "key2", 3.141592, "key3", "string", "key4", false)
 		kiwi.Log("t", time.Now().Format(time.RFC3339), "l", "info", "_n", "bench", "_p", pid, "key", 1, "key2", 3.141592, "key3", "string", "key4", false)
