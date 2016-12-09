@@ -64,6 +64,7 @@ type (
 	Sink struct {
 		id     uint
 		In     chan *box
+		close  chan struct{}
 		writer io.Writer
 		format Formatter
 		state  *int32
@@ -97,6 +98,7 @@ func SinkTo(w io.Writer, fn Formatter) *Sink {
 	collector.RUnlock()
 	sink := &Sink{
 		In:              make(chan *box, 16),
+		close:           make(chan struct{}),
 		format:          fn,
 		state:           &state,
 		writer:          w,
@@ -108,7 +110,7 @@ func SinkTo(w io.Writer, fn Formatter) *Sink {
 	sink.id = uint(collector.Count)
 	collector.Sinks = append(collector.Sinks, sink)
 	collector.Count++
-	go processOutput(sink)
+	go processSink(sink)
 	collector.Unlock()
 	return sink
 }
@@ -305,7 +307,9 @@ func (s *Sink) Start() *Sink {
 func (s *Sink) Close() {
 	if atomic.LoadInt32(s.state) > sinkClosed {
 		atomic.StoreInt32(s.state, sinkClosed)
+		collector.WaitFlush.Wait()
 		collector.Lock()
+		s.close <- struct{}{}
 		collector.Count--
 		collector.Sinks = append(collector.Sinks[0:s.id], collector.Sinks[s.id+1:]...)
 		collector.Unlock()
@@ -315,21 +319,59 @@ func (s *Sink) Close() {
 // Flush waits that all previously sent to the output records worked.
 func (s *Sink) Flush() *Sink {
 	if atomic.LoadInt32(s.state) > sinkClosed {
-		//		time.Sleep(10 * time.Microsecond)
 		collector.WaitFlush.Wait()
 	}
 	return s
 }
 
-func processOutput(s *Sink) {
+func processSink(s *Sink) {
 	var (
 		box *box
 		ok  bool
 	)
 	for {
-		box, ok = <-s.In
-		if !ok {
-			atomic.StoreInt32(s.state, sinkClosed)
+		select {
+		case box, ok = <-s.In:
+			if !ok {
+				atomic.StoreInt32(s.state, sinkClosed)
+				s.Lock()
+				s.positiveFilters = nil
+				s.negativeFilters = nil
+				s.hiddenKeys = nil
+				s.Unlock()
+				return
+			}
+			if atomic.LoadInt32(s.state) < sinkActive {
+				if box.Group != nil {
+					box.Group.Done()
+				}
+				collector.WaitFlush.Done()
+				continue
+			}
+			s.RLock()
+			var (
+				filter Filter
+			)
+			for _, pair := range *box.Record {
+				// Negative conditions have highest priority
+				if filter, ok = s.negativeFilters[pair.Key]; ok {
+					if filter.Check(pair.Key, pair.Val.Strv) {
+						goto skipRecord
+					}
+				}
+				// At last check for positive conditions
+				if filter, ok = s.positiveFilters[pair.Key]; ok {
+					if !filter.Check(pair.Key, pair.Val.Strv) {
+						goto skipRecord
+					}
+				}
+			}
+			s.formatRecord(box.Record)
+		skipRecord:
+			s.RUnlock()
+			box.Group.Done()
+			collector.WaitFlush.Done()
+		case <-s.close:
 			s.Lock()
 			s.positiveFilters = nil
 			s.negativeFilters = nil
@@ -337,40 +379,6 @@ func processOutput(s *Sink) {
 			s.Unlock()
 			return
 		}
-		if atomic.LoadInt32(s.state) == sinkClosed {
-			collector.WaitFlush.Done()
-			return
-		}
-		if atomic.LoadInt32(s.state) == sinkStopped {
-			if box.Group != nil {
-				box.Group.Done()
-			}
-			collector.WaitFlush.Done()
-			continue
-		}
-		s.RLock()
-		var (
-			filter Filter
-		)
-		for _, pair := range *box.Record {
-			// Negative conditions have highest priority
-			if filter, ok = s.negativeFilters[pair.Key]; ok {
-				if filter.Check(pair.Key, pair.Val.Strv) {
-					goto skipRecord
-				}
-			}
-			// At last check for positive conditions
-			if filter, ok = s.positiveFilters[pair.Key]; ok {
-				if !filter.Check(pair.Key, pair.Val.Strv) {
-					goto skipRecord
-				}
-			}
-		}
-		s.formatRecord(box.Record)
-	skipRecord:
-		s.RUnlock()
-		box.Group.Done()
-		collector.WaitFlush.Done()
 	}
 }
 

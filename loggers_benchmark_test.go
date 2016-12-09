@@ -61,7 +61,7 @@ func BenchmarkLevelsKiwiTyped(b *testing.B) {
 		l.AddInt("key", 1).AddFloat64("key2", 3.141592).AddString("key3", "string").AddBool("key4", false).Error()
 	}
 	b.StopTimer()
-	out.Flush().Close()
+	out.Close()
 }
 
 func BenchmarkLevelsKiwiTypedComplex(b *testing.B) {
@@ -80,7 +80,7 @@ func BenchmarkLevelsKiwiTypedComplex(b *testing.B) {
 		l.AddInt("key", 1).AddStringer("obj", testObject).Error()
 	}
 	b.StopTimer()
-	out.Flush().Close()
+	out.Close()
 }
 
 func BenchmarkLevelsKiwiTypedHelpers(b *testing.B) {
@@ -115,7 +115,7 @@ func BenchmarkLevelsKiwiTypedHelpers(b *testing.B) {
 			kiwi.AsBool("key4", false)).Error()
 	}
 	b.StopTimer()
-	out.Flush().Close()
+	out.Close()
 }
 
 func BenchmarkLevelsKiwiTypedHelpersComplex(b *testing.B) {
@@ -134,7 +134,7 @@ func BenchmarkLevelsKiwiTypedHelpersComplex(b *testing.B) {
 		l.AddPairs(kiwi.AsInt("key", 1), kiwi.AsStringer("obj", testObject)).Error()
 	}
 	b.StopTimer()
-	out.Flush().Close()
+	out.Close()
 }
 
 func BenchmarkLevelsKiwi(b *testing.B) {
@@ -153,7 +153,7 @@ func BenchmarkLevelsKiwi(b *testing.B) {
 		l.Error("key", 1, "key2", 3.141592, "key3", "string", "key4", false)
 	}
 	b.StopTimer()
-	out.Flush().Close()
+	out.Close()
 }
 
 func BenchmarkLevelsKiwiComplex(b *testing.B) {
@@ -172,7 +172,7 @@ func BenchmarkLevelsKiwiComplex(b *testing.B) {
 		l.Error("key", 1, "obj", testObject)
 	}
 	b.StopTimer()
-	out.Flush().Close()
+	out.Close()
 }
 
 func BenchmarkLevelsKiwiGlobal(b *testing.B) {
@@ -187,5 +187,5 @@ func BenchmarkLevelsKiwiGlobal(b *testing.B) {
 		kiwi.Log("t", time.Now().Format(time.RFC3339), "l", "error", "_n", "bench", "_p", pid, "key", 1, "key2", 3.141592, "key3", "string", "key4", false)
 	}
 	b.StopTimer()
-	out.Flush().Close()
+	out.Close()
 }
