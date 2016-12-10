@@ -40,22 +40,21 @@ func Log(keyVals ...interface{}) {
 	collector.WaitFlush.Add(collector.Count)
 	var (
 		key    string
-		record = make([]pair, 0, len(keyVals))
+		record = make([]*pair, 0, len(keyVals))
 	)
 	for i, val := range keyVals {
 		if i%2 == 0 {
-			key = toRecordKey(val)
+			key = toKey(val)
 			continue
 		}
-		if value := toRecordValue(val); value.Func != nil {
-			value.Strv = value.Func.(func() string)()
-			record = append(record, pair{key, value, false})
-		} else {
-			record = append(record, pair{key, value, false})
+		var p *pair
+		if p = toPair(key, val); p.Eval != nil {
+			p.Val = p.Eval.(func() string)()
 		}
+		record = append(record, p)
 	}
 	if len(keyVals)%2 == 1 {
-		record = append(record, pair{key, value{"", nil, voidVal, false}, false})
+		record = append(record, newPair(key, "", nil, voidVal, false))
 	}
 	go sinkRecord(record)
 }

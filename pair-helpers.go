@@ -41,54 +41,54 @@ import (
 
 // AsString formats pair for string.
 // Note: type helpers are experimental part of API and may be removed.
-func AsString(key string, val string) pair {
-	return pair{key, value{val, nil, stringVal, true}, false}
+func AsString(key string, val string) *pair {
+	return newPair(key, val, nil, stringVal, true)
 }
 
 // AsStringer formats pair for string with Stringer interface (the same as fmt.Stringer).
 // Note: type helpers are experimental part of API and may be removed.
-func AsStringer(key string, val Stringer) pair {
-	return pair{key, value{val.String(), nil, stringVal, true}, false}
+func AsStringer(key string, val Stringer) *pair {
+	return newPair(key, val.String(), nil, stringVal, true)
 }
 
 // AsInt formats pair for int value. If you need add integer of specific size just
 // convert it to int, int64 or uint64 and use AddInt(), AddInt64() or AddUint64()
 // respectively.
 // Note: type helpers are experimental part of API and may be removed.
-func AsInt(key string, val int) pair {
-	return pair{key, value{strconv.Itoa(val), nil, integerVal, true}, false}
+func AsInt(key string, val int) *pair {
+	return newPair(key, strconv.Itoa(val), nil, integerVal, true)
 }
 
 // AsInt64 formats pair for int64 value.
 // Note: type helpers are experimental part of API and may be removed.
-func AsInt64(key string, val int64) pair {
-	return pair{key, value{strconv.FormatInt(val, 10), nil, integerVal, true}, false}
+func AsInt64(key string, val int64) *pair {
+	return newPair(key, strconv.FormatInt(val, 10), nil, integerVal, true)
 }
 
 // AsUint64 formats pair for uint64 value.
 // Note: type helpers are experimental part of API and may be removed.
-func AsUint64(key string, val uint64) pair {
-	return pair{key, value{strconv.FormatUint(val, 10), nil, integerVal, true}, false}
+func AsUint64(key string, val uint64) *pair {
+	return newPair(key, strconv.FormatUint(val, 10), nil, integerVal, true)
 }
 
 // AsFloat64 formats pair for float64 value. If you need add float of other size just
 // convert it to float64.
 // Note: type helpers are experimental part of API and may be removed.
-func AsFloat64(key string, val float64) pair {
-	return pair{key, value{strconv.FormatFloat(val, 'e', -1, 64), nil, floatVal, true}, false}
+func AsFloat64(key string, val float64) *pair {
+	return newPair(key, strconv.FormatFloat(val, 'e', -1, 64), nil, floatVal, true)
 }
 
 // AsBool formats pair for bool value.
 // Note: type helpers are experimental part of API and may be removed.
-func AsBool(key string, val bool) pair {
+func AsBool(key string, val bool) *pair {
 	if val {
-		return pair{key, value{"true", nil, booleanVal, false}, false}
+		return newPair(key, "true", nil, booleanVal, false)
 	}
-	return pair{key, value{"false", nil, booleanVal, false}, false}
+	return newPair(key, "false", nil, booleanVal, false)
 }
 
 // AsTime formats pair for time.Time value.
 // Note: type helpers are experimental part of API and may be removed.
-func AsTime(key string, val time.Time, layout string) pair {
-	return pair{key, value{val.Format(layout), nil, stringVal, false}, false}
+func AsTime(key string, val time.Time, layout string) *pair {
+	return newPair(key, val.Format(layout), nil, stringVal, false)
 }

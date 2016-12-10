@@ -55,12 +55,12 @@ var (
 )
 
 // Get records from logger. Helper for testing.
-func (l *Logger) getRecords() []pair {
+func (l *Logger) getRecords() []*pair {
 	return l.pairs
 }
 
 // Get context from logger. Helper for testing.
-func (l *Logger) getContext() []pair {
+func (l *Logger) getContext() []*pair {
 	return l.context
 }
 

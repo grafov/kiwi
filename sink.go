@@ -75,7 +75,7 @@ type (
 		hiddenKeys      map[string]bool
 	}
 	box struct {
-		Record *[]pair
+		Record []*pair
 		Group  *sync.WaitGroup
 	}
 )
@@ -352,16 +352,16 @@ func processSink(s *Sink) {
 			var (
 				filter Filter
 			)
-			for _, pair := range *box.Record {
+			for _, pair := range box.Record {
 				// Negative conditions have highest priority
 				if filter, ok = s.negativeFilters[pair.Key]; ok {
-					if filter.Check(pair.Key, pair.Val.Strv) {
+					if filter.Check(pair.Key, pair.Val) {
 						goto skipRecord
 					}
 				}
 				// At last check for positive conditions
 				if filter, ok = s.positiveFilters[pair.Key]; ok {
-					if !filter.Check(pair.Key, pair.Val.Strv) {
+					if !filter.Check(pair.Key, pair.Val) {
 						goto skipRecord
 					}
 				}
@@ -382,30 +382,33 @@ func processSink(s *Sink) {
 	}
 }
 
-func (s *Sink) formatRecord(record *[]pair) {
+func (s *Sink) formatRecord(record []*pair) {
 	s.format.Begin()
-	for _, pair := range *record {
+	for _, pair := range record {
 		if ok := s.hiddenKeys[pair.Key]; ok {
 			continue
 		}
-		s.format.Pair(pair.Key, pair.Val.Strv, pair.Val.Quoted)
+		s.format.Pair(pair.Key, pair.Val, pair.Quoted)
 	}
 	s.writer.Write(s.format.Finish())
 }
 
-func sinkRecord(rec []pair) {
+func sinkRecord(rec []*pair) {
 	var wg sync.WaitGroup
 	// collector.RLock()
 	// collector.WaitFlush.Add(collector.Count)
 	for _, s := range collector.Sinks {
 		if atomic.LoadInt32(s.state) == sinkActive {
 			wg.Add(1)
-			s.In <- &box{&rec, &wg}
+			s.In <- &box{rec, &wg}
 		} else {
 			collector.WaitFlush.Done()
 		}
 	}
 	collector.RUnlock()
 	wg.Wait()
-	// TODO release record to syncpool here
+	for _, p := range rec {
+		releasePair(p)
+	}
+	//	bufferPool.Put(rec)
 }
