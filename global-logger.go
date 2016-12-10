@@ -54,7 +54,7 @@ func Log(keyVals ...interface{}) {
 		record = append(record, p)
 	}
 	if len(keyVals)%2 == 1 {
-		record = append(record, &pair{key, "", nil, VoidVal, false})
+		record = append(record, &pair{key, "", nil, VoidVal})
 	}
 	go sinkRecord(record)
 }
