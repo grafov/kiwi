@@ -39,13 +39,18 @@ import (
 	"time"
 )
 
+// Possible kinds of logged values.
 const (
 	deleted = iota - 1
+	// BooleanVal and other types below commonly formatted unquoted.
+	// But it depends on the formatter.
 	BooleanVal
 	IntegerVal
 	FloatVal
 	ComplexVal
 	CustomUnquoted
+	// VoidVal and other types below commonly formatted unquoted.
+	// But it depends on the formatter.
 	VoidVal
 	StringVal
 	TimeVal
