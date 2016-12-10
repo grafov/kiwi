@@ -299,7 +299,7 @@ func (s *Sink) Start() *Sink {
 	return s
 }
 
-// Close the sink. It not flush records. Call Flush() explicitely.
+// Close closes the sink. It flushes records for the sink before closing.
 func (s *Sink) Close() {
 	if atomic.LoadInt32(s.state) > sinkClosed {
 		atomic.StoreInt32(s.state, sinkClosed)
