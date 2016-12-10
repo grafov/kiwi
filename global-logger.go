@@ -40,7 +40,7 @@ func Log(keyVals ...interface{}) {
 	collector.WaitFlush.Add(collector.Count)
 	var (
 		key    string
-		record = make([]*pair, 0, len(keyVals))
+		record = make([]*pair, 0, len(keyVals)/2+1)
 	)
 	for i, val := range keyVals {
 		if i%2 == 0 {
