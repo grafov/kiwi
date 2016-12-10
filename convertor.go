@@ -40,13 +40,15 @@ import (
 )
 
 const (
-	voidVal uint8 = iota
-	stringVal
-	booleanVal
-	integerVal
-	floatVal
-	complexVal
-	flushCmd
+	VoidVal = iota - 1
+	BooleanVal
+	IntegerVal
+	FloatVal
+	ComplexVal
+	CustomUnquoted
+	StringVal
+	TimeVal
+	CustomQuoted
 )
 
 // FloatFormat used in Float to String conversion.
@@ -117,60 +119,64 @@ func toKey(val interface{}) string {
 func toPair(key string, val interface{}) *pair {
 	switch val.(type) {
 	case string:
-		return newPair(key, val.(string), nil, stringVal, true)
+		return &pair{key, val.(string), nil, StringVal, false}
 	case []byte:
-		return newPair(key, string(val.([]byte)), nil, stringVal, true)
+		return &pair{key, string(val.([]byte)), nil, StringVal, false}
 	case bool:
 		if val.(bool) {
-			return newPair(key, "true", nil, booleanVal, false)
+			return &pair{key, "true", nil, BooleanVal, false}
 		}
-		return newPair(key, "false", nil, booleanVal, false)
+		return &pair{key, "false", nil, BooleanVal, false}
 	case int:
-		return newPair(key, strconv.Itoa(val.(int)), nil, integerVal, false)
+		return &pair{key, strconv.Itoa(val.(int)), nil, IntegerVal, false}
 	case int8:
-		return newPair(key, strconv.FormatInt(int64(val.(int8)), 10), nil, integerVal, false)
+		return &pair{key, strconv.FormatInt(int64(val.(int8)), 10), nil, IntegerVal, false}
 	case int16:
-		return newPair(key, strconv.FormatInt(int64(val.(int16)), 10), nil, integerVal, false)
+		return &pair{key, strconv.FormatInt(int64(val.(int16)), 10), nil, IntegerVal, false}
 	case int32:
-		return newPair(key, strconv.FormatInt(int64(val.(int32)), 10), nil, integerVal, false)
+		return &pair{key, strconv.FormatInt(int64(val.(int32)), 10), nil, IntegerVal, false}
 	case int64:
-		return newPair(key, strconv.FormatInt(val.(int64), 10), nil, integerVal, false)
+		return &pair{key, strconv.FormatInt(val.(int64), 10), nil, IntegerVal, false}
 	case uint:
-		return newPair(key, strconv.FormatUint(uint64(val.(uint)), 10), nil, integerVal, false)
+		return &pair{key, strconv.FormatUint(uint64(val.(uint)), 10), nil, IntegerVal, false}
 	case uint8:
-		return newPair(key, strconv.FormatUint(uint64(val.(uint8)), 10), nil, integerVal, false)
+		return &pair{key, strconv.FormatUint(uint64(val.(uint8)), 10), nil, IntegerVal, false}
 	case uint16:
-		return newPair(key, strconv.FormatUint(uint64(val.(uint16)), 10), nil, integerVal, false)
+		return &pair{key, strconv.FormatUint(uint64(val.(uint16)), 10), nil, IntegerVal, false}
 	case uint32:
-		return newPair(key, strconv.FormatUint(uint64(val.(uint32)), 10), nil, integerVal, false)
+		return &pair{key, strconv.FormatUint(uint64(val.(uint32)), 10), nil, IntegerVal, false}
 	case uint64:
-		return newPair(key, strconv.FormatUint(val.(uint64), 10), nil, integerVal, false)
+		return &pair{key, strconv.FormatUint(val.(uint64), 10), nil, IntegerVal, false}
 	case float32:
-		return newPair(key, strconv.FormatFloat(float64(val.(float32)), FloatFormat, -1, 32), nil, floatVal, false)
+		return &pair{key, strconv.FormatFloat(float64(val.(float32)), FloatFormat, -1, 32), nil, FloatVal, false}
 	case float64:
-		return newPair(key, strconv.FormatFloat(val.(float64), FloatFormat, -1, 64), nil, floatVal, false)
+		return &pair{key, strconv.FormatFloat(val.(float64), FloatFormat, -1, 64), nil, FloatVal, false}
 	case complex64:
-		return newPair(key, fmt.Sprintf("%f", val.(complex64)), nil, complexVal, false)
+		return &pair{key, fmt.Sprintf("%f", val.(complex64)), nil, ComplexVal, false}
 	case complex128:
-		return newPair(key, fmt.Sprintf("%f", val.(complex128)), nil, complexVal, false)
+		return &pair{key, fmt.Sprintf("%f", val.(complex128)), nil, ComplexVal, false}
 	case time.Time:
-		return newPair(key, val.(time.Time).Format(TimeLayout), nil, stringVal, false)
+		return &pair{key, val.(time.Time).Format(TimeLayout), nil, TimeVal, false}
 	case Valuer:
-		return newPair(key, val.(Valuer).String(), nil, stringVal, true)
+		var pairType = CustomUnquoted
+		if val.(Valuer).IsQuoted() {
+			pairType = CustomQuoted
+		}
+		return &pair{key, val.(Valuer).String(), nil, pairType, false}
 	case Stringer:
-		return newPair(key, val.(Stringer).String(), nil, stringVal, true)
+		return &pair{key, val.(Stringer).String(), nil, StringVal, false}
 	case encoding.TextMarshaler:
 		data, err := val.(encoding.TextMarshaler).MarshalText()
 		if err != nil {
-			return newPair(key, fmt.Sprintf("%s", err), nil, stringVal, true)
+			return &pair{key, fmt.Sprintf("%s", err), nil, StringVal, false}
 		}
-		return newPair(key, string(data), nil, stringVal, true)
+		return &pair{key, string(data), nil, StringVal, false}
 	case func() string:
-		return newPair(key, "", val.(func() string), stringVal, true)
+		return &pair{key, "", val.(func() string), StringVal, false}
 	case nil:
-		return newPair(key, "", nil, voidVal, false)
+		return &pair{key, "", nil, VoidVal, false}
 	default:
 		// Worst case conversion that depends on reflection.
-		return newPair(key, fmt.Sprintf("%v", val), nil, stringVal, true)
+		return &pair{key, fmt.Sprintf("%v", val), nil, StringVal, false}
 	}
 }

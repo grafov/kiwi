@@ -63,7 +63,7 @@ type (
 	// Sink methods are safe for concurrent usage.
 	Sink struct {
 		id     uint
-		In     chan *box
+		In     chan []*pair
 		close  chan struct{}
 		writer io.Writer
 		format Formatter
@@ -73,10 +73,6 @@ type (
 		positiveFilters map[string]Filter
 		negativeFilters map[string]Filter
 		hiddenKeys      map[string]bool
-	}
-	box struct {
-		Record []*pair
-		Group  *sync.WaitGroup
 	}
 )
 
@@ -97,7 +93,7 @@ func SinkTo(w io.Writer, fn Formatter) *Sink {
 	var state = sinkStopped
 	collector.RUnlock()
 	sink := &Sink{
-		In:              make(chan *box, 16),
+		In:              make(chan []*pair, 16),
 		close:           make(chan struct{}),
 		format:          fn,
 		state:           &state,
@@ -326,12 +322,12 @@ func (s *Sink) Flush() *Sink {
 
 func processSink(s *Sink) {
 	var (
-		box *box
-		ok  bool
+		record []*pair
+		ok     bool
 	)
 	for {
 		select {
-		case box, ok = <-s.In:
+		case record, ok = <-s.In:
 			if !ok {
 				atomic.StoreInt32(s.state, sinkClosed)
 				s.Lock()
@@ -342,9 +338,6 @@ func processSink(s *Sink) {
 				return
 			}
 			if atomic.LoadInt32(s.state) < sinkActive {
-				if box.Group != nil {
-					box.Group.Done()
-				}
 				collector.WaitFlush.Done()
 				continue
 			}
@@ -352,7 +345,7 @@ func processSink(s *Sink) {
 			var (
 				filter Filter
 			)
-			for _, pair := range box.Record {
+			for _, pair := range record {
 				// Negative conditions have highest priority
 				if filter, ok = s.negativeFilters[pair.Key]; ok {
 					if filter.Check(pair.Key, pair.Val) {
@@ -366,10 +359,9 @@ func processSink(s *Sink) {
 					}
 				}
 			}
-			s.formatRecord(box.Record)
+			s.formatRecord(record)
 		skipRecord:
 			s.RUnlock()
-			box.Group.Done()
 			collector.WaitFlush.Done()
 		case <-s.close:
 			s.Lock()
@@ -388,27 +380,18 @@ func (s *Sink) formatRecord(record []*pair) {
 		if ok := s.hiddenKeys[pair.Key]; ok {
 			continue
 		}
-		s.format.Pair(pair.Key, pair.Val, pair.Quoted)
+		s.format.Pair(pair.Key, pair.Val, pair.Type)
 	}
 	s.writer.Write(s.format.Finish())
 }
 
 func sinkRecord(rec []*pair) {
-	var wg sync.WaitGroup
-	// collector.RLock()
-	// collector.WaitFlush.Add(collector.Count)
 	for _, s := range collector.Sinks {
 		if atomic.LoadInt32(s.state) == sinkActive {
-			wg.Add(1)
-			s.In <- &box{rec, &wg}
+			s.In <- rec
 		} else {
 			collector.WaitFlush.Done()
 		}
 	}
 	collector.RUnlock()
-	wg.Wait()
-	for _, p := range rec {
-		releasePair(p)
-	}
-	//	bufferPool.Put(rec)
 }

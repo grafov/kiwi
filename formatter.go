@@ -44,9 +44,9 @@ type Formatter interface {
 	// or make some preparations before the output.
 	Begin()
 	// Pair function called for each key-value pair of the record.
-	// It accepts `quoted` for notify when value should be displayed in qoutes.
-	// Real look depends of the format so `quoted` hint may be ignored.
-	Pair(key, val string, quoted bool)
+	// ValueType is hint that helps the formatter decide how to output the value.
+	// For example formatter can format string values in quotes but numbers without them.
+	Pair(key, value string, valueType int)
 	// Finish function allows to add suffix string for the output.
 	// Also it returns result string for the displaying of the single record.
 	// It may be multiline if you wish. Result has no restrictions for you imagination :)
@@ -66,21 +66,21 @@ func (f *formatLogfmt) Begin() {
 	f.line.Reset()
 }
 
-func (f *formatLogfmt) Pair(key, val string, quoted bool) {
+func (f *formatLogfmt) Pair(key, val string, valType int) {
 	// TODO extend check for all non printable chars, so it need just check for each byte>space
 	if strings.ContainsAny(key, " \n\r\t") {
 		f.line.WriteString(strconv.Quote(key))
 	} else {
 		f.line.WriteString(key)
 	}
-	if val == "" && !quoted {
-		f.line.WriteRune(' ')
-		return
-	}
-	f.line.WriteRune('=')
-	if quoted {
+	switch valType {
+	case VoidVal:
+		break
+	case StringVal, CustomQuoted:
+		f.line.WriteRune('=')
 		f.line.WriteString(strconv.Quote(val))
-	} else {
+	default:
+		f.line.WriteRune('=')
 		f.line.WriteString(val)
 	}
 	f.line.WriteRune(' ')
@@ -104,12 +104,13 @@ func (f *formatJSON) Begin() {
 	f.line.WriteRune('{')
 }
 
-func (f *formatJSON) Pair(key, val string, quoted bool) {
+func (f *formatJSON) Pair(key, val string, valType int) {
 	f.line.WriteString(strconv.Quote(key))
 	f.line.WriteRune(':')
-	if quoted {
+	switch valType {
+	case StringVal, TimeVal, CustomQuoted, VoidVal:
 		f.line.WriteString(strconv.Quote(val))
-	} else {
+	default:
 		f.line.WriteString(val)
 	}
 	f.line.WriteString(", ")

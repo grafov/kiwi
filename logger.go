@@ -34,7 +34,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import (
 	"strconv"
-	"sync"
 	"time"
 )
 
@@ -63,30 +62,10 @@ type (
 		Key     string
 		Val     string
 		Eval    interface{}
-		Type    uint8
-		Quoted  bool
+		Type    int
 		Deleted bool
 	}
 )
-
-var pairPool = sync.Pool{New: func() interface{} { return new(pair) }}
-
-func newPair(key, val string, fn interface{}, t uint8, quoted bool) *pair {
-	var p = pairPool.Get().(*pair)
-	p.Key = key
-	p.Val = val
-	p.Eval = fn
-	p.Type = t
-	p.Quoted = quoted
-	p.Deleted = false
-	return p
-}
-
-func releasePair(p *pair) {
-	p.Deleted = true
-	p.Eval = nil
-	pairPool.Put(p)
-}
 
 // New creates a new logger instance.
 func New() *Logger {
@@ -109,13 +88,6 @@ func (l *Logger) New() *Logger {
 	return &Logger{contextSrc: newContextSrc, context: newContext}
 }
 
-// var bufferPool = sync.Pool{
-// 	New: func() interface{} {
-// 		record := make([]pair, 64)
-// 		return record
-// 	},
-// }
-
 // Log is the most common method for flushing previously added key-val pairs to an output.
 // After current record is flushed all pairs removed from a record except contextSrc pairs.
 func (l *Logger) Log(keyVals ...interface{}) {
@@ -124,24 +96,23 @@ func (l *Logger) Log(keyVals ...interface{}) {
 	var (
 		key    string
 		record = make([]*pair, 0, len(l.context)+len(l.pairs)+len(keyVals))
-		//record = bufferPool.Get().([]pair)
 	)
 	for _, p := range l.context {
 		if !p.Deleted {
 			if p.Eval != nil {
 				// Evaluate delayed context value here before output.
-				record = append(record, newPair(p.Key, p.Eval.(func() string)(), p.Eval, p.Type, p.Quoted))
+				record = append(record, &pair{p.Key, p.Eval.(func() string)(), p.Eval, p.Type, false})
 			} else {
-				record = append(record, newPair(p.Key, p.Val, p.Eval, p.Type, p.Quoted))
+				record = append(record, &pair{p.Key, p.Val, p.Eval, p.Type, false})
 			}
 		}
 	}
 	for _, p := range l.pairs {
 		if !p.Deleted {
 			if p.Eval != nil {
-				record = append(record, newPair(p.Key, p.Eval.(func() string)(), p.Eval, p.Type, p.Quoted))
+				record = append(record, &pair{p.Key, p.Eval.(func() string)(), p.Eval, p.Type, false})
 			} else {
-				record = append(record, newPair(p.Key, p.Val, p.Eval, p.Type, p.Quoted))
+				record = append(record, &pair{p.Key, p.Val, p.Eval, p.Type, false})
 			}
 		}
 	}
@@ -157,7 +128,7 @@ func (l *Logger) Log(keyVals ...interface{}) {
 		record = append(record, p)
 	}
 	if len(keyVals)%2 == 1 {
-		record = append(record, newPair(key, "", nil, voidVal, false))
+		record = append(record, &pair{key, "", nil, VoidVal, false})
 	}
 	go sinkRecord(record)
 	l.pairs = nil
@@ -181,7 +152,7 @@ func (l *Logger) Add(keyVals ...interface{}) *Logger {
 	}
 	//  add a key without value for odd number for key-val pairs
 	if len(keyVals)%2 == 1 {
-		l.pairs = append(l.pairs, newPair(key, "", nil, voidVal, false))
+		l.pairs = append(l.pairs, &pair{key, "", nil, VoidVal, false})
 	}
 	return l
 }
@@ -213,14 +184,14 @@ func (l *Logger) With(keyVals ...interface{}) *Logger {
 	// add a key without value for odd number for key-val pairs
 	if len(keyVals)%2 == 1 {
 		if _, ok := l.contextSrc[key]; ok {
-			for i, pair := range l.context {
-				if pair.Key == key {
-					l.context[i] = newPair(key, "", nil, voidVal, false)
+			for i, p := range l.context {
+				if p.Key == key {
+					l.context[i] = &pair{key, "", nil, VoidVal, false}
 					break
 				}
 			}
 		} else {
-			l.context = append(l.context, newPair(key, "", nil, voidVal, false))
+			l.context = append(l.context, &pair{key, "", nil, VoidVal, false})
 		}
 		l.contextSrc[key] = nil
 	}
@@ -248,12 +219,13 @@ func (l *Logger) Without(keys ...string) *Logger {
 func (l *Logger) WithTimestamp(format string) *Logger {
 	l.contextSrc["timestamp"] = func() string { return time.Now().Format(format) }
 	l.context = append(l.context,
-		newPair(
-			"timestamp",
-			"",
-			func() string { return time.Now().Format(format) },
-			stringVal,
-			true))
+		&pair{
+			Key:     "timestamp",
+			Val:     "",
+			Eval:    func() string { return time.Now().Format(format) },
+			Type:    TimeVal,
+			Deleted: false,
+		})
 	return l
 }
 
@@ -290,47 +262,47 @@ func (l *Logger) GetContextValue(key string) interface{} {
 
 // AddString adds key with a string value to a record.
 func (l *Logger) AddString(key string, val string) *Logger {
-	l.pairs = append(l.pairs, newPair(key, val, nil, stringVal, true))
+	l.pairs = append(l.pairs, &pair{key, val, nil, StringVal, false})
 	return l
 }
 
 // AddStringer adds key with a string value to a record.
 // It using Stringer interface that is the same as fmt.Stringer.
 func (l *Logger) AddStringer(key string, val Stringer) *Logger {
-	l.pairs = append(l.pairs, newPair(key, val.String(), nil, stringVal, true))
+	l.pairs = append(l.pairs, &pair{key, val.String(), nil, StringVal, false})
 	return l
 }
 
 // AddInt adds key with a int value to a record.
 func (l *Logger) AddInt(key string, val int) *Logger {
-	l.pairs = append(l.pairs, newPair(key, strconv.Itoa(val), nil, integerVal, false))
+	l.pairs = append(l.pairs, &pair{key, strconv.Itoa(val), nil, IntegerVal, false})
 	return l
 }
 
 // AddInt64 adds key with a int64 value to a record.
 func (l *Logger) AddInt64(key string, val int64) *Logger {
-	l.pairs = append(l.pairs, newPair(key, strconv.FormatInt(val, 10), nil, integerVal, false))
+	l.pairs = append(l.pairs, &pair{key, strconv.FormatInt(val, 10), nil, IntegerVal, false})
 	return l
 }
 
 // AddUint64 adds key with a uint64 value to a record.
 func (l *Logger) AddUint64(key string, val uint64) *Logger {
-	l.pairs = append(l.pairs, newPair(key, strconv.FormatUint(val, 10), nil, integerVal, false))
+	l.pairs = append(l.pairs, &pair{key, strconv.FormatUint(val, 10), nil, IntegerVal, false})
 	return l
 }
 
 // AddFloat64 adds key with a float64 value to a record.
 func (l *Logger) AddFloat64(key string, val float64) *Logger {
-	l.pairs = append(l.pairs, newPair(key, strconv.FormatFloat(val, 'e', -1, 64), nil, floatVal, false))
+	l.pairs = append(l.pairs, &pair{key, strconv.FormatFloat(val, 'e', -1, 64), nil, FloatVal, false})
 	return l
 }
 
 // AddBool adds key with a boolean value to a record.
 func (l *Logger) AddBool(key string, val bool) *Logger {
 	if val {
-		l.pairs = append(l.pairs, newPair(key, "true", nil, booleanVal, false))
+		l.pairs = append(l.pairs, &pair{key, "true", nil, BooleanVal, false})
 	} else {
-		l.pairs = append(l.pairs, newPair(key, "false", nil, booleanVal, false))
+		l.pairs = append(l.pairs, &pair{key, "false", nil, BooleanVal, false})
 	}
 	return l
 }
