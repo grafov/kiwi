@@ -90,8 +90,6 @@ func (l *Logger) New() *Logger {
 // Log is the most common method for flushing previously added key-val pairs to an output.
 // After current record is flushed all pairs removed from a record except contextSrc pairs.
 func (l *Logger) Log(keyVals ...interface{}) {
-	collector.RLock()
-	collector.WaitFlush.Add(collector.Count)
 	var (
 		key    string
 		record = make([]*pair, 0, len(l.context)+len(l.pairs)+len(keyVals)/2+1)
@@ -129,6 +127,9 @@ func (l *Logger) Log(keyVals ...interface{}) {
 	if len(keyVals)%2 == 1 {
 		record = append(record, &pair{key, "", nil, VoidVal})
 	}
+	collector.WaitFlush.Add(collector.Count)
+	// It will be unlocked inside sinkRecord().
+	collector.RLock()
 	go sinkRecord(record)
 	l.pairs = nil
 }

@@ -36,8 +36,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // It has no context. You would like use it in short applications where context and
 // initialization of logger will look too complex. Use Logger type instead.
 func Log(keyVals ...interface{}) {
-	collector.RLock()
-	collector.WaitFlush.Add(collector.Count)
 	var (
 		key    string
 		record = make([]*pair, 0, len(keyVals)/2+1)
@@ -56,5 +54,8 @@ func Log(keyVals ...interface{}) {
 	if len(keyVals)%2 == 1 {
 		record = append(record, &pair{key, "", nil, VoidVal})
 	}
+	collector.WaitFlush.Add(collector.Count)
+	// It will be unlocked inside sinkRecord().
+	collector.RLock()
 	go sinkRecord(record)
 }
