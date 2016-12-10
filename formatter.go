@@ -54,12 +54,12 @@ type Formatter interface {
 }
 
 type formatLogfmt struct {
-	line bytes.Buffer
+	line *bytes.Buffer
 }
 
 // UseLogfmt says that a sink uses Logfmt format for records output.
 func UseLogfmt() *formatLogfmt {
-	return new(formatLogfmt)
+	return &formatLogfmt{line: bytes.NewBuffer(make([]byte, 256))}
 }
 
 func (f *formatLogfmt) Begin() {
@@ -91,12 +91,12 @@ func (f *formatLogfmt) Finish() []byte {
 }
 
 type formatJSON struct {
-	line bytes.Buffer
+	line *bytes.Buffer
 }
 
 // UseJSON says that a sink uses JSON (RFC-7159) format for records output.
 func UseJSON() *formatJSON {
-	return new(formatJSON)
+	return &formatJSON{line: bytes.NewBuffer(make([]byte, 256))}
 }
 
 func (f *formatJSON) Begin() {

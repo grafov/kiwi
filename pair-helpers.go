@@ -90,5 +90,5 @@ func AsBool(key string, val bool) *pair {
 // AsTime formats pair for time.Time value.
 // Note: type helpers are experimental part of API and may be removed.
 func AsTime(key string, val time.Time, layout string) *pair {
-	return &pair{key, val.Format(layout), nil, StringVal, false}
+	return &pair{key, val.Format(layout), nil, TimeVal, false}
 }
