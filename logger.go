@@ -95,7 +95,7 @@ func (l *Logger) Log(keyVals ...interface{}) {
 	collector.WaitFlush.Add(collector.Count)
 	var (
 		key    string
-		record = make([]*pair, 0, len(l.context)+len(l.pairs)+len(keyVals))
+		record = make([]*pair, 0, len(l.context)+len(l.pairs)+len(keyVals)/2+1)
 	)
 	for _, p := range l.context {
 		if !p.Deleted {
