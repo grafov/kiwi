@@ -393,5 +393,6 @@ func sinkRecord(rec []*pair) {
 			collector.WaitFlush.Done()
 		}
 	}
+	// It locked in Log() calls.
 	collector.RUnlock()
 }
