@@ -1,12 +1,21 @@
+<!--*- mode:markdown;fill-column:100 -*-->
 # Kiwi logger & context keeper [![Go Report Card](https://goreportcard.com/badge/grafov/kiwi)](https://goreportcard.com/report/grafov/kiwi) [![Coverage Status](https://coveralls.io/repos/github/grafov/kiwi/badge.svg?branch=master)](https://coveralls.io/github/grafov/kiwi?branch=master)
 
 *Beta version. API still is subject of changes. Use it carefully!*
 
 ![Kiwi bird](flomar-kiwi-bird-300px.png)
 
-*Kiwi* /kiːwiː/ are birds native to New Zealand, in the genus Apteryx and family Apterygidae. They are flightless, have hair-like feathers and smell like mushrooms. They look strange and funny so when I wrote a logger for Go language I decided to devote it to this beast which I never seen in a wild (I live very far from places where kiwis are live).
+*Kiwi* /kiːwiː/ are birds native to New Zealand, in the genus Apteryx and family Apterygidae. They
+are flightless, have hair-like feathers and smell like mushrooms. They look strange and funny so
+when I wrote a logger for Go language I decided to devote it to this beast which I never seen in a
+wild (I live very far from places where kiwis are live).
 
 *Kiwi Logger* — this is a library with an odd logic that log your application data in its own strange way.
+
+Well... `kiwi` package is structured logger for key-value formats (Logfmt as default), highly
+customizable without hardcoded levels or nailed fields. But with dynamic filters that allow you
+change you logs on the fly. It separates output logic (when and where you want write you logs) from
+logging itself (just log anything what you want).
 
 ## Features offered by structered logging and logfmt generally and by Kiwi particularly
 
@@ -14,12 +23,12 @@ Shortly: both humans and robots will love it!
 
 Briefly:
 
-* simple format with explicit key for each log message (*logfmt* like) - for high readability by humans
-* optional JSON format that so liked by machines
+* simple format with explicit key for each log message (*logfmt* like) for high readability by humans
+* optional JSON format that liked by machines
 * there are not nailed levels, not hardcoded fields in the format
 * output dynamic filtering (change log verbosity on the fly)
 * can keep context of application
-* it fast enough and careful about memory allocs
+* it fast enough and careful about memory allocs (indeed it faster than popular logrus and log15)
 
 Kiwi logger has built around the idea:
 
@@ -27,28 +36,27 @@ Kiwi logger has built around the idea:
 
 ![Kiwi vs other loggers](kiwi-vs-other.png)
 
-Key feature of `kiwi` logger is dynamic filtering of incoming records. 
-Instead of checking severety level for decide about pass or not the record to the output,
-`kiwi` passes all records to *all* the outputs (they called *sinks* in `kiwi` terminology).
-But before actual writing each record checked with a set of filters. 
-Each sink has its own set of filter.
-It takes into account record keys, values, ranges of values. 
-So each sink decides pass the record to a writer or filter it out.
-Also any pairs in the record may be hidden: so different sinks may display different parts of the same record.
-Other effect is: any record may be written to any number of output streams. 
+Key feature of `kiwi` logger is dynamic filtering of incoming records.  Instead of checking severety
+level for decide about pass or not the record to the output, `kiwi` passes all records to *all* the
+outputs (they called *sinks* in `kiwi` terminology).  But before actual writing each record checked
+with a set of filters.  Each sink has its own set of filter.  It takes into account record keys,
+values, ranges of values.  So each sink decides pass the record to a writer or filter it out.  Also
+any pairs in the record may be hidden: so different sinks may display different parts of the same
+record.  Other effect is: any record may be written to any number of output streams.
 
-For example you can pass details of the record to a logfile for full debug. 
-But write only important information with an error message and status to stderr.
+For example you can pass details of the record to a logfile for full debug.  But write only
+important information with an error message and status to stderr.
 
-Recipe: export the handler or setup any kind of client for setting these filters in your app.
-Then you got ability for dynamically change the flow and the verbosity of logs.
-For example increase verbosity for a specific module or a single handler and decrease them for the rest of the application.
+Recipe: export the handler or setup any kind of client for setting these filters in your app.  Then
+you got ability for dynamically change the flow and the verbosity of logs.  For example increase
+verbosity for a specific module or a single handler and decrease them for the rest of the
+application.
 
 ## Docs [![GoDoc](https://godoc.org/github.com/grafov/kiwi?status.svg)](https://godoc.org/github.com/grafov/kiwi)
 
-See documentation in [the wiki](https://github.com/grafov/kiwi/wiki). 
-Examples of logger usage see at [cmd/*](cmd) subfolders.
-And of course for API description look at [godoc](http://godoc.org/github.com/grafov/kiwi).
+See documentation in [the wiki](https://github.com/grafov/kiwi/wiki).  Examples of logger usage see
+at [cmd/*](cmd) subfolders.  And of course for API description look at
+[godoc](http://godoc.org/github.com/grafov/kiwi).
 
 ## Installation [![Build Status](https://travis-ci.org/grafov/kiwi.svg?branch=master)](https://travis-ci.org/grafov/kiwi)
 
@@ -56,7 +64,8 @@ Package have not external dependencies except standard library. So just
 
     go get github.com/grafov/kiwi
 	
-The library builds tested with go versions 1.4, 1.5, 1.6, 1.7 and with the current development version.
+The library builds tested with go versions 1.4, 1.5, 1.6, 1.7 and with the current development
+version.
 
 ## Usage examples
 
@@ -110,7 +119,8 @@ func main() {
 }
 ```
 
-See more ready to run samples in `cmd` subdirs. Filters described in the wiki: [Filtering](https://github.com/grafov/kiwi/wiki/Filtering).
+See more ready to run samples in `cmd` subdirs. Filters described in the wiki:
+[Filtering](https://github.com/grafov/kiwi/wiki/Filtering).
 
 ## Work with context
 
@@ -149,9 +159,10 @@ func main() {
 
 ## Thread safety
 
-It is unsafe by design. Firstly I have used version for safe work in multiple goroutines.
-And it was not only slow but in just not need in many cases. 
-If you need a new logger in another execution thread you will create another instanse. Better is clone old instance to a new one for passing the context to a subroutine. It is all.
+It is unsafe by design. Firstly I have used version for safe work in multiple goroutines.  And it
+was not only slow but in just not need in many cases.  If you need a new logger in another execution
+thread you will create another instanse. Better is clone old instance to a new one for passing the
+context to a subroutine. It is all.
 
 ```go
 	// Creates a new logger instance.
@@ -195,19 +206,19 @@ Hence value of `lazy-sample` from the example above will be evaluated only on `L
 
 ## Warning about evil severity levels
 
-Traditional way for logging is set a level of severity for each log record. 
-Then check the level before passing this record to a writer.
-This is not the worst way but it is not obvious in many cases.
-Especially when logger introduces many severity levels like "debug", "info", "warning", "critical", "fatal", "panic" and so on. 
-Look the internet for many guides with controversial recommendations how to distinguish all these "standard" levels and try map them to various events in your application.
-For example when you should use "fatal" instead of "panic" or use "debug" instead of "info".
-Maybe not for all cases but very often severity levels obstruct understanding of logs.
+Traditional way for logging is set a level of severity for each log record.  Then check the level
+before passing this record to a writer.  This is not the worst way but it is not obvious in many
+cases.  Especially when logger introduces many severity levels like "debug", "info", "warning",
+"critical", "fatal", "panic" and so on.  Look the internet for many guides with controversial
+recommendations how to distinguish all these "standard" levels and try map them to various events in
+your application.  For example when you should use "fatal" instead of "panic" or use "debug" instead
+of "info".  Maybe not for all cases but very often severity levels obstruct understanding of logs.
 
-Like many loggers with structured output `kiwi` not recommends using of severity levels.
-Though you can use them in `kiwi` too (see helper functions in `imitate-levels.go`) and interprete them as you wish.
-Severity levels in `kiwi` don't play any role in deciding how to output the record. 
-Any records with any level will pass to all sinks. 
-Filters in each sink will decide how to actually display the record or filter it out completely.
+Like many loggers with structured output `kiwi` not recommends using of severity levels.  Though you
+can use them in `kiwi` too (see helper functions in `imitate-levels.go`) and interprete them as you
+wish.  Severity levels in `kiwi` don't play any role in deciding how to output the record.  Any
+records with any level will pass to all sinks.  Filters in each sink will decide how to actually
+display the record or filter it out completely.
 
 ## Instead of FAQ
 
@@ -226,8 +237,9 @@ Filters in each sink will decide how to actually display the record or filter it
 ## Comparison with other loggers
 
 It is not the fastest logger among benchmarked but fast enough and careful about memory allocations.
-It much faster than `logrus` and `log15`. But slower than `logxi` tests. Need more detailed tests though.
-See the benchmarks results at [github.com/grafov/go-loggers-comparison](https://github.com/grafov/go-loggers-comparison).
+It much faster than `logrus` and `log15`. But slower than `logxi` tests. Need more detailed tests
+though.  See the benchmarks results at
+[github.com/grafov/go-loggers-comparison](https://github.com/grafov/go-loggers-comparison).
 
 ## Roadmap
 
