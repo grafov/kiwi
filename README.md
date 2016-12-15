@@ -19,10 +19,6 @@ logging itself (just log anything what you want).
 
 ## Features offered by structered logging and logfmt generally and by Kiwi particularly
 
-Shortly: both humans and robots will love it!
-
-Briefly:
-
 * simple format with explicit key for each log message (*logfmt* like) for high readability by humans
 * optional JSON format that liked by machines
 * there are not nailed levels, not hardcoded fields in the format
