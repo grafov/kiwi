@@ -13,9 +13,11 @@ wild (I live very far from places where kiwis are live).
 *Kiwi Logger* — this is a library with an odd logic that log your application data in its own strange way.
 
 Well... `kiwi` package is structured logger for key-value formats (Logfmt as default), highly
-customizable without hardcoded levels or nailed fields. But with dynamic filters that allow you
-change you logs on the fly. It separates output logic (when and where you want write you logs) from
-logging itself (just log anything what you want).
+customizable without hardcoded levels or nailed fields. It has dynamic filters that allow you change
+you logs on the fly in two aspects: reducing number of records and setting set of fields for each
+record. It allows fine control on that should be logged in the moment and especially useful for
+debugging. So `kiwi` separates output logic (when and where you want write you logs) from logging
+itself (just log anything what you want).
 
 ## Features offered by structered logging and logfmt generally and by Kiwi particularly
 
