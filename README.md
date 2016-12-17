@@ -24,8 +24,10 @@ itself (just log anything what you want).
 * simple format with explicit key for each log message (*logfmt* like) for high readability by humans
 * optional JSON format that liked by machines
 * there are not nailed levels, not hardcoded fields in the format
-* output dynamic filtering (change log verbosity on the fly)
-* can keep context of application
+* dynamic filtering of the output (change log verbosity and set of record fields on the fly)
+* can keep context of the application
+* fast forking of subloggers with inherited context
+* optional lazy evaluation of arguments for lowering logger footprint
 * it fast enough and careful about memory allocs (indeed it faster than popular logrus and log15)
 
 Kiwi logger has built around the idea:
