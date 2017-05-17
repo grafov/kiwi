@@ -12,21 +12,21 @@ wild (I live very far from places where kiwis are live).
 
 *Kiwi Logger* — this is a library with an odd logic that log your application data in its own strange way.
 
-Well... `kiwi` package is structured logger for key-value formats (Logfmt as default), highly
-customizable without hardcoded levels or nailed fields. It has dynamic filters that allow you change
-you logs on the fly in two aspects: reducing number of records and setting set of fields for each
+Well... `kiwi` package is structured logger for key-value formats (with *logfmt* as default), it
+highly customizable without hardcoded levels or nailed fields. It has dynamic filters that allow you
+change you logs on the fly in two aspects: reduce number of records and restrict fields for each
 record. It allows fine control on that should be logged in the moment and especially useful for
-debugging. So `kiwi` separates output logic (when and where you want write you logs) from logging
+debugging. So `kiwi` separates output logic (when and where you want write) from logging process
 itself (just log anything what you want).
 
 ## Features offered by structered logging and logfmt generally and by Kiwi particularly
 
 * simple format with explicit key for each log message (*logfmt* like) for high readability by humans
 * optional JSON format that liked by machines
-* there are not nailed levels, not hardcoded fields in the format
+* has no nailed levels, no hardcoded fields
 * dynamic filtering of the output (change log verbosity and set of record fields on the fly)
 * can keep context of the application
-* fast forking of subloggers with inherited context
+* has fast forking of subloggers with inherited context
 * optional lazy evaluation of arguments for lowering logger footprint
 * it fast enough and careful about memory allocs (indeed it faster than popular logrus and log15)
 
@@ -37,18 +37,19 @@ Kiwi logger has built around the idea:
 ![Kiwi vs other loggers](kiwi-vs-other.png)
 
 Key feature of `kiwi` logger is dynamic filtering of incoming records.  Instead of checking severety
-level for decide about pass or not the record to the output, `kiwi` passes all records to *all* the
-outputs (they called *sinks* in `kiwi` terminology).  But before actual writing each record checked
-with a set of filters.  Each sink has its own set of filter.  It takes into account record keys,
-values, ranges of values.  So each sink decides pass the record to a writer or filter it out.  Also
-any pairs in the record may be hidden: so different sinks may display different parts of the same
-record.  Other effect is: any record may be written to any number of output streams.
+level and decide about pass or not the record to the output, `kiwi` passes all records to *all* the
+outputs (they called *sinks* in `kiwi` terminology).  But before actual writing each record will be
+checked with a set of filters.  Each sink has its own set of filters.  It takes into account record
+keys, value,s ranges of values.  So each sin decikdes how to pass the record to a writer or maybe
+filter it ou.t Also any pairs in the record may behi dden: so different sinks may display different
+parts of the same record.  Other effect is: any record may be written to any number of output
+streams.
 
 For example you can pass details of the record to a logfile for full debug.  But write only
 important information with an error message and status to stderr.
 
 Recipe: export the handler or setup any kind of client for setting these filters in your app.  Then
-you got ability for dynamically change the flow and the verbosity of logs.  For example increase
+you get ability for dynamically change the flow and the verbosity of logs.  For example increase
 verbosity for a specific module or a single handler and decrease them for the rest of the
 application.
 
