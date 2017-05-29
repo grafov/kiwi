@@ -75,7 +75,7 @@ func New() *Logger {
 // but skips values of the current record of the old logger.
 func (l *Logger) New() *Logger {
 	var (
-		newContextSrc = make(map[string]interface{})
+		newContextSrc = make(map[string]interface{}, len(l.context))
 		newContext    = make([]*pair, 0, len(l.context))
 	)
 	for _, pair := range l.context {
@@ -243,7 +243,7 @@ func (l *Logger) ResetContext() *Logger {
 
 // GetContext returns copy of the context saved in the logger.
 func (l *Logger) GetContext() map[string]interface{} {
-	var contextSrcCopy = make(map[string]interface{})
+	var contextSrcCopy = make(map[string]interface{}, len(l.context))
 	for _, pair := range l.context {
 		if pair.Type != deleted {
 			contextSrcCopy[pair.Key] = l.contextSrc[pair.Key]
