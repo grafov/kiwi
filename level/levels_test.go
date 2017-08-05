@@ -1,4 +1,4 @@
-package kiwi
+package level
 
 /* Copyright (c) 2016, Alexander I.Grafov aka Axel
 All rights reserved.
@@ -43,13 +43,15 @@ import (
 	"bytes"
 	"strings"
 	"testing"
+
+	"github.com/grafov/kiwi"
 )
 
 // Test of log with fatal level with empty value. Useless but function allow it.
 func TestLoggerLevels_LogFatalEmpty_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).Start()
+	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
 	defer out.Close()
 
 	log.Fatal()
@@ -65,7 +67,7 @@ func TestLoggerLevels_LogFatalEmpty_Logfmt(t *testing.T) {
 func TestLoggerLevels_LogFatal_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).Start()
+	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
 	defer out.Close()
 
 	log.Fatal("The sample message.")
@@ -81,7 +83,7 @@ func TestLoggerLevels_LogFatal_Logfmt(t *testing.T) {
 func TestLoggerLevels_LogFatalWKey_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).Start()
+	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
 	defer out.Close()
 
 	log.Fatal("msg", "The sample message.")
@@ -96,7 +98,7 @@ func TestLoggerLevels_LogFatalWKey_Logfmt(t *testing.T) {
 func TestLoggerLevels_LogCrit_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).Start()
+	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
 	defer out.Close()
 
 	log.Crit("The sample message.")
@@ -112,7 +114,7 @@ func TestLoggerLevels_LogCrit_Logfmt(t *testing.T) {
 func TestLoggerLevels_LogCritWKey_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).Start()
+	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
 	defer out.Close()
 
 	log.Crit("msg", "The sample message.")
@@ -128,7 +130,7 @@ func TestLoggerLevels_LogCritWKey_Logfmt(t *testing.T) {
 func TestLoggerLevels_LogError_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).Start()
+	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
 	defer out.Close()
 
 	log.Error("The sample message.")
@@ -144,7 +146,7 @@ func TestLoggerLevels_LogError_Logfmt(t *testing.T) {
 func TestLoggerLevels_LogErrorWKey_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).Start()
+	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
 	defer out.Close()
 
 	log.Error("msg", "The sample message.")
@@ -160,7 +162,7 @@ func TestLoggerLevels_LogErrorWKey_Logfmt(t *testing.T) {
 func TestLoggerLevels_LogWarn_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).Start()
+	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
 	defer out.Close()
 
 	log.Warn("The sample message.")
@@ -176,7 +178,7 @@ func TestLoggerLevels_LogWarn_Logfmt(t *testing.T) {
 func TestLoggerLevels_LogWarnWKey_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).Start()
+	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
 	defer out.Close()
 
 	log.Warn("msg", "The sample message.")

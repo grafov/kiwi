@@ -1,7 +1,7 @@
 package kiwi
 
 /*
-Copyright (c) 2016, Alexander I.Grafov aka Axel
+Copyright (c) 2016-2017, Alexander I.Grafov
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -55,12 +55,12 @@ var (
 )
 
 // Get records from logger. Helper for testing.
-func (l *Logger) getRecords() []*pair {
+func (l *Logger) getRecords() []*Pair {
 	return l.pairs
 }
 
 // Get context from logger. Helper for testing.
-func (l *Logger) getContext() []*pair {
+func (l *Logger) getContext() []*Pair {
 	return l.context
 }
 

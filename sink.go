@@ -4,7 +4,7 @@ package kiwi
 // Outputs accepts incoming log records from Loggers, check them with filters
 // and write to output streams if checks passed.
 
-/* Copyright (c) 2016, Alexander I.Grafov aka Axel
+/* Copyright (c) 2016-2017, Alexander I.Grafov aka Axel
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -62,8 +62,17 @@ type (
 	// and decides how to filter them. Each output wraps its own io.Writer.
 	// Sink methods are safe for concurrent usage.
 	Sink struct {
-		id     uint
-		In     chan []*pair
+		id uint
+		In chan []*Pair
+		/*
+
+			l1 ptr
+			l2 ptr
+			l3 ptr
+
+			[]*Pair
+			[]endMarks  - ссылки на концы строк в []*Pair
+		*/
 		close  chan struct{}
 		writer io.Writer
 		format Formatter
@@ -93,7 +102,7 @@ func SinkTo(w io.Writer, fn Formatter) *Sink {
 	var state = sinkStopped
 	collector.RUnlock()
 	sink := &Sink{
-		In:              make(chan []*pair, 16),
+		In:              make(chan []*Pair, 16),
 		close:           make(chan struct{}),
 		format:          fn,
 		state:           &state,
@@ -322,7 +331,7 @@ func (s *Sink) Flush() *Sink {
 
 func processSink(s *Sink) {
 	var (
-		record []*pair
+		record []*Pair
 		ok     bool
 	)
 	for {
@@ -374,7 +383,7 @@ func processSink(s *Sink) {
 	}
 }
 
-func (s *Sink) formatRecord(record []*pair) {
+func (s *Sink) formatRecord(record []*Pair) {
 	s.format.Begin()
 	for _, pair := range record {
 		if ok := s.hiddenKeys[pair.Key]; ok {
@@ -385,7 +394,7 @@ func (s *Sink) formatRecord(record []*pair) {
 	s.writer.Write(s.format.Finish())
 }
 
-func sinkRecord(rec []*pair) {
+func sinkRecord(rec []*Pair) {
 	for _, s := range collector.Sinks {
 		if atomic.LoadInt32(s.state) == sinkActive {
 			s.In <- rec

@@ -38,21 +38,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 func Log(keyVals ...interface{}) {
 	var (
 		key    string
-		record = make([]*pair, 0, len(keyVals)/2+1)
+		record = make([]*Pair, 0, len(keyVals)/2+1)
 	)
 	for i, val := range keyVals {
 		if i%2 == 0 {
 			key = toKey(val)
 			continue
 		}
-		var p *pair
+		var p *Pair
 		if p = toPair(key, val); p.Eval != nil {
 			p.Val = p.Eval.(func() string)()
 		}
 		record = append(record, p)
 	}
 	if len(keyVals)%2 == 1 {
-		record = append(record, &pair{key, "", nil, VoidVal})
+		record = append(record, &Pair{key, "", nil, VoidVal})
 	}
 	collector.WaitFlush.Add(collector.Count)
 	// It will be unlocked inside sinkRecord().

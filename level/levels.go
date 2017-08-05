@@ -1,8 +1,8 @@
-package kiwi
+package level
 
 // This file consists of Logger methods for imitating oldschool logging with levels.
 
-/* Copyright (c) 2016, Alexander I.Grafov aka Axel
+/* Copyright (c) 2016-2017, Alexander I.Grafov
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,9 +32,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ॐ तारे तुत्तारे तुरे स्व */
 
-// LevelName allows to change default recVal "level" to any recVal you want.
-// Set it to empty string if you want to report level without presetting any name.
-var LevelName = "level"
+import "github.com/grafov/kiwi"
+
+type Logger struct {
+	*kiwi.Logger
+}
+
+// New creates a new leveled logger instance.
+func New() *Logger {
+	return &Logger{kiwi.New()}
+}
 
 // Fatal imitates behaviour of common loggers with severity levels. It adds a record
 // with severity "level" = "fatal". Default severity name "level" may be changed
