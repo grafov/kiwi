@@ -74,8 +74,6 @@ func (f *formatLogfmt) Pair(key, val string, valType int) {
 		f.line.WriteString(key)
 	}
 	switch valType {
-	case VoidVal:
-		break
 	case StringVal, CustomQuoted:
 		f.line.WriteRune('=')
 		f.line.WriteString(strconv.Quote(val))
@@ -108,7 +106,7 @@ func (f *formatJSON) Pair(key, val string, valType int) {
 	f.line.WriteString(strconv.Quote(key))
 	f.line.WriteRune(':')
 	switch valType {
-	case StringVal, TimeVal, CustomQuoted, VoidVal:
+	case StringVal, TimeVal, CustomQuoted:
 		f.line.WriteString(strconv.Quote(val))
 	default:
 		f.line.WriteString(val)

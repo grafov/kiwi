@@ -51,7 +51,6 @@ const (
 	CustomUnquoted
 	// VoidVal and other types below commonly formatted unquoted.
 	// But it depends on the formatter.
-	VoidVal
 	StringVal
 	TimeVal
 	CustomQuoted
@@ -115,7 +114,7 @@ func toKey(val interface{}) string {
 	case time.Time:
 		return val.(time.Time).Format(TimeLayout)
 	case nil:
-		return ""
+		return "<nil>"
 	default:
 		return fmt.Sprintf("%v", val)
 	}
@@ -179,8 +178,6 @@ func toPair(key string, val interface{}) *Pair {
 		return &Pair{key, string(data), nil, StringVal}
 	case func() string:
 		return &Pair{key, "", val.(func() string), StringVal}
-	case nil:
-		return &Pair{key, "", nil, VoidVal}
 	default:
 		// Worst case conversion that depends on reflection.
 		return &Pair{key, fmt.Sprintf("%v", val), nil, StringVal}

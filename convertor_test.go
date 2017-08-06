@@ -291,7 +291,7 @@ func TestConvertor_LogNil(t *testing.T) {
 	log.Log(nil)
 
 	out.Flush().Close()
-	if strings.TrimSpace(output.String()) != `` {
+	if strings.TrimSpace(output.String()) != `message="<nil>"` {
 		println(output.String())
 		t.Fail()
 	}
@@ -305,7 +305,7 @@ func TestConvertor_LogNilNil(t *testing.T) {
 	log.Log(nil, nil)
 
 	out.Flush().Close()
-	if strings.TrimSpace(output.String()) != `` {
+	if strings.TrimSpace(output.String()) != `<nil>="<nil>"` {
 		println(output.String())
 		t.Fail()
 	}

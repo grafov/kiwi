@@ -32,6 +32,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ॐ तारे तुत्तारे तुरे स्व */
 
+var UnpairedKey = "message"
+
 type (
 	// Logger keeps context and log record. There are many loggers initialized
 	// in different places of application. Loggers are not safe for
@@ -90,42 +92,37 @@ func (l *Logger) Log(keyVals ...interface{}) {
 		}
 	}
 	for _, p := range l.pairs {
-		if p.Type != deleted {
-			if p.Eval != nil {
-				record = append(record, &Pair{p.Key, p.Eval.(func() string)(), p.Eval, p.Type})
-			} else {
-				record = append(record, &Pair{p.Key, p.Val, p.Eval, p.Type})
-			}
+		if p.Eval != nil {
+			record = append(record, &Pair{p.Key, p.Eval.(func() string)(), p.Eval, p.Type})
+		} else {
+			record = append(record, &Pair{p.Key, p.Val, p.Eval, p.Type})
 		}
 	}
 	var (
-		key     string
+		key     interface{}
 		nextKey = true
 	)
 	for _, val := range keyVals {
 		if nextKey {
 			switch val.(type) {
 			case Pair:
-				l.pairs = append(l.pairs, val.(*Pair))
+				record = append(record, val.(*Pair))
 				continue
 			}
-			key = toKey(val)
+			key = val
 			nextKey = false
 		} else {
 			var p *Pair
-			if p = toPair(key, val); p.Eval != nil {
+			if p = toPair(toKey(key), val); p.Eval != nil {
 				p.Val = p.Eval.(func() string)()
 			}
 			record = append(record, p)
 			nextKey = true
 		}
-
 	}
-	// TODO for odd number of arguments pass the last argument as a
-	// value with some predefined key ("message" for
-	// example). Usecase: Log("Just a message without a key")
+	//  add the value without the key for odd number for key-val pairs
 	if !nextKey {
-		record = append(record, &Pair{key, "", nil, VoidVal})
+		record = append(record, toPair(UnpairedKey, key))
 	}
 	collector.WaitFlush.Add(collector.Count)
 	// It will be unlocked inside sinkRecord().
@@ -140,7 +137,7 @@ func (l *Logger) Log(keyVals ...interface{}) {
 // will be restored.
 func (l *Logger) Add(keyVals ...interface{}) *Logger {
 	var (
-		key     string
+		key     interface{}
 		nextKey = true
 	)
 	// key=val pairs
@@ -151,16 +148,16 @@ func (l *Logger) Add(keyVals ...interface{}) *Logger {
 				l.pairs = append(l.pairs, val.(*Pair))
 				continue
 			}
-			key = toKey(val)
+			key = val
 			nextKey = false
 		} else {
-			l.pairs = append(l.pairs, toPair(key, val))
+			l.pairs = append(l.pairs, toPair(toKey(key), val))
 			nextKey = true
 		}
 	}
-	//  add a key without value for odd number for key-val pairs
+	//  add the value without the key for odd number for key-val pairs
 	if !nextKey {
-		l.pairs = append(l.pairs, &Pair{key, "", nil, VoidVal})
+		l.pairs = append(l.pairs, toPair(UnpairedKey, key))
 	}
 	return l
 }
@@ -168,7 +165,8 @@ func (l *Logger) Add(keyVals ...interface{}) *Logger {
 // With defines a context for the logger. The context overrides pairs in the record.
 func (l *Logger) With(keyVals ...interface{}) *Logger {
 	var (
-		key     string
+		key     interface{}
+		keyStr  string
 		nextKey = true
 	)
 	// key=val pairs
@@ -176,19 +174,20 @@ func (l *Logger) With(keyVals ...interface{}) *Logger {
 		if nextKey {
 			switch val.(type) {
 			case Pair:
-				l.context[key] = val.(Pair)
+				l.context[keyStr] = val.(Pair)
 				continue
 			}
-			key = toKey(val)
+			key = val
 			nextKey = false
-			continue
+		} else {
+			keyStr = toKey(key)
+			l.context[keyStr] = *toPair(keyStr, val)
+			nextKey = true
 		}
-		l.context[key] = *toPair(key, val)
-		nextKey = true
 	}
-	// add a key without value for odd number for key-val pairs
+	//  add the value without the key for odd number for key-val pairs
 	if !nextKey {
-		l.context[key] = Pair{key, "", nil, VoidVal}
+		l.context[UnpairedKey] = *toPair(UnpairedKey, key)
 	}
 	return l
 }

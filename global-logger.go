@@ -34,25 +34,38 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Log is simplified realization of Logger.Log().
 // It has no context. You would like use it in short applications where context and
-// initialization of logger will look too complex. Use Logger type instead.
+// initialization of logger bring unneed complexity. Use Logger type instead.
 func Log(keyVals ...interface{}) {
 	var (
-		key    string
-		record = make([]*Pair, 0, len(keyVals)/2+1)
+		record  = make([]*Pair, 0, len(keyVals)/2+1)
+		key     interface{}
+		nextKey = true
 	)
-	for i, val := range keyVals {
-		if i%2 == 0 {
-			key = toKey(val)
-			continue
-		}
+	for _, val := range keyVals {
 		var p *Pair
-		if p = toPair(key, val); p.Eval != nil {
-			p.Val = p.Eval.(func() string)()
+		if nextKey {
+			switch val.(type) {
+			case Pair:
+				p = val.(*Pair)
+				if p.Eval != nil {
+					p.Val = p.Eval.(func() string)()
+				}
+				record = append(record, p)
+				continue
+			}
+			key = val
+			nextKey = false
+		} else {
+			if p = toPair(toKey(key), val); p.Eval != nil {
+				p.Val = p.Eval.(func() string)()
+			}
+			record = append(record, p)
+			nextKey = true
 		}
-		record = append(record, p)
 	}
-	if len(keyVals)%2 == 1 {
-		record = append(record, &Pair{key, "", nil, VoidVal})
+	//  add the value without the key for odd number for key-val pairs
+	if !nextKey {
+		record = append(record, toPair(UnpairedKey, key))
 	}
 	collector.WaitFlush.Add(collector.Count)
 	// It will be unlocked inside sinkRecord().
