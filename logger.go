@@ -2,7 +2,7 @@ package kiwi
 
 // This file consists of Logger related structures and functions.
 
-/* Copyright (c) 2016, Alexander I.Grafov aka Axel
+/* Copyright (c) 2016-2017, Alexander I.Grafov
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -31,10 +31,6 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ॐ तारे तुत्तारे तुरे स्व */
-
-import (
-	"time"
-)
 
 type (
 	// Logger keeps context and log record. There are many loggers initialized
@@ -235,20 +231,6 @@ func (l *Logger) Without(keys ...string) *Logger {
 			}
 		}
 	}
-	return l
-}
-
-// TODO move it to a subpackage
-// WithTimestamp adds "timestamp" field to the context.
-func (l *Logger) WithTimestamp(format string) *Logger {
-	l.contextSrc["timestamp"] = func() string { return time.Now().Format(format) }
-	l.context = append(l.context,
-		&Pair{
-			Key:  "timestamp",
-			Val:  "",
-			Eval: func() string { return time.Now().Format(format) },
-			Type: TimeVal,
-		})
 	return l
 }
 

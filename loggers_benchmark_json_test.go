@@ -10,6 +10,7 @@ import (
 	"github.com/grafov/kiwi"
 	"github.com/grafov/kiwi/level"
 	"github.com/grafov/kiwi/strict"
+	"github.com/grafov/kiwi/timestamp"
 )
 
 // These tests write out all log levels with concurrency turned on and
@@ -20,7 +21,7 @@ func BenchmarkLevelsKiwiStrict_JSON(b *testing.B) {
 	b.ResetTimer()
 	l := level.New()
 	l.With("_n", "bench", "_p", pid)
-	l.WithTimestamp(time.RFC3339)
+	l.With(timestamp.Set(time.RFC3339))
 	level.LevelName = "l"
 	out := kiwi.SinkTo(buf, kiwi.UseJSON()).Start()
 	for i := 0; i < b.N; i++ {
@@ -38,7 +39,7 @@ func BenchmarkLevelsKiwiStrictComplex_JSON(b *testing.B) {
 	b.ResetTimer()
 	l := level.New()
 	l.With("_n", "bench", "_p", pid)
-	l.WithTimestamp(time.RFC3339)
+	l.With(timestamp.Set(time.RFC3339))
 	level.LevelName = "l"
 	out := kiwi.SinkTo(buf, kiwi.UseJSON()).Start()
 	for i := 0; i < b.N; i++ {
@@ -56,7 +57,7 @@ func BenchmarkLevelsKiwi_JSON(b *testing.B) {
 	b.ResetTimer()
 	l := level.New()
 	l.With("_n", "bench", "_p", pid)
-	l.WithTimestamp(time.RFC3339)
+	l.With(timestamp.Set(time.RFC3339))
 	level.LevelName = "l"
 	out := kiwi.SinkTo(buf, kiwi.UseJSON()).Start()
 	for i := 0; i < b.N; i++ {
@@ -74,7 +75,7 @@ func BenchmarkLevelsKiwiComplex_JSON(b *testing.B) {
 	b.ResetTimer()
 	l := level.New()
 	l.With("_n", "bench", "_p", pid)
-	l.WithTimestamp(time.RFC3339)
+	l.With(timestamp.Set(time.RFC3339))
 	level.LevelName = "l"
 	out := kiwi.SinkTo(buf, kiwi.UseJSON()).Start()
 	for i := 0; i < b.N; i++ {
