@@ -60,7 +60,7 @@ func (l *Logger) getRecords() []*Pair {
 }
 
 // Get context from logger. Helper for testing.
-func (l *Logger) getContext() []*Pair {
+func (l *Logger) getContext() map[string]Pair {
 	return l.context
 }
 
@@ -77,13 +77,13 @@ func TestLogger_NewWithContext(t *testing.T) {
 	log := New().With("key", "value", "key2", 123)
 
 	sublog := log.New()
-	context := sublog.GetContext()
+	context := sublog.getContext()
 
-	if context["key"] != "value" {
+	if context["key"].Val != "value" {
 		t.Fail()
 
 	}
-	if context["key2"] != 123 {
+	if context["key2"].Val != "123" {
 		t.Fail()
 	}
 }
@@ -94,13 +94,13 @@ func TestLogger_NewWithoutContext(t *testing.T) {
 
 	log.Without("key")
 	sublog := log.New()
-	context := sublog.GetContext()
+	context := sublog.getContext()
 
-	if context["key"] == "value" {
+	if context["key"].Val == "value" {
 		t.Fail()
 
 	}
-	if context["key2"] != 123 {
+	if context["key2"].Val != "123" {
 		t.Fail()
 	}
 }

@@ -38,9 +38,8 @@ type (
 	// concurrent usage so then you need logger for another goroutine you will need clone existing instance.
 	// See Logger.New() method below for details.
 	Logger struct {
-		contextSrc map[string]interface{}
-		context    []*Pair
-		pairs      []*Pair
+		context map[string]Pair
+		pairs   []*Pair
 	}
 	// Stringer is the same as fmt.Stringer
 	Stringer interface {
@@ -65,39 +64,29 @@ type (
 
 // New creates a new logger instance.
 func New() *Logger {
-	return &Logger{contextSrc: make(map[string]interface{})}
+	return &Logger{context: make(map[string]Pair)}
 }
 
 // New creates copy of logger instance. It copies the context of the old logger
 // but skips values of the current record of the old logger.
 func (l *Logger) New() *Logger {
-	var (
-		newContextSrc = make(map[string]interface{}, len(l.context))
-		newContext    = make([]*Pair, 0, len(l.context))
-	)
-	for _, pair := range l.context {
-		if pair.Type != deleted {
-			newContextSrc[pair.Key] = l.contextSrc[pair.Key]
-			newContext = append(newContext, pair)
-		}
+	var newContext = make(map[string]Pair, len(l.context))
+	for key, pair := range l.context {
+		newContext[key] = pair
 	}
-	return &Logger{contextSrc: newContextSrc, context: newContext}
+	return &Logger{context: newContext}
 }
 
 // Log is the most common method for flushing previously added key-val pairs to an output.
 // After current record is flushed all pairs removed from a record except contextSrc pairs.
 func (l *Logger) Log(keyVals ...interface{}) {
-	var (
-		record = make([]*Pair, 0, len(l.context)+len(l.pairs)+len(keyVals)/2+1)
-	)
+	var record = make([]*Pair, 0, len(l.context)+len(l.pairs)+len(keyVals)/2+1)
 	for _, p := range l.context {
-		if p.Type != deleted {
-			if p.Eval != nil {
-				// Evaluate delayed context value here before output.
-				record = append(record, &Pair{p.Key, p.Eval.(func() string)(), p.Eval, p.Type})
-			} else {
-				record = append(record, &Pair{p.Key, p.Val, p.Eval, p.Type})
-			}
+		if p.Eval != nil {
+			// Evaluate delayed context value here before output.
+			record = append(record, &Pair{p.Key, p.Eval.(func() string)(), p.Eval, p.Type})
+		} else {
+			record = append(record, &Pair{p.Key, p.Val, p.Eval, p.Type})
 		}
 	}
 	for _, p := range l.pairs {
@@ -179,40 +168,27 @@ func (l *Logger) Add(keyVals ...interface{}) *Logger {
 // With defines a context for the logger. The context overrides pairs in the record.
 func (l *Logger) With(keyVals ...interface{}) *Logger {
 	var (
-		key string
+		key     string
+		nextKey = true
 	)
 	// key=val pairs
-	for i, val := range keyVals {
-		if i%2 == 0 {
+	for _, val := range keyVals {
+		if nextKey {
+			switch val.(type) {
+			case Pair:
+				l.context[key] = val.(Pair)
+				continue
+			}
 			key = toKey(val)
+			nextKey = false
 			continue
 		}
-		// keep context keys unique
-		if _, ok := l.contextSrc[key]; ok {
-			for i, pair := range l.context {
-				if pair.Key == key {
-					l.context[i] = toPair(key, val)
-					break
-				}
-			}
-		} else {
-			l.context = append(l.context, toPair(key, val))
-		}
-		l.contextSrc[key] = val
+		l.context[key] = *toPair(key, val)
+		nextKey = true
 	}
 	// add a key without value for odd number for key-val pairs
-	if len(keyVals)%2 == 1 {
-		if _, ok := l.contextSrc[key]; ok {
-			for i, p := range l.context {
-				if p.Key == key {
-					l.context[i] = &Pair{key, "", nil, VoidVal}
-					break
-				}
-			}
-		} else {
-			l.context = append(l.context, &Pair{key, "", nil, VoidVal})
-		}
-		l.contextSrc[key] = nil
+	if !nextKey {
+		l.context[key] = Pair{key, "", nil, VoidVal}
 	}
 	return l
 }
@@ -220,16 +196,7 @@ func (l *Logger) With(keyVals ...interface{}) *Logger {
 // Without drops some keys from a context for the logger.
 func (l *Logger) Without(keys ...string) *Logger {
 	for _, key := range keys {
-		ckey := toKey(key)
-		if _, ok := l.contextSrc[key]; ok {
-			delete(l.contextSrc, key)
-			for i, pair := range l.context {
-				if pair.Key == ckey {
-					l.context[i].Type = deleted
-					break
-				}
-			}
-		}
+		delete(l.context, key)
 	}
 	return l
 }
@@ -242,25 +209,6 @@ func (l *Logger) Reset() *Logger {
 
 // ResetContext resets the context of the logger.
 func (l *Logger) ResetContext() *Logger {
-	l.contextSrc = make(map[string]interface{})
-	l.context = nil
+	l.context = make(map[string]Pair, len(l.context))
 	return l
-}
-
-// GetContext returns copy of the context saved in the logger.
-func (l *Logger) GetContext() map[string]interface{} {
-	var contextSrcCopy = make(map[string]interface{}, len(l.context))
-	for _, pair := range l.context {
-		if pair.Type != deleted {
-			contextSrcCopy[pair.Key] = l.contextSrc[pair.Key]
-		}
-	}
-	return contextSrcCopy
-}
-
-// GetContextValue returns single context value for the key.
-// It can return values deleted from the context.
-func (l *Logger) GetContextValue(key string) interface{} {
-	value := l.contextSrc[key]
-	return value
 }
