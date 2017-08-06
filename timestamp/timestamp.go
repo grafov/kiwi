@@ -38,7 +38,7 @@ import (
 	"github.com/grafov/kiwi"
 )
 
-const TimestampKey = "timestamp"
+var TimestampKey = "timestamp"
 
 // Set adds "timestamp" field to the context.
 func Set(format string) *kiwi.Pair {
