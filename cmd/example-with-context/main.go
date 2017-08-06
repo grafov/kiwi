@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"time"
 
@@ -28,11 +27,6 @@ func main() {
 	// You can provide deferred evaluation of context or ctx values if you add them wrapped
 	// with func() interface{}, where interface should be one of scalar golang types.
 	ctx.With("currentTime", func() string { return time.Now().String() })
-
-	// Get previously saved context for use in the application.
-	// They were keep as is without conversion to strings.
-	currentContext := ctx.GetContext()
-	fmt.Printf("some of the context values are: %d, %s\n", currentContext["userID"], currentContext["host"])
 
 	// These records will be output each its own currentTime value because currentTime will
 	// be evaluated on each Log() call.
