@@ -232,7 +232,8 @@ display the record or filter it out completely.
 
 * [logxi](https://github.com/mgutz/logxi)
 * [logrus](https://github.com/Sirupsen/logrus)
-* [log15](https://github.com/inconshreveable/log15) — another standard No 15 realization :)
+* [log15](https://github.com/inconshreveable/log15)
+* [zlog](https://github.com/HardySimpson/zlog) - this one is even not in Go but this C logger has some similar ideas.
 
 ## Comparison with other loggers
 
@@ -267,3 +268,4 @@ See current [tests coverage](http://gocover.io/github.com/grafov/kiwi).
 * logfmt realization in Go and specs [godoc.org/github.com/kr/logfmt](https://godoc.org/github.com/kr/logfmt)
 * see also logfmt realization [github.com/go-logfmt/logfmt](https://github.com/go-logfmt/logfmt)
 * picture used for logo [openclipart.org/detail/4416/kiwi-bird](https://openclipart.org/detail/4416/kiwi-bird)
+
