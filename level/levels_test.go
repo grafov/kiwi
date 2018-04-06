@@ -1,6 +1,6 @@
 package level
 
-/* Copyright (c) 2016, Alexander I.Grafov aka Axel
+/* Copyright (c) 2016, Alexander I.Grafov <grafov@gmail.com>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

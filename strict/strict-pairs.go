@@ -4,7 +4,7 @@ package strict
 // I not sure about this part of API yet. It should be moved into a separate
 // package or removed.
 
-/* Copyright (c) 2016-2017, Alexander I.Grafov
+/* Copyright (c) 2016-2017, Alexander I.Grafov <grafov@gmail.com>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

@@ -2,7 +2,7 @@ package level
 
 // This file consists of Logger methods for imitating oldschool logging with levels.
 
-/* Copyright (c) 2016-2017, Alexander I.Grafov
+/* Copyright (c) 2016-2017, Alexander I.Grafov <grafov@gmail.com>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

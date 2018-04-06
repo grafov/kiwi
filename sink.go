@@ -4,7 +4,7 @@ package kiwi
 // Outputs accepts incoming log records from Loggers, check them with filters
 // and write to output streams if checks passed.
 
-/* Copyright (c) 2016-2017, Alexander I.Grafov aka Axel
+/* Copyright (c) 2016-2017, Alexander I.Grafov <grafov@gmail.com>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

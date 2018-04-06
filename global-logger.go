@@ -2,7 +2,7 @@ package kiwi
 
 // This file consists of definition of global logging methods.
 
-/* Copyright (c) 2016, Alexander I.Grafov aka Axel
+/* Copyright (c) 2016, Alexander I.Grafov <grafov@gmail.com>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Log is simplified realization of Logger.Log().
 // It has no context. You would like use it in short applications where context and
-// initialization of logger bring unneed complexity. Use Logger type instead.
+// initialization of logger could brought extra complexity. Use Logger type instead.
 func Log(keyVals ...interface{}) {
 	var (
 		record  = make([]*Pair, 0, len(keyVals)/2+1)
