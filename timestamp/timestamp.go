@@ -2,7 +2,7 @@ package timestamp
 
 // Helper for using timestamp in the log output
 
-/* Copyright (c) 2016-2017, Alexander I.Grafov
+/* Copyright (c) 2016-2018, Alexander I.Grafov <grafov@gmail.com>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@ import (
 	"github.com/grafov/kiwi"
 )
 
-var TimestampKey = "timestamp"
+var TimestampKey = "at"
 
 // Set adds "timestamp" field to the context.
 func Set(format string) *kiwi.Pair {
