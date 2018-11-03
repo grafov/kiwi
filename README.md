@@ -232,9 +232,9 @@ I try to keep the main logging package simple. Filters-formatters-sinks concept 
 JSON and Logfmt. All other features I try to move to separate packages. The `kiwi` repository have
 the subpackages you could import:
 
-* `level` — imitate traditional syslog-like levels (read more details below)
-* `timestamp` — provide the logger instance with additional timestamp field
-* `strict` — helper functions for providing more type control on your records
+* [level](level) — imitate traditional syslog-like levels (read more details below)
+* [timestamp](timestamp) — provide the logger instance with additional timestamp field
+* [strict](strict) — helper functions for providing more type control on your records
 
 ## Warning about evil severity levels
 
