@@ -34,16 +34,37 @@ Kiwi logger has built around the idea:
 
 *Log everything in the code with as much details as possible. But actually write only that you need in the moment.*
 
+In the ideal world of course you could log everything and in the central storage view and filter the
+records you are interested in the moment. But in reality the most of the systems developed locally
+and often you have no central log storage in development environment. And on the production the
+records reach the central storage with some annoying delays. So you are just use local console
+output for the logging.
+
+For example you are in debugging of the `feature1` that spread across several modules of your
+system. You are instrumenting the code with multiple `log()` calls and set verbosity level to
+`DEBUG`. Then you have done with the feature and decrease you level to `ERROR`. Then you are begin
+to debug `feature2` that spread even more across the modules of your system. And all repeat
+again. You are set the level to `DEBUG` and you are see the records both for the `feature2` you are
+need and for `feature1` from the past. Welcome to grepping.
+
+The "logfmt" format solves this problem with tags. The log records consists of arbitrary number of
+key-value pairs. You can easily filter the only records you are need by the keys. The kiwi logger
+allows you set filters dynamically in runtime.
+
+## Architecture?
+
 ![Kiwi vs other loggers](kiwi-vs-other.png)
 
-Key feature of `kiwi` logger is dynamic filtering of incoming records.  Instead of checking severety
-level and decide about pass or not the record to the output, `kiwi` passes all records to *all* the
-outputs (they called *sinks* in `kiwi` terminology).  But before actual writing each record will be
-checked with a set of filters.  Each sink has its own set of filters.  It takes into account record
-keys, value,s ranges of values.  So each sin decikdes how to pass the record to a writer or maybe
-filter it ou.t Also any pairs in the record may behi dden: so different sinks may display different
-parts of the same record.  Other effect is: any record may be written to any number of output
-streams.
+Scared? ;) Ha-ha... Well, really is not too weird as this picture looks :) Let me explain with more
+clear and boring illustrations.
+
+![Kiwi flow](flow.png)
+
+The logger instances (in different goroutines for example) write everything what you want to
+log. _Sinks_ gather the data from all the instances. _Sink_ is the name for the output — it could be
+file or stdout or any other thing that realizes `io.Writer()`.  Filters for the sinks have rules to
+pass only records you are really wants for this output. For example you can dedicate the file for
+errors come from `module1` and another file for errors and warnings that come from `module2`.
 
 For example you can pass details of the record to a logfile for full debug.  But write only
 important information with an error message and status to stderr.
@@ -122,38 +143,38 @@ func main() {
 See more ready to run samples in `cmd` subdirs. Filters described in the wiki:
 [Filtering](https://github.com/grafov/kiwi/wiki/Filtering).
 
-## Work with context
+## The context records
 
-`Kiwi` logger has ability keep some pairs during lifetime of a logger instance.
+`Kiwi` logger allows you keep some pairs during lifetime of a logger instance.
 
 ```go
 import "github.com/grafov/kiwi"
 
 func main() {
 	// Creates a new logger instance.
-	log1st := kiwi.New()
+	log1 := kiwi.New()
 
 	// You can set permanent pairs as logger context.
-	log1st.With("userID", 1000, "PID", os.GetPID())
+	log1.With("userID", 1000, "PID", os.GetPID())
 
-	// They will be passed among other pairs for each record.
-	log1st.Log("msg", "details about something")
+	// They will be passed implicitly amongst other pairs for the each record.
+	log1.Log("msg", "details about something")
 	// Expect output:
 	// userID=1000 PID=12345 msg="details about something"
 	
 	// Context copied into a new logger instance after logger cloned.
-	log2nd := log1st.New()
+	log2 := log1.New()
 	
-	log2nd.Log("key", "value")
+	log2.Log("key", "value")
 	// Expect output:
 	// userID=1000 PID=12345 key="value"
 	
 	// Get previously keeped context values. Results returned as map[string]interface{}
-	appContext := log2nd.GetContext()
+	appContext := log2.GetContext()
 	fmt.Printf("%+v\n", appContext)
 	
 	// You can reset context at any time with
-	log2nd.ResetContext()
+	log2.ResetContext()
 }
 ```
 
@@ -166,16 +187,16 @@ context to a subroutine. It is all.
 
 ```go
 	// Creates a new logger instance.
-	log1st := kiwi.New().With("context key", "context value")
+	log1 := kiwi.New().With("context key", "context value")
 
 	// Just clone old instance to a new one. It will keep the context of the first instance.
-	log2nd := log1st.New()
+	log2 := log1.New()
 	
 	// And you can extend context for cloned instance.
-	log2nd.With("another key", "another value")
+	log2.With("another key", "another value")
 
 	// So other concurrent routines may accept logger with the same context.
-	go subroutine(log2nd, otherArgs...)
+	go subroutine(log2, otherArgs...)
 ```
 
 For the small apps where you won't init all these instances you would like use global `kiwi.Log()` method.
@@ -206,19 +227,25 @@ Hence value of `lazy-sample` from the example above will be evaluated only on `L
 
 ## Warning about evil severity levels
 
-Traditional way for logging is set a level of severity for each log record.  Then check the level
-before passing this record to a writer.  This is not the worst way but it is not obvious in many
-cases.  Especially when logger introduces many severity levels like "debug", "info", "warning",
-"critical", "fatal", "panic" and so on.  Look the internet for many guides with controversial
-recommendations how to distinguish all these "standard" levels and try map them to various events in
-your application.  For example when you should use "fatal" instead of "panic" or use "debug" instead
-of "info".  Maybe not for all cases but very often severity levels obstruct understanding of logs.
+The most of loggers came to you with concept of `levels`. So you are filter anything but only
+records of the preconigured level and levels above really appear in the log. The current level read
+from the configuration of the application. There are loggers that allow you change the level in
+runtime. The level here is like the key in logfmt. But logfmt became with more general idea: you can
+arbitrary number of keys for the filtering. Not only predefined words for levels but any things like
+`feature`, `module` etc. So you can filter not only by the severity but set general taxonomy of the
+categories across all the parts (subsystems, modules) of your application.
 
-Like many loggers with structured output `kiwi` not recommends using of severity levels.  Though you
-can use them in `kiwi` too (see helper functions in `imitate-levels.go`) and interprete them as you
-wish.  Severity levels in `kiwi` don't play any role in deciding how to output the record.  Any
-records with any level will pass to all sinks.  Filters in each sink will decide how to actually
-display the record or filter it out completely.
+Another problem with traditional syslog-like levels is non clear specification what exactly should
+pass to each level. Look up the internet for many guides with controversial recommendations how to
+distinguish all these "standard" levels and try map them to various events in your application. So
+in the reality programmers often debate about level for the log record. For example when you should
+use "fatal" instead of "critical" or use "debug" instead of "info". So very often severity levels
+obstruct understanding of the logs.
+
+You can use log syslog-like levels in `kiwi` if you are comfortable with them (see helper functions
+in `level` subpackage) and interprete them as you wish.  Severity levels in `kiwi` don't play any
+role in deciding how to output the record.  Any records with any level will pass to all sinks.
+Filters in each sink will decide how to actually display the record or filter it out completely.
 
 ## Instead of FAQ
 
