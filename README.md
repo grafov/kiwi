@@ -55,7 +55,7 @@ allows you set filters dynamically in runtime.
 
 ![Kiwi vs other loggers](kiwi-vs-other.png)
 
-Scared? ;) Ha-ha... Well, really is not too weird as this picture looks :) Let me explain with more
+Scared? ;) Ha-ha... Well, really it is not too weird as this picture looks :) Let me explain with more
 clear and boring illustrations.
 
 ![Kiwi flow](flow.png)
@@ -224,6 +224,17 @@ application is complex thing hence you will need initialize a new instance of ki
 
 Logger accepts functions without args that returns a string: `func () string`.
 Hence value of `lazy-sample` from the example above will be evaluated only on `Log()` call.
+
+## Additional features in other packages
+
+I try to keep the main logging package simple. Filters-formatters-sinks concept is core thing in
+`kiwi` tag filtering so it all placed in the single package. Alongside with basic formatters for
+JSON and Logfmt. All other features I try to move to separate packages. The `kiwi` repository have
+the subpackages you could import:
+
+* `level` — imitate traditional syslog-like levels (read more details below)
+* `timestamp` — provide the logger instance with additional timestamp field
+* `strict` — helper functions for providing more type control on your records
 
 ## Warning about evil severity levels
 
