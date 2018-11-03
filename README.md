@@ -34,11 +34,11 @@ Kiwi logger has built around the idea:
 
 *Log everything in the code with as much details as possible. But actually write only that you need in the moment.*
 
-In the ideal world of course you could log everything and in the central storage view and filter the
-records you are interested in the moment. But in reality the most of the systems developed locally
-and often you have no central log storage in development environment. And on the production the
-records reach the central storage with some annoying delays. So you are just use local console
-output for the logging.
+In the ideal world of course you could log _everything_ and it is right way. Then you are look up
+the central log storage that gathered logs from all the applications instances. You could view and
+filter the records you are interested in the moment. But in the reality the most of the systems
+developed locally and often you have no central log storage in development environment. And the
+`grep` utility is only the interface for logs filtering.
 
 For example you are in debugging of the `feature1` that spread across several modules of your
 system. You are instrumenting the code with multiple `log()` calls and set verbosity level to
