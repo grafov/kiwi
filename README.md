@@ -62,8 +62,8 @@ clear and boring illustrations.
 
 The logger instances (in different goroutines for example) write everything what you want to
 log. _Sinks_ gather the data from all the instances. _Sink_ is the name for the output — it could be
-file or stdout or any other thing that realizes `io.Writer()`.  Filters for the sinks have rules to
-pass only records you are really wants for this output. For example you can dedicate the file for
+a file or stdout or any other thing that realizes `io.Writer()`.  Filters for the sinks have rules to
+pass only records you are really want for this output. For example you can dedicate the file for
 errors come from `module1` and another file for errors and warnings that come from `module2`.
 
 For example you can pass details of the record to a logfile for full debug.  But write only
@@ -82,7 +82,7 @@ at [cmd/*](cmd) subfolders.  And of course for API description look at
 
 ## Installation [![Build Status](https://travis-ci.org/grafov/kiwi.svg?branch=master)](https://travis-ci.org/grafov/kiwi)
 
-Package have not external dependencies except standard library. So just
+Package have no external dependencies except standard library. So just
 
     go get github.com/grafov/kiwi
 	
