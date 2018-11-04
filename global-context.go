@@ -1,6 +1,10 @@
 package kiwi
 
-// This file consists of definition of global logging methods.
+import (
+	"sync"
+)
+
+// Global context for all logger instances including global logger.
 
 /* Copyright (c) 2016-2018, Alexander I.Grafov <grafov@gmail.com>
 All rights reserved.
@@ -32,53 +36,54 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ॐ तारे तुत्तारे तुरे स्व */
 
-// Log is simplified realization of Logger.Log().
-// You would like use it in short applications where context and
-// initialization of logger could brought extra complexity.
-// If you wish separate contexts and achieve better performance
-// use Logger type instead.
-func Log(keyVals ...interface{}) {
+type context struct {
+	sync.RWMutex
+	m map[string]Pair
+}
+
+var globalContext context
+
+func With(keyVals ...interface{}) {
 	var (
-		record  = make([]*Pair, 0, len(keyVals)/2+1)
 		key     interface{}
+		keyStr  string
 		nextKey = true
 	)
-	for _, p := range globalContext.m {
-		if p.Eval != nil {
-			// Evaluate delayed context value here before output.
-			record = append(record, &Pair{p.Key, p.Eval.(func() string)(), p.Eval, p.Type})
-		} else {
-			record = append(record, &Pair{p.Key, p.Val, p.Eval, p.Type})
-		}
-	}
+	// key=val pairs
 	for _, val := range keyVals {
-		var p *Pair
 		if nextKey {
 			switch val.(type) {
 			case Pair:
-				p = val.(*Pair)
-				if p.Eval != nil {
-					p.Val = p.Eval.(func() string)()
-				}
-				record = append(record, p)
+				globalContext.m[keyStr] = val.(Pair)
 				continue
 			}
 			key = val
 			nextKey = false
 		} else {
-			if p = toPair(toKey(key), val); p.Eval != nil {
-				p.Val = p.Eval.(func() string)()
-			}
-			record = append(record, p)
+			keyStr = toKey(key)
+			globalContext.m[keyStr] = *toPair(keyStr, val)
 			nextKey = true
 		}
 	}
-	// add the value without the key for odd number for key-val pairs
+	//  add the value without the key for odd number for key-val pairs
 	if !nextKey {
-		record = append(record, toPair(UnpairedKey, key))
+		globalContext.m[UnpairedKey] = *toPair(UnpairedKey, key)
 	}
-	collector.WaitFlush.Add(collector.Count)
-	// It will be unlocked inside sinkRecord().
-	collector.RLock()
-	go sinkRecord(record)
+}
+
+// Without drops some keys from a context for the logger.
+func Without(keys ...string) {
+	for _, key := range keys {
+		delete(globalContext.m, key)
+	}
+}
+
+// ResetContext resets the global context for the global logger and
+// its descendants.
+func ResetContext() {
+	globalContext.m = make(map[string]Pair, len(globalContext.m))
+}
+
+func init() {
+	globalContext.m = make(map[string]Pair)
 }

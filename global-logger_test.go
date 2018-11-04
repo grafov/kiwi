@@ -1,7 +1,7 @@
 package kiwi_test
 
 /*
-Copyright (c) 2016, Alexander I.Grafov <grafov@gmail.com>
+Copyright (c) 2016-2018, Alexander I.Grafov <grafov@gmail.com>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -197,6 +197,56 @@ func TestGlobalLogger_LogKeyWithSpaces_Logfmt(t *testing.T) {
 	out.Flush().Close()
 	if strings.TrimSpace(output.String()) != "\"key with spaces\"=\"The sample value.\"" {
 		println(output.String())
+		t.Fail()
+	}
+}
+
+// Test log with the context value.
+func TestGlobalLogger_WithContextPassed_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
+
+	kiwi.With("key1", "value")
+	kiwi.Log("key2", "value")
+
+	out.Flush().Close()
+	if strings.TrimSpace(output.String()) != `key1="value" key2="value"` {
+		t.Fail()
+	}
+}
+
+// Test log with adding then removing the context.
+func TestGlobalLogger_WithoutContextPassed_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
+
+	// add the context
+	kiwi.With("key1", "value")
+	// remove the context
+	kiwi.Without("key1")
+	// add regular pair
+	kiwi.Log("key2", "value")
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != `key2="value"` {
+		t.Fail()
+	}
+}
+
+// Test log with adding then reset the context.
+func TestGlobalLogger_ResetContext_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
+
+	// add the context
+	kiwi.With("key1", "value")
+	// reset the context
+	kiwi.ResetContext()
+	// add regular pair
+	kiwi.Log("key2", "value")
+
+	out.Flush()
+	if strings.TrimSpace(output.String()) != `key2="value"` {
 		t.Fail()
 	}
 }
