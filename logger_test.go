@@ -68,7 +68,7 @@ func TestNewLogger(t *testing.T) {
 	l := New()
 
 	if l == nil {
-		t.Fatal("initalized logger is nil")
+		t.Fatal("initialized logger is nil")
 	}
 }
 
