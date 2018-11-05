@@ -297,15 +297,15 @@ func TestConvertor_LogNil(t *testing.T) {
 	}
 }
 
-func TestConvertor_LogEmpty(t *testing.T) {
+func TestConvertor_LogValueWithoutKey(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
 	out := SinkTo(output, UseLogfmt()).Start()
 
-	log.Log("empty")
+	log.Log("just a single value")
 
 	out.Flush().Close()
-	if strings.TrimSpace(output.String()) != `empty="<nil>"` {
+	if strings.TrimSpace(output.String()) != `message="just a single value"` {
 		println(output.String())
 		t.Fail()
 	}
