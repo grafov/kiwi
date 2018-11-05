@@ -60,7 +60,7 @@ func With(keyVals ...interface{}) {
 			key = val
 			nextKey = false
 		} else {
-			keyStr = toKey(key)
+			keyStr = key.(string)
 			globalContext.m[keyStr] = *toPair(keyStr, val)
 			nextKey = true
 		}

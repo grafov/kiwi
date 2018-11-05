@@ -113,7 +113,7 @@ func (l *Logger) Log(keyVals ...interface{}) {
 			nextKey = false
 		} else {
 			var p *Pair
-			if p = toPair(toKey(key), val); p.Eval != nil {
+			if p = toPair(key.(string), val); p.Eval != nil {
 				p.Val = p.Eval.(func() string)()
 			}
 			record = append(record, p)
@@ -151,7 +151,7 @@ func (l *Logger) Add(keyVals ...interface{}) *Logger {
 			key = val
 			nextKey = false
 		} else {
-			l.pairs = append(l.pairs, toPair(toKey(key), val))
+			l.pairs = append(l.pairs, toPair(key.(string), val))
 			nextKey = true
 		}
 	}
@@ -180,7 +180,7 @@ func (l *Logger) With(keyVals ...interface{}) *Logger {
 			key = val
 			nextKey = false
 		} else {
-			keyStr = toKey(key)
+			keyStr = key.(string)
 			l.context[keyStr] = *toPair(keyStr, val)
 			nextKey = true
 		}

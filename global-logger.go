@@ -66,7 +66,7 @@ func Log(keyVals ...interface{}) {
 			key = val
 			nextKey = false
 		} else {
-			if p = toPair(toKey(key), val); p.Eval != nil {
+			if p = toPair(key.(string), val); p.Eval != nil {
 				p.Val = p.Eval.(func() string)()
 			}
 			record = append(record, p)

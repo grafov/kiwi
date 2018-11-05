@@ -178,7 +178,7 @@ func TestGlobalLogger_LogNumericKey_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
 
-	kiwi.Log(123, "The sample value.")
+	kiwi.Log("123", "The sample value.")
 
 	out.Flush().Close()
 	if strings.TrimSpace(output.String()) != "123=\"The sample value.\"" {
@@ -196,6 +196,48 @@ func TestGlobalLogger_LogKeyWithSpaces_Logfmt(t *testing.T) {
 
 	out.Flush().Close()
 	if strings.TrimSpace(output.String()) != "\"key with spaces\"=\"The sample value.\"" {
+		println(output.String())
+		t.Fail()
+	}
+}
+
+// Test logging of the key with tabs.
+func TestGlobalLogger_LogKeyWithTabs_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
+
+	kiwi.Log(fmt.Sprintf("key\twith\ttabs"), "The sample value.")
+
+	out.Flush().Close()
+	if strings.TrimSpace(output.String()) != "\"key\\twith\\ttabs\"=\"The sample value.\"" {
+		println(output.String())
+		t.Fail()
+	}
+}
+
+// Test logging of the multi lines key.
+func TestGlobalLogger_LogKeyMultiLine_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
+
+	kiwi.Log(fmt.Sprintf("multi\nlines\nkey"), "The sample value.")
+
+	out.Flush().Close()
+	if strings.TrimSpace(output.String()) != "\"multi\\nlines\\nkey\"=\"The sample value.\"" {
+		println(output.String())
+		t.Fail()
+	}
+}
+
+// Test logging of the multi lines value.
+func TestGlobalLogger_LogValueMultiLine_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
+
+	kiwi.Log("key", fmt.Sprintf("multi\nlines\nvalue"))
+
+	out.Flush().Close()
+	if strings.TrimSpace(output.String()) != "key=\"multi\\nlines\\nvalue\"" {
 		println(output.String())
 		t.Fail()
 	}

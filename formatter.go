@@ -67,6 +67,7 @@ func (f *formatLogfmt) Begin() {
 }
 
 func (f *formatLogfmt) Pair(key, val string, valType int) {
+	// TODO allow multiline values output?
 	// TODO extend check for all non printable chars, so it need just check for each byte>space
 	if strings.ContainsAny(key, " \n\r\t") {
 		f.line.WriteString(strconv.Quote(key))

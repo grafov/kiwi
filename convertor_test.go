@@ -92,7 +92,7 @@ func TestConvertor_LogByteType_Logfmt(t *testing.T) {
 	log := New()
 	out := SinkTo(output, UseLogfmt()).Start()
 
-	log.Log([]byte("the key"), []byte("the sample byte sequence..."))
+	log.Log("the key", []byte("the sample byte sequence..."))
 
 	out.Flush().Close()
 	if strings.TrimSpace(output.String()) != `"the key"="the sample byte sequence..."` {
@@ -106,7 +106,7 @@ func TestConvertor_LogBoolType_Logfmt(t *testing.T) {
 	log := New()
 	out := SinkTo(output, UseLogfmt()).Start()
 
-	log.Log(true, false)
+	log.Log("true", false)
 
 	out.Flush().Close()
 	if strings.TrimSpace(output.String()) != `true=false` {
@@ -120,7 +120,7 @@ func TestConvertor_LogInt8Type_Logfmt(t *testing.T) {
 	log := New()
 	out := SinkTo(output, UseLogfmt()).Start()
 
-	log.Log(int8(1), int8(2))
+	log.Log("1", int8(2))
 
 	out.Flush().Close()
 	if strings.TrimSpace(output.String()) != `1=2` {
@@ -134,7 +134,7 @@ func TestConvertor_LogInt16Type_Logfmt(t *testing.T) {
 	log := New()
 	out := SinkTo(output, UseLogfmt()).Start()
 
-	log.Log(int16(1), int16(2))
+	log.Log("1", int16(2))
 
 	out.Flush().Close()
 	if strings.TrimSpace(output.String()) != `1=2` {
@@ -148,7 +148,7 @@ func TestConvertor_LogInt32Type_Logfmt(t *testing.T) {
 	log := New()
 	out := SinkTo(output, UseLogfmt()).Start()
 
-	log.Log(int32(1), int32(2))
+	log.Log("1", int32(2))
 
 	out.Flush().Close()
 	if strings.TrimSpace(output.String()) != `1=2` {
@@ -162,7 +162,7 @@ func TestConvertor_LogIntType_Logfmt(t *testing.T) {
 	log := New()
 	out := SinkTo(output, UseLogfmt()).Start()
 
-	log.Log(1, 2)
+	log.Log("1", 2)
 
 	out.Flush().Close()
 	if strings.TrimSpace(output.String()) != `1=2` {
@@ -176,7 +176,7 @@ func TestConvertor_LogInt64Type_Logfmt(t *testing.T) {
 	log := New()
 	out := SinkTo(output, UseLogfmt()).Start()
 
-	log.Log(int64(1), int64(2))
+	log.Log("1", int64(2))
 
 	out.Flush().Close()
 	if strings.TrimSpace(output.String()) != `1=2` {
@@ -190,7 +190,7 @@ func TestConvertor_LogUint8Type_Logfmt(t *testing.T) {
 	log := New()
 	out := SinkTo(output, UseLogfmt()).Start()
 
-	log.Log(uint8(1), uint8(2))
+	log.Log("1", uint8(2))
 
 	out.Flush().Close()
 	if strings.TrimSpace(output.String()) != `1=2` {
@@ -204,7 +204,7 @@ func TestConvertor_LogUint16Type_Logfmt(t *testing.T) {
 	log := New()
 	out := SinkTo(output, UseLogfmt()).Start()
 
-	log.Log(uint16(1), uint16(2))
+	log.Log("1", uint16(2))
 
 	out.Flush().Close()
 	if strings.TrimSpace(output.String()) != `1=2` {
@@ -218,7 +218,7 @@ func TestConvertor_LogUint32Type_Logfmt(t *testing.T) {
 	log := New()
 	out := SinkTo(output, UseLogfmt()).Start()
 
-	log.Log(uint32(1), uint32(2))
+	log.Log("1", uint32(2))
 
 	out.Flush().Close()
 	if strings.TrimSpace(output.String()) != `1=2` {
@@ -232,7 +232,7 @@ func TestConvertor_LogUintType_Logfmt(t *testing.T) {
 	log := New()
 	out := SinkTo(output, UseLogfmt()).Start()
 
-	log.Log(uint(1), uint(2))
+	log.Log("1", uint(2))
 
 	out.Flush().Close()
 	if strings.TrimSpace(output.String()) != `1=2` {
@@ -246,7 +246,7 @@ func TestConvertor_LogUint64Type_Logfmt(t *testing.T) {
 	log := New()
 	out := SinkTo(output, UseLogfmt()).Start()
 
-	log.Log(uint64(1), uint64(2))
+	log.Log("1", uint64(2))
 
 	out.Flush().Close()
 	if strings.TrimSpace(output.String()) != `1=2` {
@@ -260,10 +260,10 @@ func TestConvertor_LogFloat32Type_Logfmt(t *testing.T) {
 	log := New()
 	out := SinkTo(output, UseLogfmt()).Start()
 
-	log.Log(float32(3.14159265), float32(3.14159265))
+	log.Log("pi", float32(3.14159265))
 
 	out.Flush().Close()
-	if strings.TrimSpace(output.String()) != `3.1415927e+00=3.1415927e+00` {
+	if strings.TrimSpace(output.String()) != `pi=3.1415927e+00` {
 		println(output.String())
 		t.Fail()
 	}
@@ -274,10 +274,10 @@ func TestConvertor_LogFloat64Type_Logfmt(t *testing.T) {
 	log := New()
 	out := SinkTo(output, UseLogfmt()).Start()
 
-	log.Log(3.14159265, 3.14159265)
+	log.Log("pi", 3.14159265359)
 
 	out.Flush().Close()
-	if strings.TrimSpace(output.String()) != `3.14159265e+00=3.14159265e+00` {
+	if strings.TrimSpace(output.String()) != `pi=3.14159265359e+00` {
 		println(output.String())
 		t.Fail()
 	}
@@ -288,24 +288,24 @@ func TestConvertor_LogNil(t *testing.T) {
 	log := New()
 	out := SinkTo(output, UseLogfmt()).Start()
 
-	log.Log(nil)
+	log.Log("key", nil)
 
 	out.Flush().Close()
-	if strings.TrimSpace(output.String()) != `message="<nil>"` {
+	if strings.TrimSpace(output.String()) != `key="<nil>"` {
 		println(output.String())
 		t.Fail()
 	}
 }
 
-func TestConvertor_LogNilNil(t *testing.T) {
+func TestConvertor_LogEmpty(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
 	out := SinkTo(output, UseLogfmt()).Start()
 
-	log.Log(nil, nil)
+	log.Log("empty")
 
 	out.Flush().Close()
-	if strings.TrimSpace(output.String()) != `<nil>="<nil>"` {
+	if strings.TrimSpace(output.String()) != `empty="<nil>"` {
 		println(output.String())
 		t.Fail()
 	}

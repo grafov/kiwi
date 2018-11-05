@@ -64,63 +64,6 @@ var FloatFormat byte = 'e'
 var TimeLayout = time.RFC3339
 
 // it applicable for all scalar types and for strings
-func toKey(val interface{}) string {
-	switch val.(type) {
-	case string:
-		return val.(string)
-	case []byte:
-		return string(val.([]byte))
-	case fmt.Stringer:
-		return val.(fmt.Stringer).String()
-	case encoding.TextMarshaler:
-		data, err := val.(encoding.TextMarshaler).MarshalText()
-		if err != nil {
-			return fmt.Sprintf("%s", err)
-		}
-		return string(data)
-	case bool:
-		if val.(bool) {
-			return "true"
-		}
-		return "false"
-	case int:
-		return strconv.Itoa(val.(int))
-	case int8:
-		return strconv.FormatInt(int64(val.(int8)), 10)
-	case int16:
-		return strconv.FormatInt(int64(val.(int16)), 10)
-	case int32:
-		return strconv.FormatInt(int64(val.(int32)), 10)
-	case int64:
-		return strconv.FormatInt(val.(int64), 10)
-	case uint:
-		return strconv.FormatUint(uint64(val.(uint)), 10)
-	case uint8:
-		return strconv.FormatUint(uint64(val.(uint8)), 10)
-	case uint16:
-		return strconv.FormatUint(uint64(val.(uint16)), 10)
-	case uint32:
-		return strconv.FormatUint(uint64(val.(uint32)), 10)
-	case uint64:
-		return strconv.FormatUint(val.(uint64), 10)
-	case float32:
-		return strconv.FormatFloat(float64(val.(float32)), FloatFormat, -1, 32)
-	case float64:
-		return strconv.FormatFloat(val.(float64), FloatFormat, -1, 64)
-	case complex64:
-		return fmt.Sprintf("%f", val.(complex64))
-	case complex128:
-		return fmt.Sprintf("%f", val.(complex128))
-	case time.Time:
-		return val.(time.Time).Format(TimeLayout)
-	case nil:
-		return "<nil>"
-	default:
-		return fmt.Sprintf("%v", val)
-	}
-}
-
-// it applicable for all scalar types and for strings
 func toPair(key string, val interface{}) *Pair {
 	switch val.(type) {
 	case string:
