@@ -268,6 +268,8 @@ Filters in each sink will decide how to actually display the record or filter it
 
 ## Similar works for structured logging
 
+* [zap](https://github.com/uber-go/zap)
+* [zerolog](https://github.com/rs/zerolog)
 * [logxi](https://github.com/mgutz/logxi)
 * [logrus](https://github.com/Sirupsen/logrus)
 * [log15](https://github.com/inconshreveable/log15)
@@ -295,7 +297,9 @@ Future plans:
 * throttling mode for sinks
 * ~~increase tests coverage up to 50%~~
 * add tests for concurrent execution use cases
-* increase tests coverage up to 75%
+* ~~increase tests coverage up to 75%~~
+* multiline output for values
+* increase tests coverage up to 80%
 
 See details about tasks and ideas in `TODO.org` (orgmode format).
 See current [tests coverage](http://gocover.io/github.com/grafov/kiwi).
