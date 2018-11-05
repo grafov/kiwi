@@ -1,7 +1,7 @@
 package kiwi
 
 /*
-Copyright (c) 2016-2017, Alexander I.Grafov <grafov@gmail.com>
+Copyright (c) 2016-2018, Alexander I.Grafov <grafov@gmail.com>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
