@@ -57,8 +57,8 @@ type formatLogfmt struct {
 	line *bytes.Buffer
 }
 
-// UseLogfmt says that a sink uses Logfmt format for records output.
-func UseLogfmt() *formatLogfmt {
+// AsLogfmt says that a sink uses Logfmt format for records output.
+func AsLogfmt() *formatLogfmt {
 	return &formatLogfmt{line: bytes.NewBuffer(make([]byte, 256))}
 }
 
@@ -94,8 +94,8 @@ type formatJSON struct {
 	line *bytes.Buffer
 }
 
-// UseJSON says that a sink uses JSON (RFC-7159) format for records output.
-func UseJSON() *formatJSON {
+// AsJSON says that a sink uses JSON (RFC-7159) format for records output.
+func AsJSON() *formatJSON {
 	return &formatJSON{line: bytes.NewBuffer(make([]byte, 256))}
 }
 
