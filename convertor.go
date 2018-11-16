@@ -123,6 +123,6 @@ func toPair(key string, val interface{}) *Pair {
 		return &Pair{key, "", val.(func() string), StringVal}
 	default:
 		// Worst case conversion that depends on reflection.
-		return &Pair{key, fmt.Sprintf("%v", val), nil, StringVal}
+		return &Pair{key, fmt.Sprintf("%+v", val), nil, StringVal}
 	}
 }
