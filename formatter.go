@@ -86,6 +86,7 @@ func (f *formatLogfmt) Pair(key, val string, valType int) {
 }
 
 func (f *formatLogfmt) Finish() []byte {
+	f.line.WriteRune('\n')
 	return f.line.Bytes()
 }
 
@@ -117,5 +118,6 @@ func (f *formatJSON) Pair(key, val string, valType int) {
 
 func (f *formatJSON) Finish() []byte {
 	f.line.WriteRune('}')
+	f.line.WriteRune('\n')
 	return f.line.Bytes()
 }
