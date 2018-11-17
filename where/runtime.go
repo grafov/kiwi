@@ -1,10 +1,6 @@
-package kiwi
+package where
 
-import (
-	"sync"
-)
-
-// Global context for all logger instances including global logger.
+// Helper for adding runtime info to the logger context
 
 /* Copyright (c) 2016-2018, Alexander I.Grafov <grafov@gmail.com>
 All rights reserved.
@@ -36,59 +32,63 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ॐ तारे तुत्तारे तुरे स्व */
 
-type context struct {
-	sync.RWMutex
-	m map[string]Pair
-}
+import (
+	"runtime"
+	"strconv"
+	"strings"
 
-var globalContext context
+	"github.com/grafov/kiwi"
+)
 
-func With(keyVals ...interface{}) {
+const (
+	// Names that defines the that parts of runtime information should
+	// be passed.
+	File = 1
+	Func = 2
+	Line = 4
+
+	stackJump = 2
+)
+
+// What adds runtime information to the logger context. Remember that
+// it returns a slice of pairs so add it this way:
+//
+// log.Add(where.What(where.Filename, where.Func, where.Line)...)
+func What(parts int) []*kiwi.Pair {
 	var (
-		key     interface{}
-		keyStr  string
-		nextKey = true
+		pairs []*kiwi.Pair
+		skip  = stackJump
 	)
-	// key=val pairs
-	for _, val := range keyVals {
-		if nextKey {
-			switch val.(type) {
-			case Pair:
-				globalContext.m[keyStr] = val.(Pair)
-				continue
-			case []*Pair:
-				for _, p := range val.([]*Pair) {
-					globalContext.m[p.Key] = *p
-				}
-				continue
-			}
-			key = val
-			nextKey = false
-		} else {
-			keyStr = key.(string)
-			globalContext.m[keyStr] = *toPair(keyStr, val)
-			nextKey = true
-		}
-	}
-	//  add the value without the key for odd number for key-val pairs
-	if !nextKey {
-		globalContext.m[UnpairedKey] = *toPair(UnpairedKey, key)
-	}
-}
+start:
+	pc, file, _, _ := runtime.Caller(skip)
 
-// Without drops some keys from a context for the logger.
-func Without(keys ...string) {
-	for _, key := range keys {
-		delete(globalContext.m, key)
+	if parts&Line > 0 {
+		pairs = []*kiwi.Pair{{
+			Key: "lineno",
+			Eval: func() string {
+				_, _, line, _ := runtime.Caller(skip)
+				return strconv.Itoa(line)
+			},
+			Type: kiwi.IntegerVal}}
 	}
-}
-
-// ResetContext resets the global context for the global logger and
-// its descendants.
-func ResetContext() {
-	globalContext.m = make(map[string]Pair, len(globalContext.m))
-}
-
-func init() {
-	globalContext.m = make(map[string]Pair)
+	if parts&File > 0 {
+		pairs = append(pairs, &kiwi.Pair{
+			Key:  "file",
+			Val:  file,
+			Type: kiwi.StringVal,
+		})
+	}
+	function := runtime.FuncForPC(pc).Name()
+	if parts&Func > 0 {
+		pairs = append(pairs, &kiwi.Pair{
+			Key:  "function",
+			Val:  function,
+			Type: kiwi.StringVal,
+		})
+	}
+	if strings.LastIndex(function, "grafov/kiwi.") != -1 {
+		skip++
+		goto start
+	}
+	return pairs
 }

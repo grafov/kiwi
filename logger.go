@@ -176,6 +176,11 @@ func (l *Logger) With(keyVals ...interface{}) *Logger {
 			case Pair:
 				l.context[keyStr] = val.(Pair)
 				continue
+			case []*Pair:
+				for _, p := range val.([]*Pair) {
+					l.context[p.Key] = *p
+				}
+				continue
 			}
 			key = val
 			nextKey = false
