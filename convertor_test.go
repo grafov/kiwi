@@ -54,7 +54,7 @@ func TestConvertor_NonDefaultFloatFormatPass_Logfmt(t *testing.T) {
 	log := New()
 	original := FloatFormat
 	FloatFormat = 'f'
-	out := SinkTo(output, UseLogfmt()).Start()
+	out := SinkTo(output, AsLogfmt()).Start()
 
 	log.Log("key", 3.14159265)
 
@@ -75,7 +75,7 @@ func TestConvertor_NonDefaultTimeLayoutPass_Logfmt(t *testing.T) {
 	TimeLayout = time.RFC822
 	now := time.Now()
 	nowString := now.Format(time.RFC822)
-	out := SinkTo(output, UseLogfmt()).Start()
+	out := SinkTo(output, AsLogfmt()).Start()
 
 	log.Log("key", now)
 
@@ -90,7 +90,7 @@ func TestConvertor_NonDefaultTimeLayoutPass_Logfmt(t *testing.T) {
 func TestConvertor_LogByteType_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).Start()
+	out := SinkTo(output, AsLogfmt()).Start()
 
 	log.Log("the key", []byte("the sample byte sequence..."))
 
@@ -104,7 +104,7 @@ func TestConvertor_LogByteType_Logfmt(t *testing.T) {
 func TestConvertor_LogBoolType_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).Start()
+	out := SinkTo(output, AsLogfmt()).Start()
 
 	log.Log("true", false)
 
@@ -118,7 +118,7 @@ func TestConvertor_LogBoolType_Logfmt(t *testing.T) {
 func TestConvertor_LogInt8Type_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).Start()
+	out := SinkTo(output, AsLogfmt()).Start()
 
 	log.Log("1", int8(2))
 
@@ -132,7 +132,7 @@ func TestConvertor_LogInt8Type_Logfmt(t *testing.T) {
 func TestConvertor_LogInt16Type_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).Start()
+	out := SinkTo(output, AsLogfmt()).Start()
 
 	log.Log("1", int16(2))
 
@@ -146,7 +146,7 @@ func TestConvertor_LogInt16Type_Logfmt(t *testing.T) {
 func TestConvertor_LogInt32Type_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).Start()
+	out := SinkTo(output, AsLogfmt()).Start()
 
 	log.Log("1", int32(2))
 
@@ -160,7 +160,7 @@ func TestConvertor_LogInt32Type_Logfmt(t *testing.T) {
 func TestConvertor_LogIntType_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).Start()
+	out := SinkTo(output, AsLogfmt()).Start()
 
 	log.Log("1", 2)
 
@@ -174,7 +174,7 @@ func TestConvertor_LogIntType_Logfmt(t *testing.T) {
 func TestConvertor_LogInt64Type_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).Start()
+	out := SinkTo(output, AsLogfmt()).Start()
 
 	log.Log("1", int64(2))
 
@@ -188,7 +188,7 @@ func TestConvertor_LogInt64Type_Logfmt(t *testing.T) {
 func TestConvertor_LogUint8Type_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).Start()
+	out := SinkTo(output, AsLogfmt()).Start()
 
 	log.Log("1", uint8(2))
 
@@ -202,7 +202,7 @@ func TestConvertor_LogUint8Type_Logfmt(t *testing.T) {
 func TestConvertor_LogUint16Type_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).Start()
+	out := SinkTo(output, AsLogfmt()).Start()
 
 	log.Log("1", uint16(2))
 
@@ -216,7 +216,7 @@ func TestConvertor_LogUint16Type_Logfmt(t *testing.T) {
 func TestConvertor_LogUint32Type_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).Start()
+	out := SinkTo(output, AsLogfmt()).Start()
 
 	log.Log("1", uint32(2))
 
@@ -230,7 +230,7 @@ func TestConvertor_LogUint32Type_Logfmt(t *testing.T) {
 func TestConvertor_LogUintType_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).Start()
+	out := SinkTo(output, AsLogfmt()).Start()
 
 	log.Log("1", uint(2))
 
@@ -244,7 +244,7 @@ func TestConvertor_LogUintType_Logfmt(t *testing.T) {
 func TestConvertor_LogUint64Type_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).Start()
+	out := SinkTo(output, AsLogfmt()).Start()
 
 	log.Log("1", uint64(2))
 
@@ -258,7 +258,7 @@ func TestConvertor_LogUint64Type_Logfmt(t *testing.T) {
 func TestConvertor_LogFloat32Type_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).Start()
+	out := SinkTo(output, AsLogfmt()).Start()
 
 	log.Log("pi", float32(3.14159265))
 
@@ -272,7 +272,7 @@ func TestConvertor_LogFloat32Type_Logfmt(t *testing.T) {
 func TestConvertor_LogFloat64Type_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).Start()
+	out := SinkTo(output, AsLogfmt()).Start()
 
 	log.Log("pi", 3.14159265359)
 
@@ -286,7 +286,7 @@ func TestConvertor_LogFloat64Type_Logfmt(t *testing.T) {
 func TestConvertor_LogNil(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).Start()
+	out := SinkTo(output, AsLogfmt()).Start()
 
 	log.Log("key", nil)
 
@@ -300,7 +300,7 @@ func TestConvertor_LogNil(t *testing.T) {
 func TestConvertor_LogValueWithoutKey(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, UseLogfmt()).Start()
+	out := SinkTo(output, AsLogfmt()).Start()
 
 	log.Log("just a single value")
 

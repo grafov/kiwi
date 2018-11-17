@@ -14,9 +14,9 @@ func main() {
 
 	// You can set arbitrary number of outputs.
 	// But they will remain unused until you explicitly start them with Start().
-	info := kiwi.SinkTo(os.Stdout, kiwi.UseLogfmt())
-	errors := kiwi.SinkTo(os.Stderr, kiwi.UseLogfmt())
-	something := kiwi.SinkTo(tmpFile, kiwi.UseLogfmt())
+	info := kiwi.SinkTo(os.Stdout, kiwi.AsLogfmt())
+	errors := kiwi.SinkTo(os.Stderr, kiwi.AsLogfmt())
+	something := kiwi.SinkTo(tmpFile, kiwi.AsLogfmt())
 
 	// Each record by default will copied to all outputs.
 	// But until you Start() any output the records will just dropped as the sample record below.

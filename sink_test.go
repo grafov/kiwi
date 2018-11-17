@@ -51,7 +51,7 @@ import (
 func TestSink_LogToStoppedSink_Logfmt(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(stream, UseLogfmt())
+	out := SinkTo(stream, AsLogfmt())
 
 	log.Log("key", "The sample string that should be ignored.")
 
@@ -66,7 +66,7 @@ func TestSink_LogToStoppedSink_Logfmt(t *testing.T) {
 func TestSink_LogToStoppedSink_JSON(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(stream, UseJSON())
+	out := SinkTo(stream, AsJSON())
 
 	log.Log("key", "The sample string that should be ignored.")
 
@@ -79,21 +79,21 @@ func TestSink_LogToStoppedSink_JSON(t *testing.T) {
 
 // Test of log to the stopped sink. It should not crash logger.
 func TestSink_StopTwice(t *testing.T) {
-	out := SinkTo(bytes.NewBufferString(""), UseLogfmt())
+	out := SinkTo(bytes.NewBufferString(""), AsLogfmt())
 	out.Stop()
 	out.Close()
 }
 
 // Test of start already started sink. It should not crash logger.
 func TestSink_StartTwice(t *testing.T) {
-	out := SinkTo(bytes.NewBufferString(""), UseLogfmt()).Start()
+	out := SinkTo(bytes.NewBufferString(""), AsLogfmt()).Start()
 	out.Start()
 	out.Close()
 }
 
 // Test of the close already closed sink. It should not crash logger.
 func TestSink_CloseTwice(t *testing.T) {
-	out := SinkTo(bytes.NewBufferString(""), UseLogfmt())
+	out := SinkTo(bytes.NewBufferString(""), AsLogfmt())
 	out.Close()
 	out.Close()
 }
@@ -101,10 +101,10 @@ func TestSink_CloseTwice(t *testing.T) {
 // Test of reuse of the already created sink.
 func TestSink_SinkReuse(t *testing.T) {
 	stream := bytes.NewBufferString("")
-	out := SinkTo(stream, UseLogfmt())
+	out := SinkTo(stream, AsLogfmt())
 
-	SinkTo(stream, UseJSON())
-	SinkTo(stream, UseLogfmt())
+	SinkTo(stream, AsJSON())
+	SinkTo(stream, AsLogfmt())
 
 	out.Close()
 }
@@ -113,7 +113,7 @@ func TestSink_SinkReuse(t *testing.T) {
 func TestSink_HideKey(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(stream, UseLogfmt())
+	out := SinkTo(stream, AsLogfmt())
 
 	out.Start().Hide("two")
 	log.Log("one", 1, "two", 2, "three", 3)
@@ -129,7 +129,7 @@ func TestSink_HideKey(t *testing.T) {
 func TestSink_UnhideKey(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(stream, UseLogfmt())
+	out := SinkTo(stream, AsLogfmt())
 
 	out.Hide("two").Start().Unhide("two")
 	log.Log("one", 1, "two", 2, "three", 3)
@@ -145,7 +145,7 @@ func TestSink_UnhideKey(t *testing.T) {
 func TestSink_UnhideKeyTwice(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(stream, UseLogfmt())
+	out := SinkTo(stream, AsLogfmt())
 
 	out.Start().Unhide("one").Unhide("one")
 	log.Log("one", 1, "two", 2)
@@ -162,7 +162,7 @@ func TestSink_UnhideKeyTwice(t *testing.T) {
 func TestSink_WithKeyFilterPass(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(stream, UseLogfmt()).WithKey("Gandalf").Start()
+	out := SinkTo(stream, AsLogfmt()).WithKey("Gandalf").Start()
 
 	log.Log("Gandalf", "You shall not pass!") // cite from the movie
 
@@ -178,7 +178,7 @@ func TestSink_WithKeyFilterPass(t *testing.T) {
 func TestSink_WithoutKeyFilterOut(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(stream, UseLogfmt()).WithoutKey("Gandalf").Start()
+	out := SinkTo(stream, AsLogfmt()).WithoutKey("Gandalf").Start()
 
 	log.Log("Gandalf", "You cannot pass!") // cite from the book
 
@@ -193,7 +193,7 @@ func TestSink_WithoutKeyFilterOut(t *testing.T) {
 func TestSink_WithValueFilterMissedKeyPass(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(stream, UseLogfmt()).WithValue("key", "passed").Start()
+	out := SinkTo(stream, AsLogfmt()).WithValue("key", "passed").Start()
 
 	log.Log("key", "passed")
 
@@ -209,7 +209,7 @@ func TestSink_WithValueFilterMissedKeyPass(t *testing.T) {
 func TestSink_WithValueFilterPass(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(stream, UseLogfmt()).WithValue("key", "passed", "and this passed too").Start()
+	out := SinkTo(stream, AsLogfmt()).WithValue("key", "passed", "and this passed too").Start()
 
 	log.Log("key", "passed", "key", "and this passed too")
 
@@ -224,7 +224,7 @@ func TestSink_WithValueFilterPass(t *testing.T) {
 func TestSink_WithValueFilterOut(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(stream, UseLogfmt()).WithValue("key", "filtered", "out").Start()
+	out := SinkTo(stream, AsLogfmt()).WithValue("key", "filtered", "out").Start()
 
 	log.Log("key", "try it")
 
@@ -239,7 +239,7 @@ func TestSink_WithValueFilterOut(t *testing.T) {
 func TestSink_WithIntRangeFilterMissedKeyPass(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(stream, UseLogfmt()).WithInt64Range("key", 1, 2).Start()
+	out := SinkTo(stream, AsLogfmt()).WithInt64Range("key", 1, 2).Start()
 
 	log.Log("another key", 3)
 
@@ -254,7 +254,7 @@ func TestSink_WithIntRangeFilterMissedKeyPass(t *testing.T) {
 func TestSink_WithIntRangeFilterPass(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(stream, UseLogfmt()).WithInt64Range("key", 1, 3).Start()
+	out := SinkTo(stream, AsLogfmt()).WithInt64Range("key", 1, 3).Start()
 
 	log.Log("key", 2)
 
@@ -269,7 +269,7 @@ func TestSink_WithIntRangeFilterPass(t *testing.T) {
 func TestSink_WithIntRangeFilterFilterOut(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(stream, UseLogfmt()).WithInt64Range("key", 1, 3).Start()
+	out := SinkTo(stream, AsLogfmt()).WithInt64Range("key", 1, 3).Start()
 
 	log.Log("key", 4)
 
@@ -284,7 +284,7 @@ func TestSink_WithIntRangeFilterFilterOut(t *testing.T) {
 func TestSink_WithFloatRangeFilterMissedKeyPass(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(stream, UseLogfmt()).WithFloat64Range("key", 1.0, 2.0).Start()
+	out := SinkTo(stream, AsLogfmt()).WithFloat64Range("key", 1.0, 2.0).Start()
 
 	log.Log("another key", 3)
 
@@ -299,7 +299,7 @@ func TestSink_WithFloatRangeFilterMissedKeyPass(t *testing.T) {
 func TestSink_WithFloatRangeFilterPass(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(stream, UseLogfmt()).WithFloat64Range("key", 1.0, 3.0).Start()
+	out := SinkTo(stream, AsLogfmt()).WithFloat64Range("key", 1.0, 3.0).Start()
 
 	log.Log("key", 2.0)
 
@@ -314,7 +314,7 @@ func TestSink_WithFloatRangeFilterPass(t *testing.T) {
 func TestSink_WithFloatRangeFilterOut(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(stream, UseLogfmt()).WithFloat64Range("key", 1.0, 3.0).Start()
+	out := SinkTo(stream, AsLogfmt()).WithFloat64Range("key", 1.0, 3.0).Start()
 
 	log.Log("key", 4.0)
 
@@ -333,7 +333,7 @@ func TestSink_WithTimeRangeFilterPass(t *testing.T) {
 	hourAfterNow := now.Add(1 * time.Hour)
 	halfHourAfterNow := now.Add(30 * time.Minute)
 	halfHourAsString := halfHourAfterNow.Format(TimeLayout)
-	out := SinkTo(stream, UseLogfmt()).WithTimeRange("key", now, hourAfterNow).Start()
+	out := SinkTo(stream, AsLogfmt()).WithTimeRange("key", now, hourAfterNow).Start()
 
 	log.Log("key", halfHourAfterNow)
 
@@ -351,7 +351,7 @@ func TestSink_WithTimeRangeFilterOut(t *testing.T) {
 	now := time.Now()
 	hourAfterNow := now.Add(1 * time.Hour)
 	halfHourAfterNow := now.Add(30 * time.Minute)
-	out := SinkTo(stream, UseLogfmt()).WithTimeRange("key", now, halfHourAfterNow).Start()
+	out := SinkTo(stream, AsLogfmt()).WithTimeRange("key", now, halfHourAfterNow).Start()
 
 	log.Log("key", hourAfterNow)
 
@@ -373,7 +373,7 @@ func TestSink_WithCustomPass(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
 	var customFilter customFilterThatReturnsTrue
-	out := SinkTo(stream, UseLogfmt()).WithFilter("key", customFilter).Start()
+	out := SinkTo(stream, AsLogfmt()).WithFilter("key", customFilter).Start()
 
 	log.Log("key", 2)
 
@@ -389,7 +389,7 @@ func TestSink_WithCustomMissedKeyPass(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
 	var customFilter customFilterThatReturnsTrue
-	out := SinkTo(stream, UseLogfmt()).WithFilter("key", customFilter).Start()
+	out := SinkTo(stream, AsLogfmt()).WithFilter("key", customFilter).Start()
 
 	log.Log("another key", 3)
 
@@ -411,7 +411,7 @@ func TestSink_WithCustomFilterOut(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
 	var customFilter customFilterThatReturnsFalse
-	out := SinkTo(stream, UseLogfmt()).WithFilter("key", customFilter).Start()
+	out := SinkTo(stream, AsLogfmt()).WithFilter("key", customFilter).Start()
 
 	log.Log("key", 2)
 

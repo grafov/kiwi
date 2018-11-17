@@ -12,7 +12,7 @@ func main() {
 	ctx := kiwi.New()
 
 	// For starting write ctx records to some writer output should be initialized.
-	out := kiwi.SinkTo(os.Stdout, kiwi.UseLogfmt()).Start()
+	out := kiwi.SinkTo(os.Stdout, kiwi.AsLogfmt()).Start()
 
 	// setup context of the logger
 	ctx.With("userID", 1000, "host", "local", "startedAt", time.Now())

@@ -7,6 +7,6 @@ import (
 )
 
 func main() {
-	kiwi.SinkTo(os.Stdout, kiwi.UseLogfmt()).Start()
+	kiwi.SinkTo(os.Stdout, kiwi.AsLogfmt()).Start()
 	kiwi.Log("key1", "text value", "key2", 123)
 }

@@ -13,7 +13,7 @@ func main() {
 
 	// For starting write log records to some writer output should be
 	// initialized.
-	output := kiwi.SinkTo(os.Stdout, kiwi.UseLogfmt()).Start()
+	output := kiwi.SinkTo(os.Stdout, kiwi.AsLogfmt()).Start()
 
 	log.Add("sample-record", 1, "key", "value")
 	log.Log()

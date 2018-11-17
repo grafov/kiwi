@@ -45,7 +45,7 @@ import (
 // Test logging of string value.
 func TestGlobalLogger_LogStringValue_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
-	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
+	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
 
 	kiwi.Log("k", "The sample string with a lot of spaces.")
 
@@ -59,7 +59,7 @@ func TestGlobalLogger_LogStringValue_Logfmt(t *testing.T) {
 // Test logging of byte array.
 func TestGlobalLogger_LogBytesValue_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
-	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
+	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
 
 	kiwi.Log("k", []byte("The sample string with a lot of spaces."))
 
@@ -73,7 +73,7 @@ func TestGlobalLogger_LogBytesValue_Logfmt(t *testing.T) {
 // Test logging of integer value.
 func TestGlobalLogger_LogIntValue_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
-	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
+	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
 
 	kiwi.Log("k", 123)
 
@@ -87,7 +87,7 @@ func TestGlobalLogger_LogIntValue_Logfmt(t *testing.T) {
 // Test logging of negative integer value.
 func TestGlobalLogger_LogNegativeIntValue_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
-	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
+	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
 
 	kiwi.Log("k", 123)
 
@@ -101,7 +101,7 @@ func TestGlobalLogger_LogNegativeIntValue_Logfmt(t *testing.T) {
 // Test logging of float value in default (scientific) format.
 func TestGlobalLogger_LogFloatValue_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
-	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
+	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
 
 	kiwi.Log("k", 3.14159265359)
 
@@ -115,7 +115,7 @@ func TestGlobalLogger_LogFloatValue_Logfmt(t *testing.T) {
 // Test logging of float value in fixed format.
 func TestGlobalLogger_LogFixedFloatValue_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
-	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
+	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
 
 	kiwi.FloatFormat = 'f'
 	kiwi.Log("k", 3.14159265359)
@@ -132,7 +132,7 @@ func TestGlobalLogger_LogFixedFloatValue_Logfmt(t *testing.T) {
 // Test logging of boolean value.
 func TestGlobalLogger_LogBoolValue_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
-	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
+	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
 
 	kiwi.Log("k", true, "k2", false)
 
@@ -146,7 +146,7 @@ func TestGlobalLogger_LogBoolValue_Logfmt(t *testing.T) {
 // Test logging of complex number.
 func TestGlobalLogger_LogComplexValue_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
-	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
+	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
 
 	kiwi.Log("k", .12345E+5i, "k2", 1.e+0i)
 
@@ -160,7 +160,7 @@ func TestGlobalLogger_LogComplexValue_Logfmt(t *testing.T) {
 // Test logging of time literal.
 func TestGlobalLogger_LogTimeValue_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
-	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
+	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
 	value := time.Now()
 	valueString := value.Format(kiwi.TimeLayout)
 
@@ -176,7 +176,7 @@ func TestGlobalLogger_LogTimeValue_Logfmt(t *testing.T) {
 // Test logging of the numeric key.
 func TestGlobalLogger_LogNumericKey_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
-	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
+	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
 
 	kiwi.Log("123", "The sample value.")
 
@@ -190,7 +190,7 @@ func TestGlobalLogger_LogNumericKey_Logfmt(t *testing.T) {
 // Test logging of the key with spaces.
 func TestGlobalLogger_LogKeyWithSpaces_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
-	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
+	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
 
 	kiwi.Log("key with spaces", "The sample value.")
 
@@ -204,7 +204,7 @@ func TestGlobalLogger_LogKeyWithSpaces_Logfmt(t *testing.T) {
 // Test logging of the key with tabs.
 func TestGlobalLogger_LogKeyWithTabs_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
-	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
+	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
 
 	kiwi.Log(fmt.Sprintf("key\twith\ttabs"), "The sample value.")
 
@@ -218,7 +218,7 @@ func TestGlobalLogger_LogKeyWithTabs_Logfmt(t *testing.T) {
 // Test logging of the multi lines key.
 func TestGlobalLogger_LogKeyMultiLine_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
-	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
+	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
 
 	kiwi.Log(fmt.Sprintf("multi\nlines\nkey"), "The sample value.")
 
@@ -232,7 +232,7 @@ func TestGlobalLogger_LogKeyMultiLine_Logfmt(t *testing.T) {
 // Test logging of the multi lines value.
 func TestGlobalLogger_LogValueMultiLine_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
-	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
+	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
 
 	kiwi.Log("key", fmt.Sprintf("multi\nlines\nvalue"))
 
@@ -246,7 +246,7 @@ func TestGlobalLogger_LogValueMultiLine_Logfmt(t *testing.T) {
 // Test log with the context value.
 func TestGlobalLogger_WithContextPassed_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
-	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
+	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
 
 	kiwi.With("key1", "value")
 	kiwi.Log("key2", "value")
@@ -260,7 +260,7 @@ func TestGlobalLogger_WithContextPassed_Logfmt(t *testing.T) {
 // Test log with adding then removing the context.
 func TestGlobalLogger_WithoutContextPassed_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
-	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
+	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
 
 	// add the context
 	kiwi.With("key1", "value")
@@ -278,7 +278,7 @@ func TestGlobalLogger_WithoutContextPassed_Logfmt(t *testing.T) {
 // Test log with adding then reset the context.
 func TestGlobalLogger_ResetContext_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
-	out := kiwi.SinkTo(output, kiwi.UseLogfmt()).Start()
+	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
 
 	// add the context
 	kiwi.With("key1", "value")
