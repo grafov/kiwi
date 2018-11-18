@@ -1,4 +1,4 @@
-# Runtime package for Kiwi log
+# Runtime package for Kiwi log (experimental)
 
 The package adds runtime information (package name, function, line
 number) as the keys and the values to the logger context.

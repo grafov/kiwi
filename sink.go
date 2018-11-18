@@ -311,8 +311,8 @@ func (s *Sink) Start() *Sink {
 // Close closes the sink. It flushes records for the sink before closing.
 func (s *Sink) Close() {
 	if atomic.LoadInt32(s.state) > sinkClosed {
+		s.Flush()
 		atomic.StoreInt32(s.state, sinkClosed)
-		collector.WaitFlush.Wait()
 		collector.Lock()
 		s.close <- struct{}{}
 		collector.Count--
