@@ -43,6 +43,7 @@ func Log(keyVals ...interface{}) {
 		key     interface{}
 		nextKey = true
 	)
+	globalContext.RLock()
 	for _, p := range globalContext.m {
 		if p.Eval != nil {
 			// Evaluate delayed context value here before output.
@@ -51,6 +52,7 @@ func Log(keyVals ...interface{}) {
 			record = append(record, &Pair{p.Key, p.Val, p.Eval, p.Type})
 		}
 	}
+	globalContext.RUnlock()
 	for _, val := range keyVals {
 		var p *Pair
 		if nextKey {

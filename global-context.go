@@ -50,6 +50,7 @@ func With(keyVals ...interface{}) {
 		nextKey = true
 	)
 	// key=val pairs
+	globalContext.Lock()
 	for _, val := range keyVals {
 		if nextKey {
 			switch val.(type) {
@@ -74,19 +75,24 @@ func With(keyVals ...interface{}) {
 	if !nextKey {
 		globalContext.m[UnpairedKey] = *toPair(UnpairedKey, key)
 	}
+	globalContext.Unlock()
 }
 
 // Without drops some keys from a context for the logger.
 func Without(keys ...string) {
+	globalContext.Lock()
 	for _, key := range keys {
 		delete(globalContext.m, key)
 	}
+	globalContext.Unlock()
 }
 
 // ResetContext resets the global context for the global logger and
 // its descendants.
 func ResetContext() {
+	globalContext.Lock()
 	globalContext.m = make(map[string]Pair, len(globalContext.m))
+	globalContext.Unlock()
 }
 
 func init() {
