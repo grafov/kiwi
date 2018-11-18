@@ -66,13 +66,19 @@ type (
 
 // New creates a new logger instance.
 func New() *Logger {
-	return &Logger{context: make(map[string]Pair)}
+	var newContext = make(map[string]Pair, len(globalContext.m)*2)
+	globalContext.RLock()
+	for key, pair := range globalContext.m {
+		newContext[key] = pair
+	}
+	globalContext.RUnlock()
+	return &Logger{context: newContext}
 }
 
 // New creates copy of logger instance. It copies the context of the old logger
 // but skips values of the current record of the old logger.
 func (l *Logger) New() *Logger {
-	var newContext = make(map[string]Pair, len(l.context))
+	var newContext = make(map[string]Pair, len(l.context)*2)
 	for key, pair := range l.context {
 		newContext[key] = pair
 	}
@@ -213,6 +219,6 @@ func (l *Logger) Reset() *Logger {
 
 // ResetContext resets the context of the logger.
 func (l *Logger) ResetContext() *Logger {
-	l.context = make(map[string]Pair, len(l.context))
+	l.context = make(map[string]Pair, len(l.context)*2)
 	return l
 }
