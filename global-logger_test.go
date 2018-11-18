@@ -43,6 +43,20 @@ import (
 )
 
 // Test logging of string value.
+func TestGlobalLogger_LogSingleValue_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
+
+	kiwi.Log("single value without key")
+
+	out.Flush().Close()
+	if strings.TrimSpace(output.String()) != `message="single value without key"` {
+		println(output.String())
+		t.Fail()
+	}
+}
+
+// Test logging of string value.
 func TestGlobalLogger_LogStringValue_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()

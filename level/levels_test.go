@@ -73,7 +73,7 @@ func TestLoggerLevels_LogFatal_Logfmt(t *testing.T) {
 	log.Fatal("The sample message.")
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != "level=\"fatal\" \"The sample message.\"" {
+	if strings.TrimSpace(output.String()) != `level="fatal" message="The sample message."` {
 		println(output.String())
 		t.Fail()
 	}
@@ -89,7 +89,7 @@ func TestLoggerLevels_LogFatalWKey_Logfmt(t *testing.T) {
 	log.Fatal("msg", "The sample message.")
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != "msg=\"The sample message.\" level=\"fatal\"" {
+	if strings.TrimSpace(output.String()) != `msg="The sample message." level="fatal"` {
 		t.Fail()
 	}
 }
@@ -104,7 +104,7 @@ func TestLoggerLevels_LogCrit_Logfmt(t *testing.T) {
 	log.Crit("The sample message.")
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != "level=\"critical\" \"The sample message.\"" {
+	if strings.TrimSpace(output.String()) != `level="critical" message="The sample message."` {
 		println(output.String())
 		t.Fail()
 	}
@@ -120,7 +120,7 @@ func TestLoggerLevels_LogCritWKey_Logfmt(t *testing.T) {
 	log.Crit("msg", "The sample message.")
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != "msg=\"The sample message.\" level=\"critical\"" {
+	if strings.TrimSpace(output.String()) != `msg="The sample message." level="critical"` {
 		println(output.String())
 		t.Fail()
 	}
@@ -136,7 +136,7 @@ func TestLoggerLevels_LogError_Logfmt(t *testing.T) {
 	log.Error("The sample message.")
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != "level=\"error\" \"The sample message.\"" {
+	if strings.TrimSpace(output.String()) != `level="error" message="The sample message."` {
 		println(output.String())
 		t.Fail()
 	}
@@ -152,7 +152,7 @@ func TestLoggerLevels_LogErrorWKey_Logfmt(t *testing.T) {
 	log.Error("msg", "The sample message.")
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != "msg=\"The sample message.\" level=\"error\"" {
+	if strings.TrimSpace(output.String()) != `msg="The sample message." level="error"` {
 		println(output.String())
 		t.Fail()
 	}
@@ -168,7 +168,7 @@ func TestLoggerLevels_LogWarn_Logfmt(t *testing.T) {
 	log.Warn("The sample message.")
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != "level=\"warning\" \"The sample message.\"" {
+	if strings.TrimSpace(output.String()) != `level="warning" message="The sample message."` {
 		println(output.String())
 		t.Fail()
 	}
@@ -184,7 +184,7 @@ func TestLoggerLevels_LogWarnWKey_Logfmt(t *testing.T) {
 	log.Warn("msg", "The sample message.")
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != "msg=\"The sample message.\" level=\"warning\"" {
+	if strings.TrimSpace(output.String()) != `msg="The sample message." level="warning"` {
 		println(output.String())
 		t.Fail()
 	}
