@@ -72,11 +72,11 @@ func TestNewLogger(t *testing.T) {
 	}
 }
 
-// Test of creating a new logger from existing logger.
-func TestLogger_NewWithContext(t *testing.T) {
-	log := New().With("key", "value", "key2", 123)
+// Test of creating a fork the logger from the existing logger.
+func TestLogger_ForkWithContext(t *testing.T) {
+	log := Fork().With("key", "value", "key2", 123)
 
-	sublog := log.New()
+	sublog := log.Fork()
 	context := sublog.getContext()
 
 	if context["key"].Val != "value" {
@@ -88,12 +88,28 @@ func TestLogger_NewWithContext(t *testing.T) {
 	}
 }
 
-// Test of creating a new logger from existing logger. Deleted values should not present in sublogger.
-func TestLogger_NewWithoutContext(t *testing.T) {
+// Test of creating a fork the logger from the existing logger.
+func TestLogger_NewWithContext(t *testing.T) {
 	log := New().With("key", "value", "key2", 123)
 
-	log.Without("key")
 	sublog := log.New()
+	context := sublog.getContext()
+
+	if context["key"].Val == "value" {
+		t.Fail()
+
+	}
+	if context["key2"].Val == "123" {
+		t.Fail()
+	}
+}
+
+// Test of creating a new logger from existing logger. Deleted values should not present in sublogger.
+func TestLogger_ForkWithoutContext(t *testing.T) {
+	log := Fork().With("key", "value", "key2", 123)
+
+	log.Without("key")
+	sublog := log.Fork()
 	context := sublog.getContext()
 
 	if context["key"].Val == "value" {

@@ -64,8 +64,9 @@ type (
 	}
 )
 
-// New creates a new logger instance.
-func New() *Logger {
+// Fork creates a new logger instance that inherited the context from
+// the global logger.
+func Fork() *Logger {
 	var newContext = make(map[string]Pair, len(globalContext.m)*2)
 	globalContext.RLock()
 	for key, pair := range globalContext.m {
@@ -75,13 +76,28 @@ func New() *Logger {
 	return &Logger{context: newContext}
 }
 
-// New creates copy of logger instance. It copies the context of the old logger
-// but skips values of the current record of the old logger.
-func (l *Logger) New() *Logger {
+// New creates a new logger instance but not copy context from the
+// global logger.
+func New() *Logger {
+	var newContext = make(map[string]Pair)
+	return &Logger{context: newContext}
+}
+
+// Fork creates a new instance of the logger. It copies the context
+// from the logger from the parent logger. But the values of the
+// current record of the parent logger discarded.
+func (l *Logger) Fork() *Logger {
 	var newContext = make(map[string]Pair, len(l.context)*2)
 	for key, pair := range l.context {
 		newContext[key] = pair
 	}
+	return &Logger{context: newContext}
+}
+
+// New creates a new instance of the logger. It not inherited the
+// context of the parent logger.
+func (l *Logger) New() *Logger {
+	var newContext = make(map[string]Pair)
 	return &Logger{context: newContext}
 }
 
