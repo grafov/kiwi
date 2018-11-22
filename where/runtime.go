@@ -43,9 +43,8 @@ import (
 const (
 	// Names that defines the that parts of runtime information should
 	// be passed.
-	File = 1
-	Func = 2
-	Line = 4
+	FilePos  = 1
+	Function = 2
 
 	stackJump = 2
 )
@@ -59,32 +58,22 @@ func What(parts int) []*kiwi.Pair {
 		pairs []*kiwi.Pair
 		skip  = stackJump
 	)
-	if parts&Line > 0 {
+	if parts&FilePos > 0 {
 		pairs = []*kiwi.Pair{{
-			Key: "lineno",
+			Key: "file",
 			Eval: func() string {
 			start:
-				pc, _, line, _ := runtime.Caller(skip)
+				pc, file, line, _ := runtime.Caller(skip)
 				function := runtime.FuncForPC(pc).Name()
 				if strings.LastIndex(function, "grafov/kiwi.") != -1 {
 					skip++
 					goto start
 				}
-				return strconv.Itoa(line)
+				return file + ":" + strconv.Itoa(line)
 			},
-			Type: kiwi.IntegerVal}}
+			Type: kiwi.StringVal}}
 	}
-	if parts&File > 0 {
-		pairs = append(pairs, &kiwi.Pair{
-			Key: "file",
-			Eval: func() string {
-				_, file, _, _ := runtime.Caller(skip)
-				return file
-			},
-			Type: kiwi.StringVal,
-		})
-	}
-	if parts&Func > 0 {
+	if parts&Function > 0 {
 		pairs = append(pairs, &kiwi.Pair{
 			Key: "function",
 			Eval: func() string {
