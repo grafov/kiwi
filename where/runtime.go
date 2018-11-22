@@ -59,36 +59,41 @@ func What(parts int) []*kiwi.Pair {
 		pairs []*kiwi.Pair
 		skip  = stackJump
 	)
-start:
-	pc, file, _, _ := runtime.Caller(skip)
-
 	if parts&Line > 0 {
 		pairs = []*kiwi.Pair{{
 			Key: "lineno",
 			Eval: func() string {
-				_, _, line, _ := runtime.Caller(skip)
+			start:
+				pc, _, line, _ := runtime.Caller(skip)
+				function := runtime.FuncForPC(pc).Name()
+				if strings.LastIndex(function, "grafov/kiwi.") != -1 {
+					skip++
+					goto start
+				}
 				return strconv.Itoa(line)
 			},
 			Type: kiwi.IntegerVal}}
 	}
 	if parts&File > 0 {
 		pairs = append(pairs, &kiwi.Pair{
-			Key:  "file",
-			Val:  file,
+			Key: "file",
+			Eval: func() string {
+				_, file, _, _ := runtime.Caller(skip)
+				return file
+			},
 			Type: kiwi.StringVal,
 		})
 	}
-	function := runtime.FuncForPC(pc).Name()
 	if parts&Func > 0 {
 		pairs = append(pairs, &kiwi.Pair{
-			Key:  "function",
-			Val:  function,
+			Key: "function",
+			Eval: func() string {
+				pc, _, _, _ := runtime.Caller(skip)
+				function := runtime.FuncForPC(pc).Name()
+				return function
+			},
 			Type: kiwi.StringVal,
 		})
-	}
-	if strings.LastIndex(function, "grafov/kiwi.") != -1 {
-		skip++
-		goto start
 	}
 	return pairs
 }
