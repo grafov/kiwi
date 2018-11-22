@@ -57,6 +57,21 @@ var collector struct {
 	WaitFlush sync.WaitGroup
 }
 
+// FlushAll waits for all sinks to be flushed.
+func FlushAll() {
+	var w sync.WaitGroup
+	collector.RLock()
+	for _, s := range collector.Sinks {
+		w.Add(1)
+		go func(s *Sink) {
+			s.Flush()
+			w.Done()
+		}(s)
+	}
+	collector.RUnlock()
+	w.Wait()
+}
+
 type (
 	// Sink used for filtering incoming log records from all logger instances
 	// and decides how to filter them. Each output wraps its own io.Writer.
