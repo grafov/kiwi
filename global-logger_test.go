@@ -1,7 +1,7 @@
 package kiwi_test
 
 /*
-Copyright (c) 2016-2018, Alexander I.Grafov <grafov@gmail.com>
+Copyright (c) 2016-2019, Alexander I.Grafov <grafov@gmail.com>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -188,7 +188,7 @@ func TestGlobalLogger_LogTimeValue_Logfmt(t *testing.T) {
 }
 
 // Test logging of the numeric key.
-func TestGlobalLogger_LogNumericKey_Logfmt(t *testing.T) {
+func TestGlobalLogger_LogNumericKeyAsString_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
 
@@ -197,6 +197,74 @@ func TestGlobalLogger_LogNumericKey_Logfmt(t *testing.T) {
 	out.Flush().Close()
 	if strings.TrimSpace(output.String()) != "123=\"The sample value.\"" {
 		println(output.String())
+		t.Fail()
+	}
+}
+
+// The logger accepts string keys. In other cases it complains about
+// the wrong key type. It also assumes that each key followed by the
+// value.
+func TestGlobalLogger_LogNumericKeyNotValid_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
+
+	kiwi.Log(123, "The sample value.")
+
+	out.Flush().Close()
+	expected := `kiwi-error="non a string type (int) for the key (123)" message="The sample value."`
+	if strings.TrimSpace(output.String()) != expected {
+		t.Logf("expected %s got %v", expected, output.String())
+		t.Fail()
+	}
+}
+
+// The logger accepts string keys. In other cases it complains about
+// the wrong key type. It also assumes that each key followed by the
+// value.
+func TestGlobalLogger_LogTwoNumericsNotValid_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
+
+	kiwi.Log(12, 34)
+
+	out.Flush().Close()
+	expected := `kiwi-error="non a string type (int) for the key (12)" message=34`
+	if strings.TrimSpace(output.String()) != expected {
+		t.Logf("expected %s got %v", expected, output.String())
+		t.Fail()
+	}
+}
+
+// The logger accepts string keys. In other cases it complains about
+// the wrong key type. It also assumes that each key followed by the
+// value.
+func TestGlobalLogger_LogThreeNumericsNotValid_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
+
+	kiwi.Log(12, 34, 56)
+
+	out.Flush().Close()
+	expected := `kiwi-error="non a string type (int) for the key (12)" message=34 kiwi-error="non a string type (int) for the key (56)"`
+	if strings.TrimSpace(output.String()) != expected {
+		t.Logf("expected %s got %v", expected, output.String())
+		t.Fail()
+	}
+}
+
+// The logger accepts string keys. In other cases it complains about
+// the wrong key type. It also assumes that each key followed by the
+// value.
+func TestGlobalLogger_LogFourNumericsNotValid_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
+
+	kiwi.Log(12, 34, 56, 78)
+
+	out.Flush().Close()
+	expected := `kiwi-error="non a string type (int) for the key (12)" message=34 kiwi-error="non a string type (int) for the key (56)" message=78`
+	if strings.TrimSpace(output.String()) != expected {
+		t.Logf("expected %s got %v", expected, output.String())
 		t.Fail()
 	}
 }
@@ -259,6 +327,7 @@ func TestGlobalLogger_LogValueMultiLine_Logfmt(t *testing.T) {
 
 // Test log with the context value.
 func TestGlobalLogger_WithContextPassed_Logfmt(t *testing.T) {
+	kiwi.ResetContext()
 	output := bytes.NewBufferString("")
 	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
 
@@ -271,8 +340,77 @@ func TestGlobalLogger_WithContextPassed_Logfmt(t *testing.T) {
 	}
 }
 
+// The context accepts even number of keys and values for merging them
+// into pairs. It the case with the odd number of values the last
+// value prepended with default key "message".
+func TestGlobalLogger_WithOddContextPassed_Logfmt(t *testing.T) {
+	kiwi.ResetContext()
+	output := bytes.NewBufferString("")
+	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
+
+	kiwi.With("key1", "value", "orphan-value")
+	kiwi.Log("key2", "value")
+
+	out.Flush().Close()
+	expected := `key1="value" message="orphan-value" key2="value"`
+	if strings.TrimSpace(output.String()) != expected {
+		t.Logf("expected %s got %v", expected, output.String())
+		t.Fail()
+	}
+}
+
+// The context accepts even number of keys and values for merging them
+// into pairs. It the case with the odd number of values the last
+// value prepended with default key "message".
+func TestGlobalLogger_WithKeyOnlyPassed_Logfmt(t *testing.T) {
+	kiwi.ResetContext()
+	output := bytes.NewBufferString("")
+	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
+
+	kiwi.With("orphan-value")
+	kiwi.Log("key2", "value")
+
+	out.Flush().Close()
+	expected := `message="orphan-value" key2="value"`
+	if strings.TrimSpace(output.String()) != expected {
+		t.Logf("expected %s got %v", expected, output.String())
+		t.Fail()
+	}
+}
+
+// The context accepts string keys. In other cases it complains about
+// the wrong key type. It also assumes that each key followed by the
+// value.
+func TestGlobalLogger_WithIntKeyInvalid_Logfmt(t *testing.T) {
+	kiwi.ResetContext()
+	output := bytes.NewBufferString("")
+	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
+
+	kiwi.With(123, 456)
+	kiwi.Log("key2", "value")
+
+	out.Flush().Close()
+	got := output.String()
+	expected := `kiwi-error="wrong type for the key"`
+	if !strings.Contains(got, expected) {
+		t.Logf("expected %s got %v", expected, got)
+		t.Fail()
+	}
+	expected = `message=456`
+	if !strings.Contains(got, expected) {
+		t.Logf("expected %s got %v", expected, got)
+		t.Fail()
+	}
+	expected = `key2="value"`
+	if !strings.Contains(got, expected) {
+		t.Logf("expected %s got %v", expected, got)
+		t.Fail()
+	}
+}
+
 // Test log with adding then removing the context.
 func TestGlobalLogger_WithoutContextPassed_Logfmt(t *testing.T) {
+	kiwi.ResetContext()
 	output := bytes.NewBufferString("")
 	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
 
@@ -291,6 +429,7 @@ func TestGlobalLogger_WithoutContextPassed_Logfmt(t *testing.T) {
 
 // Test log with adding then reset the context.
 func TestGlobalLogger_ResetContext_Logfmt(t *testing.T) {
+	kiwi.ResetContext()
 	output := bytes.NewBufferString("")
 	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
 

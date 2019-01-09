@@ -1,8 +1,10 @@
 package kiwi
 
+import "fmt"
+
 // This file consists of definition of global logging methods.
 
-/* Copyright (c) 2016-2018, Alexander I.Grafov <grafov@gmail.com>
+/* Copyright (c) 2016-2019, Alexander I.Grafov <grafov@gmail.com>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -38,11 +40,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // If you wish separate contexts and achieve better performance
 // use Logger type instead.
 func Log(keyVals ...interface{}) {
-	var (
-		record  = make([]*Pair, 0, len(keyVals)/2+1)
-		key     interface{}
-		nextKey = true
-	)
+	// 1. Log the context.
+	var record = make([]*Pair, 0, len(keyVals)/2+1)
 	globalContext.RLock()
 	for _, p := range globalContext.m {
 		if p.Eval != nil {
@@ -53,10 +52,17 @@ func Log(keyVals ...interface{}) {
 		}
 	}
 	globalContext.RUnlock()
+	// 2. Log the regular key-value pairs that come in the args.
+	var (
+		key          string
+		shouldBeAKey = true
+	)
 	for _, val := range keyVals {
 		var p *Pair
-		if nextKey {
+		if shouldBeAKey {
 			switch val.(type) {
+			case string:
+				key = val.(string)
 			case Pair:
 				p = val.(*Pair)
 				if p.Eval != nil {
@@ -64,23 +70,25 @@ func Log(keyVals ...interface{}) {
 				}
 				record = append(record, p)
 				continue
+			default:
+				record = append(record, toPair(ErrorKey, fmt.Sprintf("non a string type (%T) for the key (%v)", val, val)))
+				key = UnpairedKey
 			}
-			key = val
-			nextKey = false
 		} else {
-			if p = toPair(key.(string), val); p.Eval != nil {
+			if p = toPair(key, val); p.Eval != nil {
 				p.Val = p.Eval.(func() string)()
 			}
 			record = append(record, p)
-			nextKey = true
 		}
+		shouldBeAKey = !shouldBeAKey
 	}
-	// add the value without the key for odd number for key-val pairs
-	if !nextKey {
+	// Add the value without the key for odd number for key-val pairs.
+	if !shouldBeAKey && key != UnpairedKey {
 		record = append(record, toPair(UnpairedKey, key))
 	}
-	collector.WaitFlush.Add(collector.Count)
+	// 2. Pass the record to the collector.
 	// It will be unlocked inside sinkRecord().
+	collector.WaitFlush.Add(collector.Count)
 	collector.RLock()
 	go sinkRecord(record)
 }

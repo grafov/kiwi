@@ -1,7 +1,7 @@
 package where
 
 /*
-Copyright (c) 2016, Alexander I.Grafov <grafov@gmail.com>
+Copyright (c) 2016-2019, Alexander I.Grafov <grafov@gmail.com>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,7 @@ func TestWhere_GetAllInfo_Logfmt(t *testing.T) {
 	log := kiwi.New()
 	out := kiwi.SinkTo(stream, kiwi.AsLogfmt()).Start()
 
-	log.With(What(File | Line | Func))
+	log.With(What(FilePos | Function))
 	log.Log("key", "value")
 
 	out.Flush().Close()
@@ -76,7 +76,7 @@ func TestWhereGlobal_GetAllInfo_Logfmt(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	out := kiwi.SinkTo(stream, kiwi.AsLogfmt()).Start()
 
-	kiwi.With(What(File | Line | Func))
+	kiwi.With(What(FilePos | Function))
 	kiwi.Log("key", "value")
 
 	out.Flush().Close()

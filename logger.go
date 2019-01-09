@@ -1,8 +1,10 @@
 package kiwi
 
+import "fmt"
+
 // This file consists of Logger related structures and functions.
 
-/* Copyright (c) 2016-2018, Alexander I.Grafov <grafov@gmail.com>
+/* Copyright (c) 2016-2019, Alexander I.Grafov <grafov@gmail.com>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,7 +34,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ॐ तारे तुत्तारे तुरे स्व */
 
-var UnpairedKey = "message"
+var (
+	UnpairedKey = "message"
+	ErrorKey    = "kiwi-error"
+)
 
 type (
 	// Logger keeps context and log record. There are many loggers initialized
@@ -104,6 +109,7 @@ func (l *Logger) New() *Logger {
 // Log is the most common method for flushing previously added key-val pairs to an output.
 // After current record is flushed all pairs removed from a record except contextSrc pairs.
 func (l *Logger) Log(keyVals ...interface{}) {
+	// 1. Log the context.
 	var record = make([]*Pair, 0, len(l.context)+len(l.pairs)+len(keyVals)/2+1)
 	for _, p := range l.context {
 		if p.Eval != nil {
@@ -113,6 +119,7 @@ func (l *Logger) Log(keyVals ...interface{}) {
 			record = append(record, &Pair{p.Key, p.Val, p.Eval, p.Type})
 		}
 	}
+	// 2. Log the regular key-value pairs that added before by Add() calls.
 	for _, p := range l.pairs {
 		if p.Eval != nil {
 			record = append(record, &Pair{p.Key, p.Eval.(func() string)(), p.Eval, p.Type})
@@ -120,34 +127,34 @@ func (l *Logger) Log(keyVals ...interface{}) {
 			record = append(record, &Pair{p.Key, p.Val, p.Eval, p.Type})
 		}
 	}
+	// 3. Log the regular key-value pairs that come in the args.
 	var (
-		key     interface{}
-		nextKey = true
+		key          string
+		shouldBeAKey = true
 	)
 	for _, val := range keyVals {
-		if nextKey {
+		if shouldBeAKey {
 			switch val.(type) {
+			case string:
+				key = val.(string)
 			case Pair:
 				record = append(record, val.(*Pair))
 				continue
+			default:
+				record = append(record, toPair(ErrorKey, fmt.Sprintf("non a string type (%T) for the key (%v)", val, val)))
+				key = UnpairedKey
 			}
-			key = val
-			nextKey = false
 		} else {
-			var p *Pair
-			if p = toPair(key.(string), val); p.Eval != nil {
-				p.Val = p.Eval.(func() string)()
-			}
-			record = append(record, p)
-			nextKey = true
+			record = append(record, toPair(key, val))
 		}
+		shouldBeAKey = !shouldBeAKey
 	}
-	//  add the value without the key for odd number for key-val pairs
-	if !nextKey {
+	if !shouldBeAKey && key != UnpairedKey {
 		record = append(record, toPair(UnpairedKey, key))
 	}
+	// 4. Pass the record to the collector.
+	// The collector will be unlocked inside sinkRecord().
 	collector.WaitFlush.Add(collector.Count)
-	// It will be unlocked inside sinkRecord().
 	collector.RLock()
 	go sinkRecord(record)
 	l.pairs = nil
@@ -159,26 +166,28 @@ func (l *Logger) Log(keyVals ...interface{}) {
 // will be restored.
 func (l *Logger) Add(keyVals ...interface{}) *Logger {
 	var (
-		key     interface{}
-		nextKey = true
+		key          string
+		shouldBeAKey = true
 	)
 	// key=val pairs
 	for _, val := range keyVals {
-		if nextKey {
+		if shouldBeAKey {
 			switch val.(type) {
+			case string:
+				key = val.(string)
 			case Pair:
 				l.pairs = append(l.pairs, val.(*Pair))
 				continue
+			default:
+				l.pairs = append(l.pairs, toPair(ErrorKey, fmt.Sprintf("non a string type (%T) for the key (%v)", val, val)))
+				continue
 			}
-			key = val
-			nextKey = false
 		} else {
-			l.pairs = append(l.pairs, toPair(key.(string), val))
-			nextKey = true
+			l.pairs = append(l.pairs, toPair(key, val))
 		}
+		shouldBeAKey = !shouldBeAKey
 	}
-	//  add the value without the key for odd number for key-val pairs
-	if !nextKey {
+	if !shouldBeAKey {
 		l.pairs = append(l.pairs, toPair(UnpairedKey, key))
 	}
 	return l
@@ -187,34 +196,34 @@ func (l *Logger) Add(keyVals ...interface{}) *Logger {
 // With defines a context for the logger. The context overrides pairs in the record.
 func (l *Logger) With(keyVals ...interface{}) *Logger {
 	var (
-		key     interface{}
-		keyStr  string
-		nextKey = true
+		key          string
+		shouldBeAKey = true
 	)
 	// key=val pairs
 	for _, val := range keyVals {
-		if nextKey {
+		if shouldBeAKey {
 			switch val.(type) {
+			case string:
+				key = val.(string)
 			case Pair:
-				l.context[keyStr] = val.(Pair)
+				l.context[key] = val.(Pair)
 				continue
 			case []*Pair:
 				for _, p := range val.([]*Pair) {
 					l.context[p.Key] = *p
 				}
 				continue
+			default:
+				l.context[ErrorKey] = *toPair(ErrorKey, fmt.Sprintf("non a string type (%T) for the key (%v)", val, val))
+				continue
 			}
-			key = val
-			nextKey = false
 		} else {
-			keyStr = key.(string)
-			l.context[keyStr] = *toPair(keyStr, val)
-			nextKey = true
+			l.context[key] = *toPair(key, val)
 		}
+		shouldBeAKey = !shouldBeAKey
 	}
-	//  add the value without the key for odd number for key-val pairs
-	if !nextKey {
-		l.context[UnpairedKey] = *toPair(UnpairedKey, key)
+	if !shouldBeAKey {
+		l.pairs = append(l.pairs, toPair(UnpairedKey, key))
 	}
 	return l
 }

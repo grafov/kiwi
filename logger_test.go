@@ -1,7 +1,7 @@
 package kiwi
 
 /*
-Copyright (c) 2016-2018, Alexander I.Grafov <grafov@gmail.com>
+Copyright (c) 2016-2019, Alexander I.Grafov <grafov@gmail.com>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -80,10 +80,11 @@ func TestLogger_ForkWithContext(t *testing.T) {
 	context := sublog.getContext()
 
 	if context["key"].Val != "value" {
+		t.Logf("expected %s got %v", "value", context["key"].Val)
 		t.Fail()
-
 	}
 	if context["key2"].Val != "123" {
+		t.Logf("expected %s got %v", "123", context["key2"].Val)
 		t.Fail()
 	}
 }
@@ -173,10 +174,10 @@ func TestLogger_LogNegativeIntValue_Logfmt(t *testing.T) {
 	out := SinkTo(output, AsLogfmt()).Start()
 	defer out.Close()
 
-	log.Log("k", 123)
+	log.Log("k", -123)
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != "k=123" {
+	if strings.TrimSpace(output.String()) != "k=-123" {
 		t.Fail()
 	}
 }
@@ -261,6 +262,60 @@ func TestLogger_LogTimeValue_Logfmt(t *testing.T) {
 	}
 }
 
+func TestLogger_LogIntKeyInvalid_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, AsLogfmt()).Start()
+	defer out.Close()
+
+	log.Log(123, 456)
+
+	out.Flush()
+	expected := `kiwi-error="non a string type (int) for the key (123)" message=456`
+	if strings.TrimSpace(output.String()) != expected {
+		t.Logf("expected %s got %v", expected, output.String())
+		t.Fail()
+	}
+}
+
+// The logger accepts string keys. In other cases it complains about
+// the wrong key type. It also assumes that each key followed by the
+// value.
+func TestLogger_LogThreeIntKeysInvalid_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, AsLogfmt()).Start()
+	defer out.Close()
+
+	log.Log(123, 456, 789)
+
+	out.Flush()
+	expected := `kiwi-error="non a string type (int) for the key (123)" message=456 kiwi-error="non a string type (int) for the key (789)"`
+	if strings.TrimSpace(output.String()) != expected {
+		t.Logf("expected %s got %v", expected, output.String())
+		t.Fail()
+	}
+}
+
+// The logger accepts string keys. In other cases it complains about
+// the wrong key type. It also assumes that each key followed by the
+// value.
+func TestLogger_LogFourIntKeysInvalid_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, AsLogfmt()).Start()
+	defer out.Close()
+
+	log.Log(12, 34, 56, 78)
+
+	out.Flush()
+	expected := `kiwi-error="non a string type (int) for the key (12)" message=34 kiwi-error="non a string type (int) for the key (56)" message=78`
+	if strings.TrimSpace(output.String()) != expected {
+		t.Logf("expected %s got %v", expected, output.String())
+		t.Fail()
+	}
+}
+
 // Test chaining for Add()
 func TestLogger_AddMixChained_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
@@ -271,7 +326,9 @@ func TestLogger_AddMixChained_Logfmt(t *testing.T) {
 	log.Add("k", "value2").Add("k2", 123).Add("k3", 3.14159265359).Log()
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != "k=\"value2\" k2=123 k3=3.14159265359e+00" {
+	expected := `k="value2" k2=123 k3=3.14159265359e+00`
+	if strings.TrimSpace(output.String()) != expected {
+		t.Logf("expected %s got %v", expected, output.String())
 		t.Fail()
 	}
 }

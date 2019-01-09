@@ -6,7 +6,7 @@ import (
 
 // Global context for all logger instances including global logger.
 
-/* Copyright (c) 2016-2018, Alexander I.Grafov <grafov@gmail.com>
+/* Copyright (c) 2016-2019, Alexander I.Grafov <grafov@gmail.com>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -43,42 +43,44 @@ type context struct {
 
 var globalContext context
 
+// With adds key-vals to the global logger context. It is safe for
+// concurrency.
 func With(keyVals ...interface{}) {
 	var (
-		key     interface{}
-		keyStr  string
-		nextKey = true
+		key          string
+		shouldBeAKey = true
 	)
-	// key=val pairs
 	globalContext.Lock()
 	for _, val := range keyVals {
-		if nextKey {
+		if shouldBeAKey {
 			switch val.(type) {
+			case string:
+				key = val.(string)
 			case Pair:
-				globalContext.m[keyStr] = val.(Pair)
+				globalContext.m[key] = val.(Pair)
 				continue
 			case []*Pair:
 				for _, p := range val.([]*Pair) {
 					globalContext.m[p.Key] = *p
 				}
 				continue
+			default:
+				globalContext.m[ErrorKey] = *toPair(ErrorKey, "wrong type for the key")
+				key = UnpairedKey
 			}
-			key = val
-			nextKey = false
 		} else {
-			keyStr = key.(string)
-			globalContext.m[keyStr] = *toPair(keyStr, val)
-			nextKey = true
+			globalContext.m[key] = *toPair(key, val)
 		}
+		shouldBeAKey = !shouldBeAKey
 	}
-	//  add the value without the key for odd number for key-val pairs
-	if !nextKey {
+	if !shouldBeAKey {
 		globalContext.m[UnpairedKey] = *toPair(UnpairedKey, key)
 	}
 	globalContext.Unlock()
 }
 
-// Without drops some keys from a context for the logger.
+// Without drops the keys from the context of the global logger. It is safe for
+// concurrency.
 func Without(keys ...string) {
 	globalContext.Lock()
 	for _, key := range keys {
@@ -88,7 +90,7 @@ func Without(keys ...string) {
 }
 
 // ResetContext resets the global context for the global logger and
-// its descendants.
+// its descendants. It is safe for concurrency.
 func ResetContext() {
 	globalContext.Lock()
 	globalContext.m = make(map[string]Pair, len(globalContext.m))
