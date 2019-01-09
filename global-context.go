@@ -73,7 +73,7 @@ func With(keyVals ...interface{}) {
 		}
 		shouldBeAKey = !shouldBeAKey
 	}
-	if !shouldBeAKey {
+	if !shouldBeAKey && key != UnpairedKey {
 		globalContext.m[UnpairedKey] = *toPair(UnpairedKey, key)
 	}
 	globalContext.Unlock()

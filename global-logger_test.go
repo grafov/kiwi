@@ -378,6 +378,25 @@ func TestGlobalLogger_WithKeyOnlyPassed_Logfmt(t *testing.T) {
 	}
 }
 
+// The logger and context accept even number of keys and values for
+// merging them into pairs. It the case with the odd number of values
+// the last value prepended with default key "message".
+func TestGlobalLogger_OddArgsInvalid_Logfmt(t *testing.T) {
+	kiwi.ResetContext()
+	output := bytes.NewBufferString("")
+	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
+
+	kiwi.With("orphan-context")
+	kiwi.Log("orphan-value")
+
+	out.Flush().Close()
+	expected := `message="orphan-context" message="orphan-value"`
+	if strings.TrimSpace(output.String()) != expected {
+		t.Logf("expected %s got %v", expected, output.String())
+		t.Fail()
+	}
+}
+
 // The context accepts string keys. In other cases it complains about
 // the wrong key type. It also assumes that each key followed by the
 // value.

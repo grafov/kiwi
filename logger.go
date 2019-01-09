@@ -215,14 +215,14 @@ func (l *Logger) With(keyVals ...interface{}) *Logger {
 				continue
 			default:
 				l.context[ErrorKey] = *toPair(ErrorKey, fmt.Sprintf("non a string type (%T) for the key (%v)", val, val))
-				continue
+				key = UnpairedKey
 			}
 		} else {
 			l.context[key] = *toPair(key, val)
 		}
 		shouldBeAKey = !shouldBeAKey
 	}
-	if !shouldBeAKey {
+	if !shouldBeAKey && key != UnpairedKey {
 		l.pairs = append(l.pairs, toPair(UnpairedKey, key))
 	}
 	return l
