@@ -41,10 +41,9 @@ import (
 
 // Possible kinds of logged values.
 const (
-	deleted = iota - 1
 	// BooleanVal and other types below commonly formatted unquoted.
 	// But it depends on the formatter.
-	BooleanVal
+	BooleanVal = iota
 	IntegerVal
 	FloatVal
 	ComplexVal

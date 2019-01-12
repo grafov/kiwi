@@ -70,7 +70,7 @@ type (
 )
 
 // Fork creates a new logger instance that inherited the context from
-// the global logger.
+// the global logger. Thi fuction is concurrent safe.
 func Fork() *Logger {
 	var newContext = make(map[string]Pair, len(globalContext.m)*2)
 	globalContext.RLock()
@@ -193,57 +193,8 @@ func (l *Logger) Add(keyVals ...interface{}) *Logger {
 	return l
 }
 
-// With defines a context for the logger. The context overrides pairs in the record.
-func (l *Logger) With(keyVals ...interface{}) *Logger {
-	var (
-		key          string
-		shouldBeAKey = true
-	)
-	// key=val pairs
-	for _, val := range keyVals {
-		if shouldBeAKey {
-			switch val.(type) {
-			case string:
-				key = val.(string)
-			case Pair:
-				l.context[key] = val.(Pair)
-				continue
-			case []*Pair:
-				for _, p := range val.([]*Pair) {
-					l.context[p.Key] = *p
-				}
-				continue
-			default:
-				l.context[ErrorKey] = *toPair(ErrorKey, fmt.Sprintf("non a string type (%T) for the key (%v)", val, val))
-				key = UnpairedKey
-			}
-		} else {
-			l.context[key] = *toPair(key, val)
-		}
-		shouldBeAKey = !shouldBeAKey
-	}
-	if !shouldBeAKey && key != UnpairedKey {
-		l.pairs = append(l.pairs, toPair(UnpairedKey, key))
-	}
-	return l
-}
-
-// Without drops some keys from a context for the logger.
-func (l *Logger) Without(keys ...string) *Logger {
-	for _, key := range keys {
-		delete(l.context, key)
-	}
-	return l
-}
-
 // Reset logger values added after last Log() call. It keeps context untouched.
 func (l *Logger) Reset() *Logger {
 	l.pairs = nil
-	return l
-}
-
-// ResetContext resets the context of the logger.
-func (l *Logger) ResetContext() *Logger {
-	l.context = make(map[string]Pair, len(l.context)*2)
 	return l
 }

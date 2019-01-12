@@ -1,6 +1,6 @@
 package kiwi
 
-// Global context for all logger instances including global logger.
+// The logger instance context.
 
 /* Copyright (c) 2016-2019, Alexander I.Grafov <grafov@gmail.com>
 All rights reserved.
@@ -32,25 +32,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ॐ तारे तुत्तारे तुरे स्व */
 
-import (
-	"sync"
-)
+import "fmt"
 
-type context struct {
-	sync.RWMutex
-	m map[string]Pair
-}
-
-var globalContext context
-
-// With adds key-vals to the global logger context. It is safe for
-// concurrency.
-func With(keyVals ...interface{}) {
+// With defines a context for the logger. The context overrides pairs
+// in the record. The function is not concurrent safe.
+func (l *Logger) With(keyVals ...interface{}) *Logger {
 	var (
 		key          string
 		shouldBeAKey = true
 	)
-	globalContext.Lock()
+	// key=val pairs
 	for _, val := range keyVals {
 		if shouldBeAKey {
 			switch val.(type) {
@@ -58,46 +49,40 @@ func With(keyVals ...interface{}) {
 				key = val.(string)
 			case *Pair:
 				p := val.(*Pair)
-				globalContext.m[p.Key] = *p
+				l.context[p.Key] = *p
 				continue
 			case []*Pair:
 				for _, p := range val.([]*Pair) {
-					globalContext.m[p.Key] = *p
+					l.context[p.Key] = *p
 				}
 				continue
 			default:
-				globalContext.m[ErrorKey] = *toPair(ErrorKey, "wrong type for the key")
+				l.context[ErrorKey] = *toPair(ErrorKey, fmt.Sprintf("non a string type (%T) for the key (%v)", val, val))
 				key = UnpairedKey
 			}
 		} else {
-			globalContext.m[key] = *toPair(key, val)
+			l.context[key] = *toPair(key, val)
 		}
 		shouldBeAKey = !shouldBeAKey
 	}
 	if !shouldBeAKey && key != UnpairedKey {
-		globalContext.m[UnpairedKey] = *toPair(UnpairedKey, key)
+		l.pairs = append(l.pairs, toPair(UnpairedKey, key))
 	}
-	globalContext.Unlock()
+	return l
 }
 
-// Without drops the keys from the context of the global logger. It is safe for
-// concurrency.
-func Without(keys ...string) {
-	globalContext.Lock()
+// Without drops some keys from a context for the logger. The function
+// is not concurrent safe.
+func (l *Logger) Without(keys ...string) *Logger {
 	for _, key := range keys {
-		delete(globalContext.m, key)
+		delete(l.context, key)
 	}
-	globalContext.Unlock()
+	return l
 }
 
-// ResetContext resets the global context for the global logger and
-// its descendants. It is safe for concurrency.
-func ResetContext() {
-	globalContext.Lock()
-	globalContext.m = make(map[string]Pair, len(globalContext.m))
-	globalContext.Unlock()
-}
-
-func init() {
-	globalContext.m = make(map[string]Pair)
+// ResetContext resets the context of the logger. The function is not
+// concurrent safe.
+func (l *Logger) ResetContext() *Logger {
+	l.context = make(map[string]Pair, len(l.context)*2)
+	return l
 }
