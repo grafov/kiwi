@@ -50,92 +50,92 @@ These parts separated by empty lines in each test function.
 */
 
 // Test logging of string value.
-func TestLogger_LogStringValue_Logfmt(t *testing.T) {
+func TestLogger_LogStringValue_JSON(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, AsLogfmt()).Start()
+	out := SinkTo(output, AsJSON()).Start()
 	defer out.Close()
 
 	log.Log("k", "The sample string with a lot of spaces.")
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != `k="The sample string with a lot of spaces."` {
+	if strings.TrimSpace(output.String()) != `{"k":"The sample string with a lot of spaces.", }` {
 		t.Fail()
 	}
 }
 
 // Test logging of byte array.
-func TestLogger_LogBytesValue_Logfmt(t *testing.T) {
+func TestLogger_LogBytesValue_JSON(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, AsLogfmt()).Start()
+	out := SinkTo(output, AsJSON()).Start()
 	defer out.Close()
 
 	log.Log("k", []byte("The sample string with a lot of spaces."))
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != `k="The sample string with a lot of spaces."` {
+	if strings.TrimSpace(output.String()) != `{"k":"The sample string with a lot of spaces.", }` {
 		t.Fail()
 	}
 }
 
 // Test logging of integer value.
-func TestLogger_LogIntValue_Logfmt(t *testing.T) {
+func TestLogger_LogIntValue_JSON(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, AsLogfmt()).Start()
+	out := SinkTo(output, AsJSON()).Start()
 	defer out.Close()
 
 	log.Log("k", 123)
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != "k=123" {
+	if strings.TrimSpace(output.String()) != `{"k":123, }` {
 		t.Fail()
 	}
 }
 
 // Test logging of negative integer value.
-func TestLogger_LogNegativeIntValue_Logfmt(t *testing.T) {
+func TestLogger_LogNegativeIntValue_JSON(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, AsLogfmt()).Start()
+	out := SinkTo(output, AsJSON()).Start()
 	defer out.Close()
 
 	log.Log("k", -123)
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != "k=-123" {
+	if strings.TrimSpace(output.String()) != `{"k":-123, }` {
 		t.Fail()
 	}
 }
 
 // Test logging of float value in default (scientific) format.
-func TestLogger_LogFloatValue_Logfmt(t *testing.T) {
+func TestLogger_LogFloatValue_JSON(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, AsLogfmt()).Start()
+	out := SinkTo(output, AsJSON()).Start()
 	defer out.Close()
 
 	log.Log("k", 3.14159265359)
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != "k=3.14159265359e+00" {
+	if strings.TrimSpace(output.String()) != `{"k":3.14159265359e+00, }` {
 		t.Fail()
 	}
 }
 
 // Test logging of float value in fixed format.
-func TestLogger_LogFixedFloatValue_Logfmt(t *testing.T) {
+func TestLogger_LogFixedFloatValue_JSON(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, AsLogfmt()).Start()
+	out := SinkTo(output, AsJSON()).Start()
 	defer out.Close()
 
 	FloatFormat = 'f'
 	log.Log("k", 3.14159265359)
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != "k=3.14159265359" {
+	if strings.TrimSpace(output.String()) != `{"k":3.14159265359, }` {
 		t.Fail()
 	}
 	// Turn back to default format.
@@ -143,40 +143,40 @@ func TestLogger_LogFixedFloatValue_Logfmt(t *testing.T) {
 }
 
 // Test logging of boolean value.
-func TestLogger_LogBoolValue_Logfmt(t *testing.T) {
+func TestLogger_LogBoolValue_JSON(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, AsLogfmt()).Start()
+	out := SinkTo(output, AsJSON()).Start()
 	defer out.Close()
 
 	log.Log("k", true, "k2", false)
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != "k=true k2=false" {
+	if strings.TrimSpace(output.String()) != `{"k":true, "k2":false, }` {
 		t.Fail()
 	}
 }
 
 // Test logging of complex number.
-func TestLogger_LogComplexValue_Logfmt(t *testing.T) {
+func TestLogger_LogComplexValue_JSON(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, AsLogfmt()).Start()
+	out := SinkTo(output, AsJSON()).Start()
 	defer out.Close()
 
 	log.Log("k", .12345E+5i, "k2", 1.e+0i)
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != "k=(0.000000+12345.000000i) k2=(0.000000+1.000000i)" {
+	if strings.TrimSpace(output.String()) != `{"k":(0.000000+12345.000000i), "k2":(0.000000+1.000000i), }` {
 		t.Fail()
 	}
 }
 
 // Test logging of time literal.
-func TestLogger_LogTimeValue_Logfmt(t *testing.T) {
+func TestLogger_LogTimeValue_JSON(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, AsLogfmt()).Start()
+	out := SinkTo(output, AsJSON()).Start()
 	value := time.Now()
 	valueString := value.Format(TimeLayout)
 	defer out.Close()
@@ -184,23 +184,27 @@ func TestLogger_LogTimeValue_Logfmt(t *testing.T) {
 	log.Log("k", value)
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != fmt.Sprintf("k=%s", valueString) {
+	expect := fmt.Sprintf(`{"k":"%s", }`, valueString)
+	got := strings.TrimSpace(output.String())
+	if got != expect {
+		t.Logf("expected %s got %v", expect, got)
 		t.Fail()
 	}
 }
 
-func TestLogger_LogIntKeyInvalid_Logfmt(t *testing.T) {
+func TestLogger_LogIntKeyInvalid_JSON(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, AsLogfmt()).Start()
+	out := SinkTo(output, AsJSON()).Start()
 	defer out.Close()
 
 	log.Log(123, 456)
 
 	out.Flush()
-	expected := `kiwi-error="non a string type (int) for the key (123)" message=456`
-	if strings.TrimSpace(output.String()) != expected {
-		t.Logf("expected %s got %v", expected, output.String())
+	expect := `{"kiwi-error":"non a string type (int) for the key (123)", "message":456, }`
+	got := strings.TrimSpace(output.String())
+	if got != expect {
+		t.Logf("expected %s got %v", expect, got)
 		t.Fail()
 	}
 }
@@ -208,18 +212,19 @@ func TestLogger_LogIntKeyInvalid_Logfmt(t *testing.T) {
 // The logger accepts string keys. In other cases it complains about
 // the wrong key type. It also assumes that each key followed by the
 // value.
-func TestLogger_LogThreeIntKeysInvalid_Logfmt(t *testing.T) {
+func TestLogger_LogThreeIntKeysInvalid_JSON(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, AsLogfmt()).Start()
+	out := SinkTo(output, AsJSON()).Start()
 	defer out.Close()
 
 	log.Log(123, 456, 789)
 
 	out.Flush()
-	expected := `kiwi-error="non a string type (int) for the key (123)" message=456 kiwi-error="non a string type (int) for the key (789)"`
-	if strings.TrimSpace(output.String()) != expected {
-		t.Logf("expected %s got %v", expected, output.String())
+	expect := `{"kiwi-error":"non a string type (int) for the key (123)", "message":456, "kiwi-error":"non a string type (int) for the key (789)", }`
+	got := strings.TrimSpace(output.String())
+	if got != expect {
+		t.Logf("expected %s got %v", expect, got)
 		t.Fail()
 	}
 }
@@ -227,60 +232,66 @@ func TestLogger_LogThreeIntKeysInvalid_Logfmt(t *testing.T) {
 // The logger accepts string keys. In other cases it complains about
 // the wrong key type. It also assumes that each key followed by the
 // value.
-func TestLogger_LogFourIntKeysInvalid_Logfmt(t *testing.T) {
+func TestLogger_LogFourIntKeysInvalid_JSON(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, AsLogfmt()).Start()
+	out := SinkTo(output, AsJSON()).Start()
 	defer out.Close()
 
 	log.Log(12, 34, 56, 78)
 
 	out.Flush()
-	expected := `kiwi-error="non a string type (int) for the key (12)" message=34 kiwi-error="non a string type (int) for the key (56)" message=78`
-	if strings.TrimSpace(output.String()) != expected {
-		t.Logf("expected %s got %v", expected, output.String())
+	expect := `{"kiwi-error":"non a string type (int) for the key (12)", "message":34, "kiwi-error":"non a string type (int) for the key (56)", "message":78, }`
+	got := strings.TrimSpace(output.String())
+	if got != expect {
+		t.Logf("expected %s got %v", expect, got)
 		t.Fail()
 	}
 }
 
 // Test chaining for Add()
-func TestLogger_AddMixChained_Logfmt(t *testing.T) {
+func TestLogger_AddMixChained_JSON(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, AsLogfmt()).Start()
+	out := SinkTo(output, AsJSON()).Start()
 	defer out.Close()
 
 	log.Add("k", "value2").Add("k2", 123).Add("k3", 3.14159265359).Log()
 
 	out.Flush()
-	expected := `k="value2" k2=123 k3=3.14159265359e+00`
-	if strings.TrimSpace(output.String()) != expected {
-		t.Logf("expected %s got %v", expected, output.String())
+	expect := `{"k":"value2", "k2":123, "k3":3.14159265359e+00, }`
+	got := strings.TrimSpace(output.String())
+	if got != expect {
+		t.Logf("expected %s got %v", expect, got)
 		t.Fail()
 	}
 }
 
 // Test log with the context value.
-func TestLogger_WithContextPassed_Logfmt(t *testing.T) {
+func TestLogger_WithContextPassed_JSON(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, AsLogfmt()).Start()
+	out := SinkTo(output, AsJSON()).Start()
 	defer out.Close()
 
 	log.With("key1", "value")
 	log.Log("key2", "value")
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != `key1="value" key2="value"` {
+	expect := `{"key1":"value", "key2":"value", }`
+	got := strings.TrimSpace(output.String())
+	if got != expect {
+		t.Logf("expected %s got %v", expect, got)
 		t.Fail()
 	}
+
 }
 
 // Test log with adding then removing the context.
-func TestLogger_WithoutContextPassed_Logfmt(t *testing.T) {
+func TestLogger_WithoutContextPassed_JSON(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, AsLogfmt()).Start()
+	out := SinkTo(output, AsJSON()).Start()
 	defer out.Close()
 
 	// add the context
@@ -291,16 +302,16 @@ func TestLogger_WithoutContextPassed_Logfmt(t *testing.T) {
 	log.Without("key1").Log()
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != `key2="value"` {
+	if strings.TrimSpace(output.String()) != `{"key2":"value", }` {
 		t.Fail()
 	}
 }
 
 // Test log with adding then reset the context.
-func TestLogger_ResetContext_Logfmt(t *testing.T) {
+func TestLogger_ResetContext_JSON(t *testing.T) {
 	output := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(output, AsLogfmt()).Start()
+	out := SinkTo(output, AsJSON()).Start()
 	defer out.Close()
 
 	// add the context
@@ -311,7 +322,7 @@ func TestLogger_ResetContext_Logfmt(t *testing.T) {
 	log.ResetContext().Log()
 
 	out.Flush()
-	if strings.TrimSpace(output.String()) != `key2="value"` {
+	if strings.TrimSpace(output.String()) != `{"key2":"value", }` {
 		t.Fail()
 	}
 }
