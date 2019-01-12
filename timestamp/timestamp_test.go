@@ -1,8 +1,7 @@
 package timestamp
 
-// Helper for using timestamp in the log output
-
-/* Copyright (c) 2016-2018, Alexander I.Grafov <grafov@gmail.com>
+/*
+Copyright (c) 2016, Alexander I.Grafov <grafov@gmail.com>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -30,23 +29,44 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-ॐ तारे तुत्तारे तुरे स्व */
+ॐ तारे तुत्तारे तुरे स्व
+
+All tests consists of three parts:
+
+- arrange structures and initialize objects for use in tests
+- act on testing object
+- check and assert on results
+
+These parts separated by empty lines in each test function.
+*/
 
 import (
-	"time"
+	"bytes"
+	"strings"
+	"testing"
 
 	"github.com/grafov/kiwi"
 )
 
-// DefaultKey defines the default key for the timestamp value.
-var DefaultKey = "at"
+// Test of log to the stopped sink.
+func TestSink_LogToStoppedSink_Logfmt(t *testing.T) {
+	out := bytes.NewBufferString("")
+	log := kiwi.New()
+	sink := kiwi.SinkTo(out, kiwi.AsLogfmt()).Start()
 
-// Set adds "timestamp" field to the context.
-func Set(format string) *kiwi.Pair {
-	return &kiwi.Pair{
-		Key:  DefaultKey,
-		Val:  "",
-		Eval: func() string { return time.Now().Format(format) },
-		Type: kiwi.TimeVal,
+	log.With(Set(kiwi.TimeLayout))
+	log.Log("key", "value")
+
+	sink.Flush().Close()
+	got := out.String()
+	expected := `at=`
+	if !strings.Contains(got, expected) {
+		t.Logf("expected %s got %v", expected, got)
+		t.Fail()
+	}
+	expected = `key="value"`
+	if !strings.Contains(got, expected) {
+		t.Logf("expected %s got %v", expected, got)
+		t.Fail()
 	}
 }
