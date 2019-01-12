@@ -38,7 +38,7 @@ import (
 
 type context struct {
 	sync.RWMutex
-	m map[string]Pair
+	m map[string]*Pair
 }
 
 var globalContext context
@@ -58,24 +58,24 @@ func With(keyVals ...interface{}) {
 				key = val.(string)
 			case *Pair:
 				p := val.(*Pair)
-				globalContext.m[p.Key] = *p
+				globalContext.m[p.Key] = p
 				continue
 			case []*Pair:
 				for _, p := range val.([]*Pair) {
-					globalContext.m[p.Key] = *p
+					globalContext.m[p.Key] = p
 				}
 				continue
 			default:
-				globalContext.m[ErrorKey] = *toPair(ErrorKey, "wrong type for the key")
+				globalContext.m[ErrorKey] = toPair(ErrorKey, "wrong type for the key")
 				key = UnpairedKey
 			}
 		} else {
-			globalContext.m[key] = *toPair(key, val)
+			globalContext.m[key] = toPair(key, val)
 		}
 		shouldBeAKey = !shouldBeAKey
 	}
 	if !shouldBeAKey && key != UnpairedKey {
-		globalContext.m[UnpairedKey] = *toPair(UnpairedKey, key)
+		globalContext.m[UnpairedKey] = toPair(UnpairedKey, key)
 	}
 	globalContext.Unlock()
 }
@@ -94,10 +94,10 @@ func Without(keys ...string) {
 // its descendants. It is safe for concurrency.
 func ResetContext() {
 	globalContext.Lock()
-	globalContext.m = make(map[string]Pair, len(globalContext.m))
+	globalContext.m = make(map[string]*Pair, len(globalContext.m))
 	globalContext.Unlock()
 }
 
 func init() {
-	globalContext.m = make(map[string]Pair)
+	globalContext.m = make(map[string]*Pair)
 }

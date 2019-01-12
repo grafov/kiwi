@@ -45,7 +45,7 @@ type (
 	// concurrent usage so then you need logger for another goroutine you will need clone existing instance.
 	// See Logger.New() method below for details.
 	Logger struct {
-		context map[string]Pair
+		context map[string]*Pair
 		pairs   []*Pair
 	}
 	// Stringer is the same as fmt.Stringer
@@ -72,7 +72,7 @@ type (
 // Fork creates a new logger instance that inherited the context from
 // the global logger. Thi fuction is concurrent safe.
 func Fork() *Logger {
-	var newContext = make(map[string]Pair, len(globalContext.m)*2)
+	var newContext = make(map[string]*Pair, len(globalContext.m)*2)
 	globalContext.RLock()
 	for key, pair := range globalContext.m {
 		newContext[key] = pair
@@ -84,7 +84,7 @@ func Fork() *Logger {
 // New creates a new logger instance but not copy context from the
 // global logger.
 func New() *Logger {
-	var newContext = make(map[string]Pair)
+	var newContext = make(map[string]*Pair)
 	return &Logger{context: newContext}
 }
 
@@ -92,7 +92,7 @@ func New() *Logger {
 // from the logger from the parent logger. But the values of the
 // current record of the parent logger discarded.
 func (l *Logger) Fork() *Logger {
-	var newContext = make(map[string]Pair, len(l.context)*2)
+	var newContext = make(map[string]*Pair, len(l.context)*2)
 	for key, pair := range l.context {
 		newContext[key] = pair
 	}
@@ -102,7 +102,7 @@ func (l *Logger) Fork() *Logger {
 // New creates a new instance of the logger. It not inherited the
 // context of the parent logger.
 func (l *Logger) New() *Logger {
-	var newContext = make(map[string]Pair)
+	var newContext = make(map[string]*Pair)
 	return &Logger{context: newContext}
 }
 

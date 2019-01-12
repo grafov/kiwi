@@ -60,7 +60,7 @@ func (l *Logger) getRecords() []*Pair {
 }
 
 // Get context from logger. Helper for testing.
-func (l *Logger) getContext() map[string]Pair {
+func (l *Logger) getContext() map[string]*Pair {
 	return l.context
 }
 
@@ -89,19 +89,17 @@ func TestLogger_ForkWithContext(t *testing.T) {
 	}
 }
 
-// Test of creating a fork the logger from the existing logger.
+// Test of a new sublogger without context inheritance (because it
+// should use Fork() for copy the context).
 func TestLogger_NewWithContext(t *testing.T) {
 	log := New().With("key", "value", "key2", 123)
 
 	sublog := log.New()
+
 	context := sublog.getContext()
-
-	if context["key"].Val == "value" {
-		t.Fail()
-
-	}
-	if context["key2"].Val == "123" {
-		t.Fail()
+	if len(context) != 0 {
+		t.Logf("expected empty context but got %v", context)
+		t.FailNow()
 	}
 }
 
@@ -113,11 +111,17 @@ func TestLogger_ForkWithoutContext(t *testing.T) {
 	sublog := log.Fork()
 	context := sublog.getContext()
 
-	if context["key"].Val == "value" {
+	if context == nil {
+		t.Logf("context is nil but should not")
+		t.FailNow()
+	}
+	if context["key"] != nil {
+		t.Logf(`expected "nil" got %v`, context["key"])
 		t.Fail()
 
 	}
-	if context["key2"].Val != "123" {
+	if context["key2"] == nil || context["key2"].Val != "123" {
+		t.Logf(`expected "value" got %v`, context["key2"])
 		t.Fail()
 	}
 }

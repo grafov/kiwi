@@ -57,16 +57,14 @@ func TestWhere_GetAllInfo_Logfmt(t *testing.T) {
 	log.Log("key", "value")
 
 	out.Flush().Close()
-	if !strings.Contains(stream.String(), `lineno=`) {
-		println(stream.String())
+	expected := `file="`
+	if !strings.Contains(stream.String(), expected) {
+		t.Logf("expected %s got %v", expected, stream.String())
 		t.Fail()
 	}
-	if !strings.Contains(stream.String(), `file="`) {
-		println(stream.String())
-		t.Fail()
-	}
-	if !strings.Contains(stream.String(), `function="`) {
-		println(stream.String())
+	expected = `function="`
+	if !strings.Contains(stream.String(), expected) {
+		t.Logf("expected %s got %v", expected, stream.String())
 		t.Fail()
 	}
 }
@@ -80,16 +78,14 @@ func TestWhereGlobal_GetAllInfo_Logfmt(t *testing.T) {
 	kiwi.Log("key", "value")
 
 	out.Flush().Close()
-	if !strings.Contains(stream.String(), `lineno=`) {
-		println(stream.String())
+	expected := `file="`
+	if !strings.Contains(stream.String(), expected) {
+		t.Logf("expected %s got %v", expected, stream.String())
 		t.Fail()
 	}
-	if !strings.Contains(stream.String(), `file="`) {
-		println(stream.String())
-		t.Fail()
-	}
-	if !strings.Contains(stream.String(), `function="`) {
-		println(stream.String())
+	expected = `function="`
+	if !strings.Contains(stream.String(), expected) {
+		t.Logf("expected %s got %v", expected, stream.String())
 		t.Fail()
 	}
 }

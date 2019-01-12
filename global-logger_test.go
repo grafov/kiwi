@@ -352,9 +352,20 @@ func TestGlobalLogger_WithOddContextPassed_Logfmt(t *testing.T) {
 	kiwi.Log("key2", "value")
 
 	out.Flush().Close()
-	expected := `key1="value" message="orphan-value" key2="value"`
-	if strings.TrimSpace(output.String()) != expected {
-		t.Logf("expected %s got %v", expected, output.String())
+	got := output.String()
+	expected := `key1="value"`
+	if !strings.Contains(got, expected) {
+		t.Logf("expected %s got %v", expected, got)
+		t.Fail()
+	}
+	expected = `message="orphan-value"`
+	if !strings.Contains(got, expected) {
+		t.Logf("expected %s got %v", expected, got)
+		t.Fail()
+	}
+	expected = `key2="value"`
+	if !strings.Contains(got, expected) {
+		t.Logf("expected %s got %v", expected, got)
 		t.Fail()
 	}
 }

@@ -49,19 +49,19 @@ func (l *Logger) With(keyVals ...interface{}) *Logger {
 				key = val.(string)
 			case *Pair:
 				p := val.(*Pair)
-				l.context[p.Key] = *p
+				l.context[p.Key] = p
 				continue
 			case []*Pair:
 				for _, p := range val.([]*Pair) {
-					l.context[p.Key] = *p
+					l.context[p.Key] = p
 				}
 				continue
 			default:
-				l.context[ErrorKey] = *toPair(ErrorKey, fmt.Sprintf("non a string type (%T) for the key (%v)", val, val))
+				l.context[ErrorKey] = toPair(ErrorKey, fmt.Sprintf("non a string type (%T) for the key (%v)", val, val))
 				key = UnpairedKey
 			}
 		} else {
-			l.context[key] = *toPair(key, val)
+			l.context[key] = toPair(key, val)
 		}
 		shouldBeAKey = !shouldBeAKey
 	}
@@ -83,6 +83,6 @@ func (l *Logger) Without(keys ...string) *Logger {
 // ResetContext resets the context of the logger. The function is not
 // concurrent safe.
 func (l *Logger) ResetContext() *Logger {
-	l.context = make(map[string]Pair, len(l.context)*2)
+	l.context = make(map[string]*Pair, len(l.context)*2)
 	return l
 }
