@@ -47,6 +47,8 @@ func New() *Logger {
 // with severity "level" = "fatal". Default severity name "level" may be changed
 // globally for all package with UseLevelName(). There is nothing special in "level"
 // key so it may be overrided with any value what you want.
+//
+// By design Fatal level doesn't call os.Exit() like other loggers do.
 func (l *Logger) Fatal(keyVals ...interface{}) {
 	if len(keyVals) == 1 {
 		l.Log(LevelName, "fatal", kiwi.UnpairedKey, keyVals[0])
