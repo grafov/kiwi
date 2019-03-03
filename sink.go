@@ -52,24 +52,14 @@ const (
 // Each sink has its own channel.
 var collector struct {
 	sync.RWMutex
-	Sinks     []*Sink
-	Count     int
-	WaitFlush sync.WaitGroup
+	Sinks []*Sink
+	Count int
 }
 
-// FlushAll waits for all sinks to be flushed.
+// FlushAll should wait for all the sinks to be flushed. It does
+// nothing currently. It has left for compatibility with old API.
 func FlushAll() {
-	var w sync.WaitGroup
-	collector.RLock()
-	for _, s := range collector.Sinks {
-		w.Add(1)
-		go func(s *Sink) {
-			s.Flush()
-			w.Done()
-		}(s)
-	}
-	collector.RUnlock()
-	w.Wait()
+	return
 }
 
 type (
@@ -77,17 +67,8 @@ type (
 	// and decides how to filter them. Each output wraps its own io.Writer.
 	// Sink methods are safe for concurrent usage.
 	Sink struct {
-		id uint
-		In chan []*Pair
-		/*
-
-			l1 ptr
-			l2 ptr
-			l3 ptr
-
-			[]*Pair
-			[]endMarks  - ссылки на концы строк в []*Pair
-		*/
+		id     uint
+		In     chan chain
 		close  chan struct{}
 		writer io.Writer
 		format Formatter
@@ -97,6 +78,10 @@ type (
 		positiveFilters map[string]Filter
 		negativeFilters map[string]Filter
 		hiddenKeys      map[string]bool
+	}
+	chain struct {
+		wg    *sync.WaitGroup
+		pairs []*Pair
 	}
 )
 
@@ -117,7 +102,7 @@ func SinkTo(w io.Writer, fn Formatter) *Sink {
 	var state = sinkStopped
 	collector.RUnlock()
 	sink := &Sink{
-		In:              make(chan []*Pair, 16),
+		In:              make(chan chain, 16),
 		close:           make(chan struct{}),
 		format:          fn,
 		state:           &state,
@@ -130,8 +115,8 @@ func SinkTo(w io.Writer, fn Formatter) *Sink {
 	sink.id = uint(collector.Count)
 	collector.Sinks = append(collector.Sinks, sink)
 	collector.Count++
-	go processSink(sink)
 	collector.Unlock()
+	go processSink(sink)
 	return sink
 }
 
@@ -325,28 +310,28 @@ func (s *Sink) Start() *Sink {
 
 // Close closes the sink. It flushes records for the sink before closing.
 func (s *Sink) Close() {
+	return
 	if atomic.LoadInt32(s.state) > sinkClosed {
-		s.Flush()
+		//		s.Flush()
 		atomic.StoreInt32(s.state, sinkClosed)
-		collector.Lock()
 		s.close <- struct{}{}
+		collector.Lock()
 		collector.Count--
 		collector.Sinks = append(collector.Sinks[0:s.id], collector.Sinks[s.id+1:]...)
 		collector.Unlock()
 	}
 }
 
-// Flush waits that all previously sent to the output records worked.
+// Flush waits that all previously sent to the output records
+// worked. It does nothing currently. It has left for compatibility
+// with old API.
 func (s *Sink) Flush() *Sink {
-	if atomic.LoadInt32(s.state) > sinkClosed {
-		collector.WaitFlush.Wait()
-	}
 	return s
 }
 
 func processSink(s *Sink) {
 	var (
-		record []*Pair
+		record chain
 		ok     bool
 	)
 	for {
@@ -359,17 +344,16 @@ func processSink(s *Sink) {
 				s.negativeFilters = nil
 				s.hiddenKeys = nil
 				s.Unlock()
+				record.wg.Done()
 				return
 			}
 			if atomic.LoadInt32(s.state) < sinkActive {
-				collector.WaitFlush.Done()
+				record.wg.Done()
 				continue
 			}
 			s.RLock()
-			var (
-				filter Filter
-			)
-			for _, pair := range record {
+			var filter Filter
+			for _, pair := range record.pairs {
 				// Negative conditions have highest priority
 				if filter, ok = s.negativeFilters[pair.Key]; ok {
 					if filter.Check(pair.Key, pair.Val) {
@@ -383,16 +367,17 @@ func processSink(s *Sink) {
 					}
 				}
 			}
-			s.formatRecord(record)
+			s.formatRecord(record.pairs)
 		skipRecord:
 			s.RUnlock()
-			collector.WaitFlush.Done()
+			record.wg.Done()
 		case <-s.close:
 			s.Lock()
 			s.positiveFilters = nil
 			s.negativeFilters = nil
 			s.hiddenKeys = nil
 			s.Unlock()
+			record.wg.Done()
 			return
 		}
 	}
@@ -410,15 +395,14 @@ func (s *Sink) formatRecord(record []*Pair) {
 }
 
 func sinkRecord(rec []*Pair) {
-	go func(rec []*Pair) {
-		collector.RLock()
-		for _, s := range collector.Sinks {
-			if atomic.LoadInt32(s.state) == sinkActive {
-				s.In <- rec
-			} else {
-				collector.WaitFlush.Done()
-			}
+	var wg sync.WaitGroup
+	collector.RLock()
+	for _, s := range collector.Sinks {
+		if atomic.LoadInt32(s.state) == sinkActive {
+			wg.Add(1)
+			s.In <- chain{&wg, rec}
 		}
-		collector.RUnlock()
-	}(rec)
+	}
+	collector.RUnlock()
+	wg.Wait()
 }

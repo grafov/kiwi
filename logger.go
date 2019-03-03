@@ -153,7 +153,6 @@ func (l *Logger) Log(keyVals ...interface{}) {
 		record = append(record, toPair(UnpairedKey, key))
 	}
 	// 4. Pass the record to the collector.
-	collector.WaitFlush.Add(collector.Count)
 	sinkRecord(record)
 	l.pairs = nil
 }
