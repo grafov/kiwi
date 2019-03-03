@@ -87,8 +87,6 @@ func Log(keyVals ...interface{}) {
 		record = append(record, toPair(UnpairedKey, key))
 	}
 	// 2. Pass the record to the collector.
-	// It will be unlocked inside sinkRecord().
 	collector.WaitFlush.Add(collector.Count)
-	collector.RLock()
-	go sinkRecord(record)
+	sinkRecord(record)
 }

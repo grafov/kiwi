@@ -410,13 +410,15 @@ func (s *Sink) formatRecord(record []*Pair) {
 }
 
 func sinkRecord(rec []*Pair) {
-	for _, s := range collector.Sinks {
-		if atomic.LoadInt32(s.state) == sinkActive {
-			s.In <- rec
-		} else {
-			collector.WaitFlush.Done()
+	go func(rec []*Pair) {
+		collector.RLock()
+		for _, s := range collector.Sinks {
+			if atomic.LoadInt32(s.state) == sinkActive {
+				s.In <- rec
+			} else {
+				collector.WaitFlush.Done()
+			}
 		}
-	}
-	// It was locked in Log() calls.
-	collector.RUnlock()
+		collector.RUnlock()
+	}(rec)
 }
