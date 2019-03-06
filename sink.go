@@ -56,12 +56,6 @@ var collector struct {
 	count int
 }
 
-// FlushAll should wait for all the sinks to be flushed. It does
-// nothing currently. It has left for compatibility with old API.
-func FlushAll() {
-	return
-}
-
 type (
 	// Sink used for filtering incoming log records from all logger instances
 	// and decides how to filter them. Each output wraps its own io.Writer.
@@ -321,13 +315,6 @@ func (s *Sink) Close() {
 		collector.sinks = append(collector.sinks[0:s.id], collector.sinks[s.id+1:]...)
 		collector.Unlock()
 	}
-}
-
-// Flush waits that all previously sent to the output records
-// worked. It does nothing currently. It has left for compatibility
-// with old API.
-func (s *Sink) Flush() *Sink {
-	return s
 }
 
 func processSink(s *Sink) {
