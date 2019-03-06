@@ -52,8 +52,8 @@ const (
 // Each sink has its own channel.
 var collector struct {
 	sync.RWMutex
-	Sinks []*Sink
-	Count int
+	sinks []*Sink
+	count int
 }
 
 // FlushAll should wait for all the sinks to be flushed. It does
@@ -92,29 +92,31 @@ type (
 // That allows firstly setup filters before sink will really accept any records.
 func SinkTo(w io.Writer, fn Formatter) *Sink {
 	collector.RLock()
-	for i, sink := range collector.Sinks {
+	for i, sink := range collector.sinks {
 		if sink.writer == w {
-			collector.Sinks[i].format = fn
+			collector.sinks[i].format = fn
 			collector.RUnlock()
-			return collector.Sinks[i]
+			return collector.sinks[i]
 		}
 	}
-	var state = sinkStopped
 	collector.RUnlock()
-	sink := &Sink{
-		In:              make(chan chain, 16),
-		close:           make(chan struct{}),
-		format:          fn,
-		state:           &state,
-		writer:          w,
-		positiveFilters: make(map[string]Filter),
-		negativeFilters: make(map[string]Filter),
-		hiddenKeys:      make(map[string]bool),
-	}
+	var (
+		state = sinkStopped
+		sink  = &Sink{
+			In:              make(chan chain, 16),
+			close:           make(chan struct{}),
+			format:          fn,
+			state:           &state,
+			writer:          w,
+			positiveFilters: make(map[string]Filter),
+			negativeFilters: make(map[string]Filter),
+			hiddenKeys:      make(map[string]bool),
+		}
+	)
 	collector.Lock()
-	sink.id = uint(collector.Count)
-	collector.Sinks = append(collector.Sinks, sink)
-	collector.Count++
+	sink.id = uint(collector.count)
+	collector.sinks = append(collector.sinks, sink)
+	collector.count++
 	collector.Unlock()
 	go processSink(sink)
 	return sink
@@ -316,8 +318,8 @@ func (s *Sink) Close() {
 		atomic.StoreInt32(s.state, sinkClosed)
 		s.close <- struct{}{}
 		collector.Lock()
-		collector.Count--
-		collector.Sinks = append(collector.Sinks[0:s.id], collector.Sinks[s.id+1:]...)
+		collector.count--
+		collector.sinks = append(collector.sinks[0:s.id], collector.sinks[s.id+1:]...)
 		collector.Unlock()
 	}
 }
@@ -397,7 +399,7 @@ func (s *Sink) formatRecord(record []*Pair) {
 func sinkRecord(rec []*Pair) {
 	var wg sync.WaitGroup
 	collector.RLock()
-	for _, s := range collector.Sinks {
+	for _, s := range collector.sinks {
 		if atomic.LoadInt32(s.state) == sinkActive {
 			wg.Add(1)
 			s.In <- chain{&wg, rec}
