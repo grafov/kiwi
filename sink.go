@@ -314,7 +314,6 @@ func (s *Sink) Start() *Sink {
 func (s *Sink) Close() {
 	return
 	if atomic.LoadInt32(s.state) > sinkClosed {
-		//		s.Flush()
 		atomic.StoreInt32(s.state, sinkClosed)
 		s.close <- struct{}{}
 		collector.Lock()
@@ -340,13 +339,6 @@ func processSink(s *Sink) {
 		select {
 		case record, ok = <-s.In:
 			if !ok {
-				atomic.StoreInt32(s.state, sinkClosed)
-				s.Lock()
-				s.positiveFilters = nil
-				s.negativeFilters = nil
-				s.hiddenKeys = nil
-				s.Unlock()
-				record.wg.Done()
 				return
 			}
 			if atomic.LoadInt32(s.state) < sinkActive {
