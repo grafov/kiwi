@@ -358,7 +358,6 @@ func processSink(s *Sink) {
 			s.negativeFilters = nil
 			s.hiddenKeys = nil
 			s.Unlock()
-			record.wg.Done()
 			return
 		}
 	}
@@ -375,6 +374,8 @@ func (s *Sink) formatRecord(record []*Pair) {
 	s.writer.Write(s.format.Finish())
 }
 
+const flushTimeout = 3 * time.Second
+
 func sinkRecord(rec []*Pair) {
 	var wg sync.WaitGroup
 	collector.RLock()
@@ -385,5 +386,15 @@ func sinkRecord(rec []*Pair) {
 		}
 	}
 	collector.RUnlock()
-	wg.Wait()
+	var c = make(chan struct{})
+	go func() {
+		defer close(c)
+		wg.Wait()
+	}()
+	select {
+	case <-c:
+		return
+	case <-time.After(flushTimeout):
+		return
+	}
 }
