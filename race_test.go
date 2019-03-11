@@ -127,6 +127,32 @@ func TestRace_ForkFork_Logfmt(t *testing.T) {
 	out.Flush()
 }
 
+// Test logging of string value.
+func TestRace_ForkInside_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	out := SinkTo(output, AsLogfmt()).Start()
+	defer out.Close()
+	var (
+		wg  sync.WaitGroup
+		log = Fork()
+	)
+	log.With("logger", "global")
+	log.Log("k", "The sample string.", "instance", 0)
+
+	for i := 0; i < 100; i++ {
+		wg.Add(1)
+		go func(i int, log *Logger) {
+			l := log.Fork().With("logger", i)
+			l.Log("k", "The sample string.", "instance", i)
+			wg.Done()
+		}(i, log)
+	}
+	log.Log("k", "The sample string.", "instance", 0)
+	wg.Wait()
+
+	out.Flush()
+}
+
 // // Test logging of byte array.
 // func TestLogger_LogBytesValue_Logfmt(t *testing.T) {
 //	output := bytes.NewBufferString("")
