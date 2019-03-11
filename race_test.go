@@ -34,6 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import (
 	"bytes"
+	"sync"
 	"testing"
 )
 
@@ -47,18 +48,81 @@ These parts separated by empty lines in each test function.
 */
 
 // Test logging of string value.
-func TestRace_LogStringValue_Logfmt(t *testing.T) {
+func TestRace_NewFromGlobal_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	out := SinkTo(output, AsLogfmt()).Start()
 	defer out.Close()
+
 	for i := 0; i < 100; i++ {
 		go func(i int) {
 			log := New()
 			log.Log("k", "The sample string.", "instance", i)
 		}(i)
 	}
-
 	Log("k", "The sample string.", "instance", 0)
+
+	out.Flush()
+}
+
+// Test logging of string value.
+func TestRace_ForkFromGlobal_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	out := SinkTo(output, AsLogfmt()).Start()
+	defer out.Close()
+
+	for i := 0; i < 100; i++ {
+		go func(i int) {
+			log := Fork()
+			log.Log("k", "The sample string.", "instance", i)
+		}(i)
+	}
+	Log("k", "The sample string.", "instance", 0)
+
+	out.Flush()
+}
+
+// Test logging of string value.
+func TestRace_Fork_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	out := SinkTo(output, AsLogfmt()).Start()
+	defer out.Close()
+	var (
+		wg sync.WaitGroup
+	)
+
+	for i := 0; i < 100; i++ {
+		wg.Add(1)
+		go func(i int) {
+			log := Fork()
+			log.Log("k", "The sample string.", "instance", i)
+			wg.Done()
+		}(i)
+	}
+	Log("k", "The sample string.", "instance", 0)
+	wg.Wait()
+
+	out.Flush()
+}
+
+// Test logging of string value.
+func TestRace_ForkFork_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	out := SinkTo(output, AsLogfmt()).Start()
+	defer out.Close()
+	var (
+		wg sync.WaitGroup
+	)
+
+	for i := 0; i < 100; i++ {
+		wg.Add(1)
+		go func(i int) {
+			log := Fork().Fork()
+			log.Log("k", "The sample string.", "instance", i)
+			wg.Done()
+		}(i)
+	}
+	Log("k", "The sample string.", "instance", 0)
+	wg.Wait()
 
 	out.Flush()
 }
