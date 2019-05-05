@@ -72,10 +72,10 @@ type (
 // Fork creates a new logger instance that inherited the context from
 // the global logger. Thi fuction is concurrent safe.
 func Fork() *Logger {
-	var newContext = make(map[string]*Pair, len(globalContext.m)*2)
+	var newContext = make(map[string]*Pair, len(globalContext.l)*2)
 	globalContext.RLock()
-	for key, pair := range globalContext.m {
-		newContext[key] = pair
+	for _, p := range globalContext.l {
+		newContext[p.Key] = p
 	}
 	globalContext.RUnlock()
 	return &Logger{context: newContext}

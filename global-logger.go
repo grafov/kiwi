@@ -43,7 +43,7 @@ func Log(keyVals ...interface{}) {
 	// 1. Log the context.
 	var record = make([]*Pair, 0, len(keyVals)/2+1)
 	globalContext.RLock()
-	for _, p := range globalContext.m {
+	for _, p := range globalContext.l {
 		if p.Eval != nil {
 			// Evaluate delayed context value here before output.
 			record = append(record, &Pair{p.Key, p.Eval.(func() string)(), p.Eval, p.Type})

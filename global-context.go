@@ -36,12 +36,12 @@ import (
 	"sync"
 )
 
+var globalContext context
+
 type context struct {
 	sync.RWMutex
-	m map[string]*Pair
+	l []*Pair
 }
-
-var globalContext context
 
 // With adds key-vals to the global logger context. It is safe for
 // concurrency.
@@ -57,25 +57,33 @@ func With(keyVals ...interface{}) {
 			case string:
 				key = val.(string)
 			case *Pair:
-				p := val.(*Pair)
-				globalContext.m[p.Key] = p
+				v := val.(*Pair)
+				for _, p := range globalContext.l {
+					if p.Key == v.Key {
+						globalContext.l = append(globalContext.l, val.(*Pair))
+					}
+				}
 				continue
 			case []*Pair:
-				for _, p := range val.([]*Pair) {
-					globalContext.m[p.Key] = p
+				for _, v := range val.([]*Pair) {
+					for _, p := range globalContext.l {
+						if p.Key == v.Key {
+							globalContext.l = append(globalContext.l, v)
+						}
+					}
 				}
 				continue
 			default:
-				globalContext.m[ErrorKey] = toPair(ErrorKey, "wrong type for the key")
+				globalContext.l = append(globalContext.l, toPair(ErrorKey, "wrong type for the key"))
 				key = UnpairedKey
 			}
 		} else {
-			globalContext.m[key] = toPair(key, val)
+			globalContext.l = append(globalContext.l, toPair(key, val))
 		}
 		shouldBeAKey = !shouldBeAKey
 	}
 	if !shouldBeAKey && key != UnpairedKey {
-		globalContext.m[UnpairedKey] = toPair(UnpairedKey, key)
+		globalContext.l = append(globalContext.l, toPair(UnpairedKey, key))
 	}
 	globalContext.Unlock()
 }
@@ -85,7 +93,11 @@ func With(keyVals ...interface{}) {
 func Without(keys ...string) {
 	globalContext.Lock()
 	for _, key := range keys {
-		delete(globalContext.m, key)
+		for i, p := range globalContext.l {
+			if key == p.Key {
+				globalContext.l = append(globalContext.l[:i], globalContext.l[i+1:]...)
+			}
+		}
 	}
 	globalContext.Unlock()
 }
@@ -94,10 +106,6 @@ func Without(keys ...string) {
 // its descendants. It is safe for concurrency.
 func ResetContext() {
 	globalContext.Lock()
-	globalContext.m = make(map[string]*Pair, len(globalContext.m))
+	globalContext.l = nil
 	globalContext.Unlock()
-}
-
-func init() {
-	globalContext.m = make(map[string]*Pair)
 }
