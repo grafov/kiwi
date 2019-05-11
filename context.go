@@ -65,7 +65,7 @@ next:
 			// arg should be a key.
 			case []*Pair:
 				for _, p := range arg.([]*Pair) {
-					for i, c := range context {
+					for i, c := range l.context {
 						if c.Key == p.Key {
 							l.context[i] = p
 							break

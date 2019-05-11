@@ -97,6 +97,23 @@ func TestLogger_NewWithContext(t *testing.T) {
 	}
 }
 
+// Test of a new sublogger without context inheritance (because it
+// should use Fork() for copy the context).
+func TestLogger_NewWithPartiallySameContext(t *testing.T) {
+	log := New().With("k", "v", "k2", "v2")
+
+	sub := log.New().With("k2", "v2")
+
+	if sub.checkContext("k") != "" {
+		t.Logf(`expected empty context but got %v`, context)
+		t.FailNow()
+	}
+	if sub.checkContext("k2") != "v2" {
+		t.Logf(`expected empty v2 but got %v`, context)
+		t.FailNow()
+	}
+}
+
 // Test of creating a new logger from existing logger. Deleted values should not present in sublogger.
 func TestLogger_ForkWithPartialContext(t *testing.T) {
 	log := Fork().With("key", "value", "key2", "value2")
