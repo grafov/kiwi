@@ -36,76 +36,98 @@ import (
 	"sync"
 )
 
-var globalContext context
-
-type context struct {
-	sync.RWMutex
-	l []*Pair
-}
+var (
+	global  sync.RWMutex
+	context []*Pair
+)
 
 // With adds key-vals to the global logger context. It is safe for
 // concurrency.
-func With(keyVals ...interface{}) {
+func With(kv ...interface{}) {
 	var (
-		key          string
-		shouldBeAKey = true
+		key       string
+		thisIsKey = true
 	)
-	globalContext.Lock()
-	for _, val := range keyVals {
-		if shouldBeAKey {
-			switch val.(type) {
+	global.Lock()
+next:
+	for _, arg := range kv {
+		if thisIsKey {
+			switch arg.(type) {
+			// The odd arg treated as the keys. The key must be a
+			// string.
 			case string:
-				key = val.(string)
+				key = arg.(string)
+			// Instead of the key the key-value pair could be
+			// passed. Next arg should be a key.
 			case *Pair:
-				v := val.(*Pair)
-				for _, p := range globalContext.l {
-					if p.Key == v.Key {
-						globalContext.l = append(globalContext.l, val.(*Pair))
+				p := arg.(*Pair)
+				for i, c := range context {
+					if c.Key == p.Key {
+						context[i] = p
+						break next
 					}
 				}
+				context = append(context, p)
 				continue
+			// Also the slice of key-value pairs could be passed. Next
+			// arg should be a key.
 			case []*Pair:
-				for _, v := range val.([]*Pair) {
-					for _, p := range globalContext.l {
-						if p.Key == v.Key {
-							globalContext.l = append(globalContext.l, v)
+				for _, p := range arg.([]*Pair) {
+					for i, c := range context {
+						if c.Key == p.Key {
+							context[i] = p
+							break
 						}
 					}
+					context = append(context, p)
 				}
 				continue
+			// The key must be be a string type. The logger generates
+			// error as a new key-value pair for the record.
 			default:
-				globalContext.l = append(globalContext.l, toPair(ErrorKey, "wrong type for the key"))
+				context = append(context, toPair(ErrorKey, "wrong type for the key"))
 				key = UnpairedKey
 			}
 		} else {
-			globalContext.l = append(globalContext.l, toPair(key, val))
+			p := toPair(key, arg)
+			for i, c := range context {
+				if c.Key == key {
+					context[i] = p
+					thisIsKey = !thisIsKey
+					break next
+				}
+			}
+			context = append(context, p)
 		}
-		shouldBeAKey = !shouldBeAKey
+		thisIsKey = !thisIsKey
 	}
-	if !shouldBeAKey && key != UnpairedKey {
-		globalContext.l = append(globalContext.l, toPair(UnpairedKey, key))
+	if !thisIsKey && key != UnpairedKey {
+		context = append(context, toPair(UnpairedKey, key))
 	}
-	globalContext.Unlock()
+	global.Unlock()
 }
 
 // Without drops the keys from the context of the global logger. It is safe for
 // concurrency.
 func Without(keys ...string) {
-	globalContext.Lock()
+	global.Lock()
 	for _, key := range keys {
-		for i, p := range globalContext.l {
-			if key == p.Key {
-				globalContext.l = append(globalContext.l[:i], globalContext.l[i+1:]...)
+		for i, p := range context {
+			if p.Key == key {
+				copy(context[i:], context[i+1:])
+				context[len(context)-1] = nil
+				context = context[:len(context)-1]
+				break
 			}
 		}
 	}
-	globalContext.Unlock()
+	global.Unlock()
 }
 
 // ResetContext resets the global context for the global logger and
 // its descendants. It is safe for concurrency.
 func ResetContext() {
-	globalContext.Lock()
-	globalContext.l = nil
-	globalContext.Unlock()
+	global.Lock()
+	context = nil
+	global.Unlock()
 }

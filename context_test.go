@@ -46,8 +46,17 @@ These parts separated by empty lines in each test function.
 */
 
 // Get context from logger. Helper for testing.
-func (l *Logger) getContext() map[string]*Pair {
+func (l *Logger) getAllContext() []*Pair {
 	return l.context
+}
+
+func (l *Logger) checkContext(key string) string {
+	for _, v := range l.context {
+		if v.Key == key {
+			return v.Val
+		}
+	}
+	return ""
 }
 
 func TestNewLogger(t *testing.T) {
@@ -62,15 +71,14 @@ func TestNewLogger(t *testing.T) {
 func TestLogger_ForkWithContext(t *testing.T) {
 	log := Fork().With("key", "value", "key2", 123)
 
-	sublog := log.Fork()
-	context := sublog.getContext()
+	sub := log.Fork()
 
-	if context["key"].Val != "value" {
-		t.Logf("expected %s got %v", "value", context["key"].Val)
+	if sub.checkContext("key") != "value" {
+		t.Logf("expected %s got %v", "value", log.checkContext("key"))
 		t.Fail()
 	}
-	if context["key2"].Val != "123" {
-		t.Logf("expected %s got %v", "123", context["key2"].Val)
+	if sub.checkContext("key2") != "123" {
+		t.Logf("expected %s got %v", "123", log.checkContext("key2"))
 		t.Fail()
 	}
 }
@@ -80,9 +88,9 @@ func TestLogger_ForkWithContext(t *testing.T) {
 func TestLogger_NewWithContext(t *testing.T) {
 	log := New().With("key", "value", "key2", 123)
 
-	sublog := log.New()
+	sub := log.New()
 
-	context := sublog.getContext()
+	context := sub.getAllContext()
 	if len(context) != 0 {
 		t.Logf("expected empty context but got %v", context)
 		t.FailNow()
@@ -90,24 +98,23 @@ func TestLogger_NewWithContext(t *testing.T) {
 }
 
 // Test of creating a new logger from existing logger. Deleted values should not present in sublogger.
-func TestLogger_ForkWithoutContext(t *testing.T) {
-	log := Fork().With("key", "value", "key2", 123)
+func TestLogger_ForkWithPartialContext(t *testing.T) {
+	log := Fork().With("key", "value", "key2", "value2")
 
 	log.Without("key")
-	sublog := log.Fork()
-	context := sublog.getContext()
+	sub := log.Fork()
 
-	if context == nil {
+	if sub.getAllContext() == nil {
 		t.Logf("context is nil but should not")
 		t.FailNow()
 	}
-	if context["key"] != nil {
-		t.Logf(`expected "nil" got %v`, context["key"])
+	if sub.checkContext("key") != "" {
+		t.Logf(`expected nothing got %v`, sub.checkContext("key"))
 		t.Fail()
 
 	}
-	if context["key2"] == nil || context["key2"].Val != "123" {
-		t.Logf(`expected "value" got %v`, context["key2"])
+	if sub.checkContext("key2") == "" || sub.checkContext("key2") != "value2" {
+		t.Logf(`expected "value2" got %v`, sub.checkContext("key2"))
 		t.Fail()
 	}
 }

@@ -45,7 +45,7 @@ type (
 	// concurrent usage so then you need logger for another goroutine you will need clone existing instance.
 	// See Logger.New() method below for details.
 	Logger struct {
-		context map[string]*Pair
+		context []*Pair
 		pairs   []*Pair
 	}
 	// Stringer is the same as fmt.Stringer
@@ -72,45 +72,41 @@ type (
 // Fork creates a new logger instance that inherited the context from
 // the global logger. Thi fuction is concurrent safe.
 func Fork() *Logger {
-	var newContext = make(map[string]*Pair, len(globalContext.l)*2)
-	globalContext.RLock()
-	for _, p := range globalContext.l {
-		newContext[p.Key] = p
-	}
-	globalContext.RUnlock()
+	var newContext = make([]*Pair, len(context))
+	global.RLock()
+	copy(newContext, context)
+	global.RUnlock()
 	return &Logger{context: newContext}
 }
 
 // New creates a new logger instance but not copy context from the
-// global logger.
+// global logger. The method is empty now, I keep it for compatibility
+// with older versions of API.
 func New() *Logger {
-	var newContext = make(map[string]*Pair)
-	return &Logger{context: newContext}
+	return new(Logger)
 }
 
 // Fork creates a new instance of the logger. It copies the context
 // from the logger from the parent logger. But the values of the
 // current record of the parent logger discarded.
 func (l *Logger) Fork() *Logger {
-	var newContext = make(map[string]*Pair, len(l.context)*2)
-	for key, pair := range l.context {
-		newContext[key] = pair
-	}
-	return &Logger{context: newContext}
+	var fork = Logger{context: make([]*Pair, len(l.context))}
+	copy(fork.context, l.context)
+	return &fork
 }
 
 // New creates a new instance of the logger. It not inherited the
-// context of the parent logger.
+// context of the parent logger. The method is empty now, I keep it
+// for compatibility with older versions of API.
 func (l *Logger) New() *Logger {
-	var newContext = make(map[string]*Pair)
-	return &Logger{context: newContext}
+	return new(Logger)
 }
 
 // Log is the most common method for flushing previously added key-val pairs to an output.
 // After current record is flushed all pairs removed from a record except contextSrc pairs.
 func (l *Logger) Log(keyVals ...interface{}) {
 	// 1. Log the context.
-	var record = make([]*Pair, 0, len(l.context)+len(l.pairs)+len(keyVals)/2+1)
+	var record = make([]*Pair, 0, len(l.context)+len(l.pairs)+len(keyVals))
 	for _, p := range l.context {
 		if p.Eval != nil {
 			// Evaluate delayed context value here before output.
