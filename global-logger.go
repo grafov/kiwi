@@ -39,31 +39,31 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // initialization of logger could brought extra complexity.
 // If you wish separate contexts and achieve better performance
 // use Logger type instead.
-func Log(keyVals ...interface{}) {
+func Log(kv ...interface{}) {
 	// 1. Log the context.
-	var record = make([]*Pair, 0, len(keyVals)/2+1)
-	globalContext.RLock()
-	for _, p := range globalContext.m {
+	var record = make([]*Pair, 0, len(context)+len(kv))
+	global.RLock()
+	for _, p := range context {
+		// Evaluate delayed context value here before the output.
 		if p.Eval != nil {
-			// Evaluate delayed context value here before output.
 			record = append(record, &Pair{p.Key, p.Eval.(func() string)(), p.Eval, p.Type})
 		} else {
-			record = append(record, &Pair{p.Key, p.Val, p.Eval, p.Type})
+			record = append(record, &Pair{p.Key, p.Val, nil, p.Type})
 		}
 	}
-	globalContext.RUnlock()
-	// 2. Log the regular key-value pairs that come in the args.
+	global.RUnlock()
+	// 2. Log the regular key-value pairs that came in the args.
 	var (
 		key          string
 		shouldBeAKey = true
 	)
-	for _, val := range keyVals {
+	for _, val := range kv {
 		var p *Pair
 		if shouldBeAKey {
 			switch val.(type) {
 			case string:
 				key = val.(string)
-			case Pair:
+			case *Pair:
 				p = val.(*Pair)
 				if p.Eval != nil {
 					p.Val = p.Eval.(func() string)()

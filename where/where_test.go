@@ -75,17 +75,17 @@ func TestWhereGlobal_GetAllInfo_Logfmt(t *testing.T) {
 	out := kiwi.SinkTo(stream, kiwi.AsLogfmt()).Start()
 
 	kiwi.With(What(FilePos | Function))
-	kiwi.Log("key", "value")
+	kiwi.Log("k", "v", "k2", "v2")
 
 	out.Flush().Close()
 	expected := `file="`
 	if !strings.Contains(stream.String(), expected) {
-		t.Logf("expected %s got %v", expected, stream.String())
+		t.Logf("expected '%s' in '%v'", expected, stream.String())
 		t.Fail()
 	}
 	expected = `function="`
 	if !strings.Contains(stream.String(), expected) {
-		t.Logf("expected %s got %v", expected, stream.String())
+		t.Logf("expected '%s' in '%v'", expected, stream.String())
 		t.Fail()
 	}
 }

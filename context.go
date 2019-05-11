@@ -38,35 +38,64 @@ import "fmt"
 // in the record. The function is not concurrent safe.
 func (l *Logger) With(keyVals ...interface{}) *Logger {
 	var (
-		key          string
-		shouldBeAKey = true
+		key       string
+		thisIsKey = true
 	)
-	// key=val pairs
-	for _, val := range keyVals {
-		if shouldBeAKey {
-			switch val.(type) {
+next:
+	for _, arg := range keyVals {
+		if thisIsKey {
+			switch arg.(type) {
+			// The odd arg treated as the keys. The key must be a
+			// string.
 			case string:
-				key = val.(string)
+				key = arg.(string)
+			// Instead of the key the key-value pair could be
+			// passed. Next arg should be a key.
 			case *Pair:
-				p := val.(*Pair)
-				l.context[p.Key] = p
+				p := arg.(*Pair)
+				for i, c := range l.context {
+					if p.Key == c.Key {
+						l.context[i] = p
+						break next
+					}
+				}
+				l.context = append(l.context, p)
 				continue
+			// Also the slice of key-value pairs could be passed. Next
+			// arg should be a key.
 			case []*Pair:
-				for _, p := range val.([]*Pair) {
-					l.context[p.Key] = p
+				for _, p := range arg.([]*Pair) {
+					for i, c := range context {
+						if c.Key == p.Key {
+							l.context[i] = p
+							break
+						}
+					}
+					l.context = append(l.context, p)
 				}
 				continue
+			// The key must be be a string type. The logger generates
+			// error as a new key-value pair for the record.
 			default:
-				l.context[ErrorKey] = toPair(ErrorKey, fmt.Sprintf("non a string type (%T) for the key (%v)", val, val))
+				l.context = append(l.context, toPair(ErrorKey, fmt.Sprintf("non a string type (%T) for the key (%v)", arg, arg)))
 				key = UnpairedKey
 			}
 		} else {
-			l.context[key] = toPair(key, val)
+			p := toPair(key, arg)
+			for i, c := range l.context {
+				if c.Key == key {
+					l.context[i] = p
+					thisIsKey = !thisIsKey
+					break next
+				}
+			}
+			l.context = append(l.context, toPair(key, arg))
 		}
-		shouldBeAKey = !shouldBeAKey
+		// After the key the next arg is not a key.
+		thisIsKey = !thisIsKey
 	}
-	if !shouldBeAKey && key != UnpairedKey {
-		l.pairs = append(l.pairs, toPair(UnpairedKey, key))
+	if !thisIsKey && key != UnpairedKey {
+		l.context = append(l.context, toPair(UnpairedKey, key))
 	}
 	return l
 }
@@ -74,8 +103,15 @@ func (l *Logger) With(keyVals ...interface{}) *Logger {
 // Without drops some keys from a context for the logger. The function
 // is not concurrent safe.
 func (l *Logger) Without(keys ...string) *Logger {
-	for _, key := range keys {
-		delete(l.context, key)
+	for _, k := range keys {
+		for i, v := range l.context {
+			if v.Key == k {
+				copy(l.context[i:], l.context[i+1:])
+				l.context[len(l.context)-1] = nil
+				l.context = l.context[:len(l.context)-1]
+				break
+			}
+		}
 	}
 	return l
 }
@@ -83,6 +119,6 @@ func (l *Logger) Without(keys ...string) *Logger {
 // ResetContext resets the context of the logger. The function is not
 // concurrent safe.
 func (l *Logger) ResetContext() *Logger {
-	l.context = make(map[string]*Pair, len(l.context)*2)
+	l.context = nil
 	return l
 }
