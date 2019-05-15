@@ -112,7 +112,7 @@ func (l *Logger) Log(keyVals ...interface{}) {
 			// Evaluate delayed context value here before output.
 			record = append(record, &Pair{p.Key, p.Eval.(func() string)(), p.Eval, p.Type})
 		} else {
-			record = append(record, &Pair{p.Key, p.Val, p.Eval, p.Type})
+			record = append(record, &Pair{p.Key, p.Val, nil, p.Type})
 		}
 	}
 	// 2. Log the regular key-value pairs that added before by Add() calls.
@@ -120,7 +120,7 @@ func (l *Logger) Log(keyVals ...interface{}) {
 		if p.Eval != nil {
 			record = append(record, &Pair{p.Key, p.Eval.(func() string)(), p.Eval, p.Type})
 		} else {
-			record = append(record, &Pair{p.Key, p.Val, p.Eval, p.Type})
+			record = append(record, &Pair{p.Key, p.Val, nil, p.Type})
 		}
 	}
 	// 3. Log the regular key-value pairs that come in the args.
@@ -133,7 +133,7 @@ func (l *Logger) Log(keyVals ...interface{}) {
 			switch val.(type) {
 			case string:
 				key = val.(string)
-			case Pair:
+			case *Pair:
 				record = append(record, val.(*Pair))
 				continue
 			default:
@@ -168,7 +168,7 @@ func (l *Logger) Add(keyVals ...interface{}) *Logger {
 			switch val.(type) {
 			case string:
 				key = val.(string)
-			case Pair:
+			case *Pair:
 				l.pairs = append(l.pairs, val.(*Pair))
 				continue
 			default:
