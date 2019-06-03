@@ -260,6 +260,23 @@ func TestLogger_AddMixChained_Logfmt(t *testing.T) {
 	}
 }
 
+// Test chaining for Add()
+func TestLogger_AddSameKeysChained_Logfmt(t *testing.T) {
+	output := bytes.NewBufferString("")
+	log := New()
+	out := SinkTo(output, AsLogfmt()).Start()
+	defer out.Close()
+
+	log.Add("k", "value").Add("k", 123).Log("k", "another")
+
+	out.Flush()
+	expected := `k="value" k=123 k="another"`
+	if strings.TrimSpace(output.String()) != expected {
+		t.Logf("expected %s got %v", expected, output.String())
+		t.Fail()
+	}
+}
+
 // Test log with the context value.
 func TestLogger_WithContextPassed_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
