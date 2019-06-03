@@ -2,7 +2,7 @@ package kiwi
 
 // This file consists of implementations of Filter interface.
 
-/* Copyright (c) 2016, Alexander I.Grafov <grafov@gmail.com>
+/* Copyright (c) 2016-2019, Alexander I.Grafov <grafov@gmail.com>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

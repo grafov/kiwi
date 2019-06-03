@@ -116,9 +116,9 @@ func SinkTo(w io.Writer, fn Formatter) *Sink {
 	return sink
 }
 
-// WithKey sets restriction for records output.
+// HasKey sets restriction for records output.
 // Only the records WITH any of the keys will be passed to output.
-func (s *Sink) WithKey(keys ...string) *Sink {
+func (s *Sink) HasKey(keys ...string) *Sink {
 	if atomic.LoadInt32(s.state) > sinkClosed {
 		s.Lock()
 		for _, key := range keys {
@@ -130,9 +130,9 @@ func (s *Sink) WithKey(keys ...string) *Sink {
 	return s
 }
 
-// WithoutKey sets restriction for records output.
+// HasNotKey sets restriction for records output.
 // Only the records WITHOUT any of the keys will be passed to output.
-func (s *Sink) WithoutKey(keys ...string) *Sink {
+func (s *Sink) HasNotKey(keys ...string) *Sink {
 	if atomic.LoadInt32(s.state) > sinkClosed {
 		s.Lock()
 		for _, key := range keys {
@@ -144,11 +144,11 @@ func (s *Sink) WithoutKey(keys ...string) *Sink {
 	return s
 }
 
-// WithValue sets restriction for records output.
+// HasValue sets restriction for records output.
 // A record passed to output if the key equal one of any of the listed values.
-func (s *Sink) WithValue(key string, vals ...string) *Sink {
+func (s *Sink) HasValue(key string, vals ...string) *Sink {
 	if len(vals) == 0 {
-		return s.WithKey(key)
+		return s.HasKey(key)
 	}
 	if atomic.LoadInt32(s.state) > sinkClosed {
 		s.Lock()
@@ -159,10 +159,10 @@ func (s *Sink) WithValue(key string, vals ...string) *Sink {
 	return s
 }
 
-// WithoutValue sets restriction for records output.
-func (s *Sink) WithoutValue(key string, vals ...string) *Sink {
+// HasNotValue sets restriction for records output.
+func (s *Sink) HasNotValue(key string, vals ...string) *Sink {
 	if len(vals) == 0 {
-		return s.WithoutKey(key)
+		return s.HasNotKey(key)
 	}
 	if atomic.LoadInt32(s.state) > sinkClosed {
 		s.Lock()
@@ -173,8 +173,8 @@ func (s *Sink) WithoutValue(key string, vals ...string) *Sink {
 	return s
 }
 
-// WithInt64Range sets restriction for records output.
-func (s *Sink) WithInt64Range(key string, from, to int64) *Sink {
+// Int64Range sets restriction for records output.
+func (s *Sink) Int64Range(key string, from, to int64) *Sink {
 	if atomic.LoadInt32(s.state) > sinkClosed {
 		s.Lock()
 		delete(s.negativeFilters, key)
@@ -184,8 +184,8 @@ func (s *Sink) WithInt64Range(key string, from, to int64) *Sink {
 	return s
 }
 
-// WithoutInt64Range sets restriction for records output.
-func (s *Sink) WithoutInt64Range(key string, from, to int64) *Sink {
+// Int64NotRange sets restriction for records output.
+func (s *Sink) Int64NotRange(key string, from, to int64) *Sink {
 	if atomic.LoadInt32(s.state) > sinkClosed {
 		s.Lock()
 		delete(s.positiveFilters, key)
@@ -195,8 +195,8 @@ func (s *Sink) WithoutInt64Range(key string, from, to int64) *Sink {
 	return s
 }
 
-// WithFloat64Range sets restriction for records output.
-func (s *Sink) WithFloat64Range(key string, from, to float64) *Sink {
+// Float64Range sets restriction for records output.
+func (s *Sink) Float64Range(key string, from, to float64) *Sink {
 	if atomic.LoadInt32(s.state) > sinkClosed {
 		s.Lock()
 		delete(s.negativeFilters, key)
@@ -206,8 +206,8 @@ func (s *Sink) WithFloat64Range(key string, from, to float64) *Sink {
 	return s
 }
 
-// WithoutFloat64Range sets restriction for records output.
-func (s *Sink) WithoutFloat64Range(key string, from, to float64) *Sink {
+// Float64NotRange sets restriction for records output.
+func (s *Sink) Float64NotRange(key string, from, to float64) *Sink {
 	if atomic.LoadInt32(s.state) > sinkClosed {
 		s.Lock()
 		delete(s.positiveFilters, key)
@@ -217,8 +217,8 @@ func (s *Sink) WithoutFloat64Range(key string, from, to float64) *Sink {
 	return s
 }
 
-// WithTimeRange sets restriction for records output.
-func (s *Sink) WithTimeRange(key string, from, to time.Time) *Sink {
+// TimeRange sets restriction for records output.
+func (s *Sink) TimeRange(key string, from, to time.Time) *Sink {
 	if atomic.LoadInt32(s.state) > sinkClosed {
 		s.Lock()
 		delete(s.negativeFilters, key)
@@ -228,8 +228,8 @@ func (s *Sink) WithTimeRange(key string, from, to time.Time) *Sink {
 	return s
 }
 
-// WithoutTimeRange sets restriction for records output.
-func (s *Sink) WithoutTimeRange(key string, from, to time.Time) *Sink {
+// TimeNotRange sets restriction for records output.
+func (s *Sink) TimeNotRange(key string, from, to time.Time) *Sink {
 	if atomic.LoadInt32(s.state) > sinkClosed {
 		s.Lock()
 		delete(s.positiveFilters, key)
