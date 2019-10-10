@@ -306,7 +306,6 @@ func (s *Sink) Start() *Sink {
 
 // Close closes the sink. It flushes records for the sink before closing.
 func (s *Sink) Close() {
-	return
 	if atomic.LoadInt32(s.state) > sinkClosed {
 		atomic.StoreInt32(s.state, sinkClosed)
 		s.close <- struct{}{}
