@@ -158,11 +158,11 @@ func TestSink_UnhideKeyTwice(t *testing.T) {
 
 }
 
-// Test of WithKey filter. It should pass record to the output.
-func TestSink_WithKeyFilterPass(t *testing.T) {
+// Test of HasKey filter. It should pass record to the output.
+func TestSink_HasKeyFilterPass(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(stream, AsLogfmt()).WithKey("Gandalf").Start()
+	out := SinkTo(stream, AsLogfmt()).HasKey("Gandalf").Start()
 
 	log.Log("Gandalf", "You shall not pass!") // cite from the movie
 
@@ -174,11 +174,11 @@ func TestSink_WithKeyFilterPass(t *testing.T) {
 
 }
 
-// Test of WithoutKey filter. It should not pass record to the output.
-func TestSink_WithoutKeyFilterOut(t *testing.T) {
+// Test of HasNotKey filter. It should not pass record to the output.
+func TestSink_HasNotKeyFilterOut(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(stream, AsLogfmt()).WithoutKey("Gandalf").Start()
+	out := SinkTo(stream, AsLogfmt()).HasNotKey("Gandalf").Start()
 
 	log.Log("Gandalf", "You cannot pass!") // cite from the book
 
@@ -189,11 +189,11 @@ func TestSink_WithoutKeyFilterOut(t *testing.T) {
 	}
 }
 
-// Test of WithValue filter. It should pass the record to the output because the key missed.
-func TestSink_WithValueFilterMissedKeyPass(t *testing.T) {
+// Test of HasValue filter. It should pass the record to the output because the key missed.
+func TestSink_HasValueFilterMissedKeyPass(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(stream, AsLogfmt()).WithValue("key", "passed").Start()
+	out := SinkTo(stream, AsLogfmt()).HasValue("key", "passed").Start()
 
 	log.Log("key", "passed")
 
@@ -205,11 +205,11 @@ func TestSink_WithValueFilterMissedKeyPass(t *testing.T) {
 
 }
 
-// Test of WithValue filter. It should pass the record to the output because the value matched.
-func TestSink_WithValueFilterPass(t *testing.T) {
+// Test of HasValue filter. It should pass the record to the output because the value matched.
+func TestSink_HasValueFilterPass(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(stream, AsLogfmt()).WithValue("key", "passed", "and this passed too").Start()
+	out := SinkTo(stream, AsLogfmt()).HasValue("key", "passed", "and this passed too").Start()
 
 	log.Log("key", "passed", "key", "and this passed too")
 
@@ -220,11 +220,11 @@ func TestSink_WithValueFilterPass(t *testing.T) {
 	}
 }
 
-// Test of WithValue filter. It should filter out the record because no one value matched.
-func TestSink_WithValueFilterOut(t *testing.T) {
+// Test of HasValue filter. It should filter out the record because no one value matched.
+func TestSink_HasValueFilterOut(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(stream, AsLogfmt()).WithValue("key", "filtered", "out").Start()
+	out := SinkTo(stream, AsLogfmt()).HasValue("key", "filtered", "out").Start()
 
 	log.Log("key", "try it")
 
@@ -235,11 +235,11 @@ func TestSink_WithValueFilterOut(t *testing.T) {
 	}
 }
 
-// Test of WithIntRange filter. It should pass the record to the output because the key missed.
-func TestSink_WithIntRangeFilterMissedKeyPass(t *testing.T) {
+// Test of HasIntRange filter. It should pass the record to the output because the key missed.
+func TestSink_HasIntRangeFilterMissedKeyPass(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(stream, AsLogfmt()).WithInt64Range("key", 1, 2).Start()
+	out := SinkTo(stream, AsLogfmt()).Int64Range("key", 1, 2).Start()
 
 	log.Log("another key", 3)
 
@@ -250,11 +250,11 @@ func TestSink_WithIntRangeFilterMissedKeyPass(t *testing.T) {
 	}
 }
 
-// Test of WithIntRange filter. It should pass the record to the output because the value in the range.
-func TestSink_WithIntRangeFilterPass(t *testing.T) {
+// Test of IntRange filter. It should pass the record to the output because the value in the range.
+func TestSink_IntRangeFilterPass(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(stream, AsLogfmt()).WithInt64Range("key", 1, 3).Start()
+	out := SinkTo(stream, AsLogfmt()).Int64Range("key", 1, 3).Start()
 
 	log.Log("key", 2)
 
@@ -265,11 +265,11 @@ func TestSink_WithIntRangeFilterPass(t *testing.T) {
 	}
 }
 
-// Test of WithIntRange filter. It should filter out the record because the value not in the range.
-func TestSink_WithIntRangeFilterFilterOut(t *testing.T) {
+// Test of IntRange filter. It should filter out the record because the value not in the range.
+func TestSink_IntRangeFilterFilterOut(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(stream, AsLogfmt()).WithInt64Range("key", 1, 3).Start()
+	out := SinkTo(stream, AsLogfmt()).Int64Range("key", 1, 3).Start()
 
 	log.Log("key", 4)
 
@@ -280,11 +280,11 @@ func TestSink_WithIntRangeFilterFilterOut(t *testing.T) {
 	}
 }
 
-// Test of WithFloatRange filter. It should pass the record to the output because the key missed.
-func TestSink_WithFloatRangeFilterMissedKeyPass(t *testing.T) {
+// Test of FloatRange filter. It should pass the record to the output because the key missed.
+func TestSink_FloatRangeFilterMissedKeyPass(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(stream, AsLogfmt()).WithFloat64Range("key", 1.0, 2.0).Start()
+	out := SinkTo(stream, AsLogfmt()).Float64Range("key", 1.0, 2.0).Start()
 
 	log.Log("another key", 3)
 
@@ -295,11 +295,11 @@ func TestSink_WithFloatRangeFilterMissedKeyPass(t *testing.T) {
 	}
 }
 
-// Test of WithFloatRange filter. It should pass the record to the output because the value in the range.
-func TestSink_WithFloatRangeFilterPass(t *testing.T) {
+// Test of FloatRange filter. It should pass the record to the output because the value in the range.
+func TestSink_FloatRangeFilterPass(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(stream, AsLogfmt()).WithFloat64Range("key", 1.0, 3.0).Start()
+	out := SinkTo(stream, AsLogfmt()).Float64Range("key", 1.0, 3.0).Start()
 
 	log.Log("key", 2.0)
 
@@ -310,11 +310,11 @@ func TestSink_WithFloatRangeFilterPass(t *testing.T) {
 	}
 }
 
-// Test of WithFloatRange filter. It should filter out the record because the value not in the range.
-func TestSink_WithFloatRangeFilterOut(t *testing.T) {
+// Test of FloatRange filter. It should filter out the record because the value not in the range.
+func TestSink_FloatRangeFilterOut(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
-	out := SinkTo(stream, AsLogfmt()).WithFloat64Range("key", 1.0, 3.0).Start()
+	out := SinkTo(stream, AsLogfmt()).Float64Range("key", 1.0, 3.0).Start()
 
 	log.Log("key", 4.0)
 
@@ -325,15 +325,15 @@ func TestSink_WithFloatRangeFilterOut(t *testing.T) {
 	}
 }
 
-// Test of WithTimeRange filter. It should pass the record to the output because the value in the range.
-func TestSink_WithTimeRangeFilterPass(t *testing.T) {
+// Test of TimeRange filter. It should pass the record to the output because the value in the range.
+func TestSink_TimeRangeFilterPass(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
 	now := time.Now()
 	hourAfterNow := now.Add(1 * time.Hour)
 	halfHourAfterNow := now.Add(30 * time.Minute)
 	halfHourAsString := halfHourAfterNow.Format(TimeLayout)
-	out := SinkTo(stream, AsLogfmt()).WithTimeRange("key", now, hourAfterNow).Start()
+	out := SinkTo(stream, AsLogfmt()).TimeRange("key", now, hourAfterNow).Start()
 
 	log.Log("key", halfHourAfterNow)
 
@@ -345,13 +345,13 @@ func TestSink_WithTimeRangeFilterPass(t *testing.T) {
 }
 
 // Test of WithTimeRange filter. It should filter out the record because the value not in the range.
-func TestSink_WithTimeRangeFilterOut(t *testing.T) {
+func TestSink_TimeRangeFilterOut(t *testing.T) {
 	stream := bytes.NewBufferString("")
 	log := New()
 	now := time.Now()
 	hourAfterNow := now.Add(1 * time.Hour)
 	halfHourAfterNow := now.Add(30 * time.Minute)
-	out := SinkTo(stream, AsLogfmt()).WithTimeRange("key", now, halfHourAfterNow).Start()
+	out := SinkTo(stream, AsLogfmt()).TimeRange("key", now, halfHourAfterNow).Start()
 
 	log.Log("key", hourAfterNow)
 
