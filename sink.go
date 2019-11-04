@@ -53,7 +53,6 @@ const (
 var collector struct {
 	sync.RWMutex
 	sinks []*Sink
-	count int
 }
 
 type (
@@ -61,7 +60,6 @@ type (
 	// and decides how to filter them. Each output wraps its own io.Writer.
 	// Sink methods are safe for concurrent usage.
 	Sink struct {
-		id     uint
 		In     chan chain
 		close  chan struct{}
 		writer io.Writer
@@ -108,9 +106,7 @@ func SinkTo(w io.Writer, fn Formatter) *Sink {
 		}
 	)
 	collector.Lock()
-	sink.id = uint(collector.count)
 	collector.sinks = append(collector.sinks, sink)
-	collector.count++
 	collector.Unlock()
 	go processSink(sink)
 	return sink
@@ -310,8 +306,14 @@ func (s *Sink) Close() {
 		atomic.StoreInt32(s.state, sinkClosed)
 		s.close <- struct{}{}
 		collector.Lock()
-		collector.count--
-		collector.sinks = append(collector.sinks[0:s.id], collector.sinks[s.id+1:]...)
+		for i, v := range collector.sinks {
+			if s == v {
+				collector.sinks[i] = collector.sinks[len(collector.sinks)-1]
+				collector.sinks[len(collector.sinks)-1] = nil
+				collector.sinks = collector.sinks[:len(collector.sinks)-1]
+				break
+			}
+		}
 		collector.Unlock()
 	}
 }
