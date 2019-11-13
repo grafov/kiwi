@@ -1,6 +1,8 @@
 <!--*- mode:markdown;fill-column:100 -*-->
 # Kiwi logger & context keeper [![Go Report Card](https://goreportcard.com/badge/grafov/kiwi)](https://goreportcard.com/report/grafov/kiwi) [![Coverage Status](https://coveralls.io/repos/github/grafov/kiwi/badge.svg?branch=master)](https://coveralls.io/github/grafov/kiwi?branch=master)
 
+[![DeepSource](https://static.deepsource.io/deepsource-badge-light.svg)](https://deepsource.io/gh/grafov/kiwi/?ref=repository-badge)
+
 *Beta version. API still is subject of changes. Use it carefully!*
 
 ![Kiwi bird](flomar-kiwi-bird-300px.png)
@@ -84,8 +86,8 @@ at [cmd/*](cmd) subfolders.  And of course for API description look at
 
 Package have no external dependencies except standard library. So just
 
-    go get github.com/grafov/kiwi
-	
+	go get github.com/grafov/kiwi
+
 The library builds has been tested with go 1.8.
 
 ## Usage examples
@@ -120,16 +122,16 @@ func main() {
 	log.Log("key", 123, "key2", 1.23e3, "key3", 'u', "key4", true)
 	// Expected output:
 	// key=123 key2=1.23e3 key3="u" key4=true
-	
+
 	// You need define even one sink: set writer and logging format.
 	// Until the sink defined log records just saved nowhere.
 	// You can define arbitrary number of sinks. Each sink has its own set of filters.
 	out:=kiwi.SinkTo(os.StdOut, kiwi.Logfmt).Start()
 
-	// Filters decide pass or not incoming log record to this output.	
-	// Example filters below will pass only records which has key "userID" and has value of level="FATAL".	
+	// Filters decide pass or not incoming log record to this output.
+	// Example filters below will pass only records which has key "userID" and has value of level="FATAL".
 	out.WithKey("userID").WithValue("level", "FATAL")
-	
+
 	// So in this manner you can fan out log record to several outputs.
 	// For example write separate log of critical errors and common log with all errors.
 	// By default without any filters any output accepts any incoming log records.
@@ -161,18 +163,18 @@ func main() {
 	log1.Log("msg", "details about something")
 	// Expect output:
 	// userID=1000 PID=12345 msg="details about something"
-	
+
 	// Context copied into a new logger instance after logger cloned.
 	log2 := log1.New()
-	
+
 	log2.Log("key", "value")
 	// Expect output:
 	// userID=1000 PID=12345 key="value"
-	
+
 	// Get previously keeped context values. Results returned as map[string]interface{}
 	appContext := log2.GetContext()
 	fmt.Printf("%+v\n", appContext)
-	
+
 	// You can reset context at any time with
 	log2.ResetContext()
 }
@@ -191,7 +193,7 @@ context to a subroutine. It is all.
 
 	// Just clone old instance to a new one. It will keep the context of the first instance.
 	log2 := log1.New()
-	
+
 	// And you can extend context for cloned instance.
 	log2.With("another key", "another value")
 
@@ -201,7 +203,7 @@ context to a subroutine. It is all.
 
 For the small apps where you won't init all these instances you would like use global `kiwi.Log()` method.
 This method just immediately flush it's args to the sinks. And by design it is safe for concurrent usage.
-Also due design simplicity it not supports context, only regular values. If you need context then you 
+Also due design simplicity it not supports context, only regular values. If you need context then you
 application is complex thing hence you will need initialize a new instance of kiwi.Logger().
 
 ## Evaluating rules
@@ -211,15 +213,15 @@ application is complex thing hence you will need initialize a new instance of ki
 * For lazy evaluating of context and record values pass them as functions:
 
 ```go
-    # For lazy evaluating you need function that returns string
-    func longActionForDelayedEvaluation() string {
-        // Do something complex...
-        // and got for example integer result.
+	# For lazy evaluating you need function that returns string
+	func longActionForDelayedEvaluation() string {
+		// Do something complex...
+		// and got for example integer result.
 		//
 		// You need convert the result to a string.
-        return strconv.Itoa(result)
-    }
-    myLog.Add("lazy-sample", longActionForDelayedEvaluation) # but not longActionForDelayedEvaluation()
+		return strconv.Itoa(result)
+	}
+	myLog.Add("lazy-sample", longActionForDelayedEvaluation) # but not longActionForDelayedEvaluation()
 ```
 
 Logger accepts functions without args that returns a string: `func () string`.
