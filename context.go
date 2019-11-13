@@ -78,7 +78,7 @@ next:
 			// error as a new key-value pair for the record.
 			default:
 				l.context = append(l.context, toPair(ErrorKey, fmt.Sprintf("non a string type (%T) for the key (%v)", arg, arg)))
-				key = UnpairedKey
+				key = MessageKey
 			}
 		} else {
 			p := toPair(key, arg)
@@ -94,8 +94,8 @@ next:
 		// After the key the next arg is not a key.
 		thisIsKey = !thisIsKey
 	}
-	if !thisIsKey && key != UnpairedKey {
-		l.context = append(l.context, toPair(UnpairedKey, key))
+	if !thisIsKey && key != MessageKey {
+		l.context = append(l.context, toPair(MessageKey, key))
 	}
 	return l
 }

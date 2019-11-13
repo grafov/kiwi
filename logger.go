@@ -35,8 +35,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ॐ तारे तुत्तारे तुरे स्व */
 
 var (
-	UnpairedKey = "message"
-	ErrorKey    = "kiwi-error"
+	MessageKey = "message"
+	ErrorKey   = "kiwi-error"
+	InfoKey    = "kiwi-info"
 )
 
 type (
@@ -138,15 +139,15 @@ func (l *Logger) Log(keyVals ...interface{}) {
 				continue
 			default:
 				record = append(record, toPair(ErrorKey, fmt.Sprintf("non a string type (%T) for the key (%v)", val, val)))
-				key = UnpairedKey
+				key = MessageKey
 			}
 		} else {
 			record = append(record, toPair(key, val))
 		}
 		shouldBeAKey = !shouldBeAKey
 	}
-	if !shouldBeAKey && key != UnpairedKey {
-		record = append(record, toPair(UnpairedKey, key))
+	if !shouldBeAKey && key != MessageKey {
+		record = append(record, toPair(MessageKey, key))
 	}
 	// 4. Pass the record to the collector.
 	sinkRecord(record)
@@ -181,7 +182,7 @@ func (l *Logger) Add(keyVals ...interface{}) *Logger {
 		shouldBeAKey = !shouldBeAKey
 	}
 	if !shouldBeAKey {
-		l.pairs = append(l.pairs, toPair(UnpairedKey, key))
+		l.pairs = append(l.pairs, toPair(MessageKey, key))
 	}
 	return l
 }

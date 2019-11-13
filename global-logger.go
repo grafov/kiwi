@@ -72,7 +72,7 @@ func Log(kv ...interface{}) {
 				continue
 			default:
 				record = append(record, toPair(ErrorKey, fmt.Sprintf("non a string type (%T) for the key (%v)", val, val)))
-				key = UnpairedKey
+				key = MessageKey
 			}
 		} else {
 			if p = toPair(key, val); p.Eval != nil {
@@ -83,8 +83,8 @@ func Log(kv ...interface{}) {
 		shouldBeAKey = !shouldBeAKey
 	}
 	// Add the value without the key for odd number for key-val pairs.
-	if !shouldBeAKey && key != UnpairedKey {
-		record = append(record, toPair(UnpairedKey, key))
+	if !shouldBeAKey && key != MessageKey {
+		record = append(record, toPair(MessageKey, key))
 	}
 	// 2. Pass the record to the collector.
 	sinkRecord(record)

@@ -86,7 +86,7 @@ next:
 			// error as a new key-value pair for the record.
 			default:
 				context = append(context, toPair(ErrorKey, "wrong type for the key"))
-				key = UnpairedKey
+				key = MessageKey
 			}
 		} else {
 			p := toPair(key, arg)
@@ -101,8 +101,8 @@ next:
 		}
 		thisIsKey = !thisIsKey
 	}
-	if !thisIsKey && key != UnpairedKey {
-		context = append(context, toPair(UnpairedKey, key))
+	if !thisIsKey && key != MessageKey {
+		context = append(context, toPair(MessageKey, key))
 	}
 	global.Unlock()
 }

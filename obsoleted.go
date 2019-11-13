@@ -35,12 +35,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // FlushAll should wait for all the sinks to be flushed. It does
 // nothing currently. It has left for compatibility with old API.
 func FlushAll() {
-	return
+	Log(InfoKey, "obsoleted function", MessageKey, "FlushAll() is obsoleted, you should it from the code")
 }
 
 // Flush waits that all previously sent to the output records
 // worked. It does nothing currently. It has left for compatibility
 // with old API.
 func (s *Sink) Flush() *Sink {
+	Log(InfoKey, "obsoleted", MessageKey, "sink.Flush() is obsoleted, you should it from the code")
 	return s
 }

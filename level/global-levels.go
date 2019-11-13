@@ -44,7 +44,7 @@ var LevelName = "level"
 // key so it may be overrided with any value what you want.
 func Fatal(keyVals ...interface{}) {
 	if len(keyVals) == 1 {
-		kiwi.Log(LevelName, "fatal", kiwi.UnpairedKey, keyVals[0])
+		kiwi.Log(LevelName, "fatal", kiwi.MessageKey, keyVals[0])
 	} else {
 		kiwi.Log(append(keyVals, LevelName, "fatal")...)
 	}
@@ -56,7 +56,7 @@ func Fatal(keyVals ...interface{}) {
 // key so it may be overrided with any value what you want.
 func Crit(keyVals ...interface{}) {
 	if len(keyVals) == 1 {
-		kiwi.Log(LevelName, "critical", kiwi.UnpairedKey, keyVals[0])
+		kiwi.Log(LevelName, "critical", kiwi.MessageKey, keyVals[0])
 	} else {
 		kiwi.Log(append(keyVals, LevelName, "critical")...)
 	}
@@ -68,7 +68,7 @@ func Crit(keyVals ...interface{}) {
 // key so it may be overrided with any recVal you want.
 func Error(keyVals ...interface{}) {
 	if len(keyVals) == 1 {
-		kiwi.Log(LevelName, "error", kiwi.UnpairedKey, keyVals[0])
+		kiwi.Log(LevelName, "error", kiwi.MessageKey, keyVals[0])
 	} else {
 		kiwi.Log(append(keyVals, LevelName, "error")...)
 	}
@@ -80,7 +80,7 @@ func Error(keyVals ...interface{}) {
 // key so it may be overrided with any recVal you want.
 func Warn(keyVals ...interface{}) {
 	if len(keyVals) == 1 {
-		kiwi.Log(LevelName, "warning", kiwi.UnpairedKey, keyVals[0])
+		kiwi.Log(LevelName, "warning", kiwi.MessageKey, keyVals[0])
 	} else {
 		kiwi.Log(append(keyVals, LevelName, "warning")...)
 	}
@@ -92,7 +92,7 @@ func Warn(keyVals ...interface{}) {
 // key so it may be overrided with any value what you want.
 func Info(keyVals ...interface{}) {
 	if len(keyVals) == 1 {
-		kiwi.Log(LevelName, "info", kiwi.UnpairedKey, keyVals[0])
+		kiwi.Log(LevelName, "info", kiwi.MessageKey, keyVals[0])
 	} else {
 		kiwi.Log(append(keyVals, LevelName, "info")...)
 	}
@@ -104,7 +104,7 @@ func Info(keyVals ...interface{}) {
 // key so it may be overrided with any value what you want.
 func Debug(keyVals ...interface{}) {
 	if len(keyVals) == 1 {
-		kiwi.Log(LevelName, "debug", kiwi.UnpairedKey, keyVals[0])
+		kiwi.Log(LevelName, "debug", kiwi.MessageKey, keyVals[0])
 	} else {
 		kiwi.Log(append(keyVals, LevelName, "debug")...)
 	}

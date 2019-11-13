@@ -51,7 +51,7 @@ func New() *Logger {
 // By design Fatal level doesn't call os.Exit() like other loggers do.
 func (l *Logger) Fatal(keyVals ...interface{}) {
 	if len(keyVals) == 1 {
-		l.Log(LevelName, "fatal", kiwi.UnpairedKey, keyVals[0])
+		l.Log(LevelName, "fatal", kiwi.MessageKey, keyVals[0])
 	} else {
 		l.Log(append(keyVals, LevelName, "fatal")...)
 	}
@@ -63,7 +63,7 @@ func (l *Logger) Fatal(keyVals ...interface{}) {
 // key so it may be overrided with any value what you want.
 func (l *Logger) Crit(keyVals ...interface{}) {
 	if len(keyVals) == 1 {
-		l.Log(LevelName, "critical", kiwi.UnpairedKey, keyVals[0])
+		l.Log(LevelName, "critical", kiwi.MessageKey, keyVals[0])
 	} else {
 		l.Log(append(keyVals, LevelName, "critical")...)
 	}
@@ -75,7 +75,7 @@ func (l *Logger) Crit(keyVals ...interface{}) {
 // key so it may be overrided with any recVal you want.
 func (l *Logger) Error(keyVals ...interface{}) {
 	if len(keyVals) == 1 {
-		l.Log(LevelName, "error", kiwi.UnpairedKey, keyVals[0])
+		l.Log(LevelName, "error", kiwi.MessageKey, keyVals[0])
 	} else {
 		l.Log(append(keyVals, LevelName, "error")...)
 	}
@@ -87,7 +87,7 @@ func (l *Logger) Error(keyVals ...interface{}) {
 // key so it may be overrided with any recVal you want.
 func (l *Logger) Warn(keyVals ...interface{}) {
 	if len(keyVals) == 1 {
-		l.Log(LevelName, "warning", kiwi.UnpairedKey, keyVals[0])
+		l.Log(LevelName, "warning", kiwi.MessageKey, keyVals[0])
 	} else {
 		l.Log(append(keyVals, LevelName, "warning")...)
 	}
@@ -99,7 +99,7 @@ func (l *Logger) Warn(keyVals ...interface{}) {
 // key so it may be overrided with any value what you want.
 func (l *Logger) Info(keyVals ...interface{}) {
 	if len(keyVals) == 1 {
-		l.Log(LevelName, "info", kiwi.UnpairedKey, keyVals[0])
+		l.Log(LevelName, "info", kiwi.MessageKey, keyVals[0])
 	} else {
 		l.Log(append(keyVals, LevelName, "info")...)
 	}
@@ -111,7 +111,7 @@ func (l *Logger) Info(keyVals ...interface{}) {
 // key so it may be overrided with any value what you want.
 func (l *Logger) Debug(keyVals ...interface{}) {
 	if len(keyVals) == 1 {
-		l.Log(LevelName, "debug", kiwi.UnpairedKey, keyVals[0])
+		l.Log(LevelName, "debug", kiwi.MessageKey, keyVals[0])
 	} else {
 		l.Log(append(keyVals, LevelName, "debug")...)
 	}
