@@ -60,15 +60,14 @@ func Log(kv ...interface{}) {
 	for _, val := range kv {
 		var p *Pair
 		if shouldBeAKey {
-			switch val.(type) {
+			switch v := val.(type) {
 			case string:
-				key = val.(string)
+				key = v
 			case *Pair:
-				p = val.(*Pair)
-				if p.Eval != nil {
-					p.Val = p.Eval.(func() string)()
+				if v.Eval != nil {
+					v.Val = v.Eval.(func() string)()
 				}
-				record = append(record, p)
+				record = append(record, v)
 				continue
 			default:
 				record = append(record, toPair(ErrorKey, fmt.Sprintf("non a string type (%T) for the key (%v)", val, val)))

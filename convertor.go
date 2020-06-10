@@ -2,7 +2,7 @@ package kiwi
 
 // Convert incoming values to string representation. For keys and values.
 
-/* Copyright (c) 2016-2018, Alexander I.Grafov <grafov@gmail.com>
+/* Copyright (c) 2016-2020, Alexander I.Grafov <grafov@gmail.com>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -64,62 +64,62 @@ var TimeLayout = time.RFC3339
 
 // it applicable for all scalar types and for strings
 func toPair(key string, val interface{}) *Pair {
-	switch val.(type) {
+	switch v := val.(type) {
 	case string:
-		return &Pair{key, val.(string), nil, StringVal}
+		return &Pair{key, v, nil, StringVal}
 	case []byte:
-		return &Pair{key, string(val.([]byte)), nil, StringVal}
+		return &Pair{key, string(v), nil, StringVal}
 	case bool:
 		if val.(bool) {
 			return &Pair{key, "true", nil, BooleanVal}
 		}
 		return &Pair{key, "false", nil, BooleanVal}
 	case int:
-		return &Pair{key, strconv.Itoa(val.(int)), nil, IntegerVal}
+		return &Pair{key, strconv.Itoa(v), nil, IntegerVal}
 	case int8:
-		return &Pair{key, strconv.FormatInt(int64(val.(int8)), 10), nil, IntegerVal}
+		return &Pair{key, strconv.FormatInt(int64(v), 10), nil, IntegerVal}
 	case int16:
-		return &Pair{key, strconv.FormatInt(int64(val.(int16)), 10), nil, IntegerVal}
+		return &Pair{key, strconv.FormatInt(int64(v), 10), nil, IntegerVal}
 	case int32:
-		return &Pair{key, strconv.FormatInt(int64(val.(int32)), 10), nil, IntegerVal}
+		return &Pair{key, strconv.FormatInt(int64(v), 10), nil, IntegerVal}
 	case int64:
-		return &Pair{key, strconv.FormatInt(val.(int64), 10), nil, IntegerVal}
+		return &Pair{key, strconv.FormatInt(v, 10), nil, IntegerVal}
 	case uint:
-		return &Pair{key, strconv.FormatUint(uint64(val.(uint)), 10), nil, IntegerVal}
+		return &Pair{key, strconv.FormatUint(uint64(v), 10), nil, IntegerVal}
 	case uint8:
-		return &Pair{key, strconv.FormatUint(uint64(val.(uint8)), 10), nil, IntegerVal}
+		return &Pair{key, strconv.FormatUint(uint64(v), 10), nil, IntegerVal}
 	case uint16:
-		return &Pair{key, strconv.FormatUint(uint64(val.(uint16)), 10), nil, IntegerVal}
+		return &Pair{key, strconv.FormatUint(uint64(v), 10), nil, IntegerVal}
 	case uint32:
-		return &Pair{key, strconv.FormatUint(uint64(val.(uint32)), 10), nil, IntegerVal}
+		return &Pair{key, strconv.FormatUint(uint64(v), 10), nil, IntegerVal}
 	case uint64:
-		return &Pair{key, strconv.FormatUint(val.(uint64), 10), nil, IntegerVal}
+		return &Pair{key, strconv.FormatUint(v, 10), nil, IntegerVal}
 	case float32:
-		return &Pair{key, strconv.FormatFloat(float64(val.(float32)), FloatFormat, -1, 32), nil, FloatVal}
+		return &Pair{key, strconv.FormatFloat(float64(v), FloatFormat, -1, 32), nil, FloatVal}
 	case float64:
-		return &Pair{key, strconv.FormatFloat(val.(float64), FloatFormat, -1, 64), nil, FloatVal}
+		return &Pair{key, strconv.FormatFloat(v, FloatFormat, -1, 64), nil, FloatVal}
 	case complex64:
-		return &Pair{key, fmt.Sprintf("%f", val.(complex64)), nil, ComplexVal}
+		return &Pair{key, fmt.Sprintf("%f", v), nil, ComplexVal}
 	case complex128:
-		return &Pair{key, fmt.Sprintf("%f", val.(complex128)), nil, ComplexVal}
+		return &Pair{key, fmt.Sprintf("%f", v), nil, ComplexVal}
 	case time.Time:
-		return &Pair{key, val.(time.Time).Format(TimeLayout), nil, TimeVal}
+		return &Pair{key, v.Format(TimeLayout), nil, TimeVal}
 	case Valuer:
 		var pairType = CustomUnquoted
-		if val.(Valuer).IsQuoted() {
+		if v.IsQuoted() {
 			pairType = CustomQuoted
 		}
-		return &Pair{key, val.(Valuer).String(), nil, pairType}
+		return &Pair{key, v.String(), nil, pairType}
 	case Stringer:
-		return &Pair{key, val.(Stringer).String(), nil, StringVal}
+		return &Pair{key, v.String(), nil, StringVal}
 	case encoding.TextMarshaler:
-		data, err := val.(encoding.TextMarshaler).MarshalText()
+		data, err := v.MarshalText()
 		if err != nil {
 			return &Pair{key, fmt.Sprintf("%s", err), nil, StringVal}
 		}
 		return &Pair{key, string(data), nil, StringVal}
 	case func() string:
-		return &Pair{key, "", val.(func() string), StringVal}
+		return &Pair{key, "", v, StringVal}
 	default:
 		// Worst case conversion that depends on reflection.
 		return &Pair{key, fmt.Sprintf("%+v", val), nil, StringVal}

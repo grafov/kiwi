@@ -131,11 +131,11 @@ func (l *Logger) Log(keyVals ...interface{}) {
 	)
 	for _, val := range keyVals {
 		if shouldBeAKey {
-			switch val.(type) {
+			switch v := val.(type) {
 			case string:
-				key = val.(string)
+				key = v
 			case *Pair:
-				record = append(record, val.(*Pair))
+				record = append(record, v)
 				continue
 			default:
 				record = append(record, toPair(ErrorKey, fmt.Sprintf("non a string type (%T) for the key (%v)", val, val)))
@@ -166,11 +166,11 @@ func (l *Logger) Add(keyVals ...interface{}) *Logger {
 	// key=val pairs
 	for _, val := range keyVals {
 		if shouldBeAKey {
-			switch val.(type) {
+			switch v := val.(type) {
 			case string:
-				key = val.(string)
+				key = v
 			case *Pair:
-				l.pairs = append(l.pairs, val.(*Pair))
+				l.pairs = append(l.pairs, v)
 				continue
 			default:
 				l.pairs = append(l.pairs, toPair(ErrorKey, fmt.Sprintf("non a string type (%T) for the key (%v)", val, val)))

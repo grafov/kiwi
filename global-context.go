@@ -2,7 +2,7 @@ package kiwi
 
 // Global context for all logger instances including global logger.
 
-/* Copyright (c) 2016-2019, Alexander I.Grafov <grafov@gmail.com>
+/* Copyright (c) 2016-2020, Alexander I.Grafov <grafov@gmail.com>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -52,15 +52,14 @@ func With(kv ...interface{}) {
 next:
 	for _, arg := range kv {
 		if thisIsKey {
-			switch arg.(type) {
+			switch p := arg.(type) {
 			// The odd arg treated as the keys. The key must be a
 			// string.
 			case string:
-				key = arg.(string)
+				key = p
 			// Instead of the key the key-value pair could be
 			// passed. Next arg should be a key.
 			case *Pair:
-				p := arg.(*Pair)
 				for i, c := range context {
 					if c.Key == p.Key {
 						context[i] = p
@@ -72,14 +71,14 @@ next:
 			// Also the slice of key-value pairs could be passed. Next
 			// arg should be a key.
 			case []*Pair:
-				for _, p := range arg.([]*Pair) {
+				for _, v := range p {
 					for i, c := range context {
-						if c.Key == p.Key {
-							context[i] = p
+						if c.Key == v.Key {
+							context[i] = v
 							break
 						}
 					}
-					context = append(context, p)
+					context = append(context, v)
 				}
 				continue
 			// The key must be be a string type. The logger generates
