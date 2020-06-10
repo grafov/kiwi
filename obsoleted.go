@@ -2,7 +2,7 @@ package kiwi
 
 // Obsoleted functions that may be removed in the future.
 
-/* Copyright (c) 2016-2019, Alexander I.Grafov <grafov@gmail.com>
+/* Copyright (c) 2016-2020, Alexander I.Grafov <grafov@gmail.com>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,13 +35,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // FlushAll should wait for all the sinks to be flushed. It does
 // nothing currently. It has left for compatibility with old API.
 func FlushAll() {
-	Log(InfoKey, "obsoleted function", MessageKey, "FlushAll() is obsoleted, you should it from the code")
+	Log(InfoKey, "obsoleted", MessageKey, "FlushAll() is obsoleted, you should remove it from the code")
 }
 
 // Flush waits that all previously sent to the output records
 // worked. It does nothing currently. It has left for compatibility
 // with old API.
 func (s *Sink) Flush() *Sink {
-	Log(InfoKey, "obsoleted", MessageKey, "sink.Flush() is obsoleted, you should it from the code")
+	Log(InfoKey, "obsoleted", MessageKey, "sink.Flush() is obsoleted, you should remove it from the code")
 	return s
 }
