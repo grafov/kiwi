@@ -248,13 +248,20 @@ func (s *Sink) WithFilter(key string, customFilter Filter) *Sink {
 	return s
 }
 
-// Reset all filters for the keys for the output.
+// Reset all filters for the keys for the output. If no one key
+// provided it do global reset for all filters of the sink.
 func (s *Sink) Reset(keys ...string) *Sink {
 	if atomic.LoadInt32(s.state) > sinkClosed {
 		s.Lock()
-		for _, key := range keys {
-			delete(s.positiveFilters, key)
-			delete(s.negativeFilters, key)
+		if len(keys) > 0 {
+			for _, key := range keys {
+				delete(s.positiveFilters, key)
+				delete(s.negativeFilters, key)
+			}
+		} else {
+			s.positiveFilters = make(map[string]Filter)
+			s.negativeFilters = make(map[string]Filter)
+			s.hiddenKeys = make(map[string]bool)
 		}
 		s.Unlock()
 	}
