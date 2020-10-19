@@ -44,15 +44,15 @@ func (l *Logger) With(keyVals ...interface{}) *Logger {
 next:
 	for _, arg := range keyVals {
 		if thisIsKey {
-			switch arg.(type) {
+			switch t := arg.(type) {
 			// The odd arg treated as the keys. The key must be a
 			// string.
 			case string:
-				key = arg.(string)
+				key = t
 			// Instead of the key the key-value pair could be
 			// passed. Next arg should be a key.
 			case *Pair:
-				p := arg.(*Pair)
+				p := t
 				for i, c := range l.context {
 					if p.Key == c.Key {
 						l.context[i] = p
@@ -64,7 +64,7 @@ next:
 			// Also the slice of key-value pairs could be passed. Next
 			// arg should be a key.
 			case []*Pair:
-				for _, p := range arg.([]*Pair) {
+				for _, p := range t {
 					for i, c := range l.context {
 						if c.Key == p.Key {
 							l.context[i] = p
