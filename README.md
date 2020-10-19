@@ -3,7 +3,7 @@
 
 [![DeepSource](https://static.deepsource.io/deepsource-badge-light.svg)](https://deepsource.io/gh/grafov/kiwi/?ref=repository-badge)
 
-*Beta version. API still is subject of changes. Use it carefully!*
+*The project is long live experiment. Use it carefully.*
 
 ![Kiwi bird](flomar-kiwi-bird-300px.png)
 
@@ -288,6 +288,7 @@ though.  See the benchmarks results at
 
 What should be done before the first release:
 
+* handle nils in more convenient way
 * test behaviour of all the filters and fix possible bugs
 * test JSON output and fix possible bugs
 * ~~realize API for custom filters~~
@@ -312,4 +313,3 @@ See current [tests coverage](http://gocover.io/github.com/grafov/kiwi).
 * logfmt realization in Go and specs [godoc.org/github.com/kr/logfmt](https://godoc.org/github.com/kr/logfmt)
 * see also logfmt realization [github.com/go-logfmt/logfmt](https://github.com/go-logfmt/logfmt)
 * picture used for logo [openclipart.org/detail/4416/kiwi-bird](https://openclipart.org/detail/4416/kiwi-bird)
-
