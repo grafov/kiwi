@@ -58,7 +58,6 @@ func TestLogger_LogStringValue_Logfmt(t *testing.T) {
 
 	log.Log("k", "The sample string with a lot of spaces.")
 
-	out.Flush()
 	if strings.TrimSpace(output.String()) != `k="The sample string with a lot of spaces."` {
 		t.Fail()
 	}
@@ -73,7 +72,7 @@ func TestLogger_LogBytesValue_Logfmt(t *testing.T) {
 
 	log.Log("k", []byte("The sample string with a lot of spaces."))
 
-	out.Flush()
+
 	if strings.TrimSpace(output.String()) != `k="The sample string with a lot of spaces."` {
 		t.Fail()
 	}
@@ -88,7 +87,7 @@ func TestLogger_LogIntValue_Logfmt(t *testing.T) {
 
 	log.Log("k", 123)
 
-	out.Flush()
+
 	if strings.TrimSpace(output.String()) != "k=123" {
 		t.Fail()
 	}
@@ -103,7 +102,7 @@ func TestLogger_LogNegativeIntValue_Logfmt(t *testing.T) {
 
 	log.Log("k", -123)
 
-	out.Flush()
+
 	if strings.TrimSpace(output.String()) != "k=-123" {
 		t.Fail()
 	}
@@ -118,7 +117,7 @@ func TestLogger_LogFloatValue_Logfmt(t *testing.T) {
 
 	log.Log("k", 3.14159265359)
 
-	out.Flush()
+
 	if strings.TrimSpace(output.String()) != "k=3.14159265359e+00" {
 		t.Fail()
 	}
@@ -134,7 +133,7 @@ func TestLogger_LogFixedFloatValue_Logfmt(t *testing.T) {
 	FloatFormat = 'f'
 	log.Log("k", 3.14159265359)
 
-	out.Flush()
+
 	if strings.TrimSpace(output.String()) != "k=3.14159265359" {
 		t.Fail()
 	}
@@ -151,7 +150,7 @@ func TestLogger_LogBoolValue_Logfmt(t *testing.T) {
 
 	log.Log("k", true, "k2", false)
 
-	out.Flush()
+
 	if strings.TrimSpace(output.String()) != "k=true k2=false" {
 		t.Fail()
 	}
@@ -166,7 +165,7 @@ func TestLogger_LogComplexValue_Logfmt(t *testing.T) {
 
 	log.Log("k", .12345E+5i, "k2", 1.e+0i)
 
-	out.Flush()
+
 	if strings.TrimSpace(output.String()) != "k=(0.000000+12345.000000i) k2=(0.000000+1.000000i)" {
 		t.Fail()
 	}
@@ -183,7 +182,7 @@ func TestLogger_LogTimeValue_Logfmt(t *testing.T) {
 
 	log.Log("k", value)
 
-	out.Flush()
+
 	if strings.TrimSpace(output.String()) != fmt.Sprintf("k=%s", valueString) {
 		t.Fail()
 	}
@@ -197,7 +196,7 @@ func TestLogger_LogIntKeyInvalid_Logfmt(t *testing.T) {
 
 	log.Log(123, 456)
 
-	out.Flush()
+
 	expected := `kiwi-error="non a string type (int) for the key (123)" message=456`
 	if strings.TrimSpace(output.String()) != expected {
 		t.Logf("expected %s got %v", expected, output.String())
@@ -216,7 +215,7 @@ func TestLogger_LogThreeIntKeysInvalid_Logfmt(t *testing.T) {
 
 	log.Log(123, 456, 789)
 
-	out.Flush()
+
 	expected := `kiwi-error="non a string type (int) for the key (123)" message=456 kiwi-error="non a string type (int) for the key (789)"`
 	if strings.TrimSpace(output.String()) != expected {
 		t.Logf("expected %s got %v", expected, output.String())
@@ -235,7 +234,7 @@ func TestLogger_LogFourIntKeysInvalid_Logfmt(t *testing.T) {
 
 	log.Log(12, 34, 56, 78)
 
-	out.Flush()
+
 	expected := `kiwi-error="non a string type (int) for the key (12)" message=34 kiwi-error="non a string type (int) for the key (56)" message=78`
 	if strings.TrimSpace(output.String()) != expected {
 		t.Logf("expected %s got %v", expected, output.String())
@@ -252,7 +251,7 @@ func TestLogger_AddMixChained_Logfmt(t *testing.T) {
 
 	log.Add("k", "value2").Add("k2", 123).Add("k3", 3.14159265359).Log()
 
-	out.Flush()
+
 	expected := `k="value2" k2=123 k3=3.14159265359e+00`
 	if strings.TrimSpace(output.String()) != expected {
 		t.Logf("expected %s got %v", expected, output.String())
@@ -269,7 +268,7 @@ func TestLogger_AddSameKeysChained_Logfmt(t *testing.T) {
 
 	log.Add("k", "value").Add("k", 123).Log("k", "another")
 
-	out.Flush()
+
 	expected := `k="value" k=123 k="another"`
 	if strings.TrimSpace(output.String()) != expected {
 		t.Logf("expected %s got %v", expected, output.String())
@@ -287,7 +286,7 @@ func TestLogger_WithContextPassed_Logfmt(t *testing.T) {
 	log.With("key1", "value")
 	log.Log("key2", "value")
 
-	out.Flush()
+
 	if strings.TrimSpace(output.String()) != `key1="value" key2="value"` {
 		t.Fail()
 	}
@@ -307,7 +306,7 @@ func TestLogger_WithoutContextPassed_Logfmt(t *testing.T) {
 	// remove the context and flush the record
 	log.Without("key1").Log()
 
-	out.Flush()
+
 	if strings.TrimSpace(output.String()) != `key2="value"` {
 		t.Fail()
 	}
@@ -327,7 +326,7 @@ func TestLogger_ResetContext_Logfmt(t *testing.T) {
 	// reset the context and flush the record
 	log.ResetContext().Log()
 
-	out.Flush()
+
 	if strings.TrimSpace(output.String()) != `key2="value"` {
 		t.Fail()
 	}

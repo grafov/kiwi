@@ -55,7 +55,7 @@ func TestSink_LogToStoppedSink_Logfmt(t *testing.T) {
 
 	log.Log("key", "The sample string that should be ignored.")
 
-	out.Flush().Close()
+	out.Close()
 	if strings.TrimSpace(stream.String()) != "" {
 		println(stream.String())
 		t.Fail()
@@ -70,7 +70,7 @@ func TestSink_LogToStoppedSink_JSON(t *testing.T) {
 
 	log.Log("key", "The sample string that should be ignored.")
 
-	out.Flush().Close()
+	out.Close()
 	if strings.TrimSpace(stream.String()) != "" {
 		println(stream.String())
 		t.Fail()
@@ -118,7 +118,7 @@ func TestSink_HideKey(t *testing.T) {
 	out.Start().Hide("two")
 	log.Log("one", 1, "two", 2, "three", 3)
 
-	out.Flush().Close()
+	out.Close()
 	if strings.TrimSpace(stream.String()) != `one=1 three=3` {
 		println(stream.String())
 		t.Fail()
@@ -134,7 +134,7 @@ func TestSink_UnhideKey(t *testing.T) {
 	out.Hide("two").Start().Unhide("two")
 	log.Log("one", 1, "two", 2, "three", 3)
 
-	out.Flush().Close()
+	out.Close()
 	if strings.TrimSpace(stream.String()) != `one=1 two=2 three=3` {
 		println(stream.String())
 		t.Fail()
@@ -150,7 +150,7 @@ func TestSink_UnhideKeyTwice(t *testing.T) {
 	out.Start().Unhide("one").Unhide("one")
 	log.Log("one", 1, "two", 2)
 
-	out.Flush().Close()
+	out.Close()
 	if strings.TrimSpace(stream.String()) != `one=1 two=2` {
 		println(stream.String())
 		t.Fail()
@@ -166,7 +166,7 @@ func TestSink_HasKeyFilterPass(t *testing.T) {
 
 	log.Log("Gandalf", "You shall not pass!") // cite from the movie
 
-	out.Flush().Close()
+	out.Close()
 	if strings.TrimSpace(stream.String()) != `Gandalf="You shall not pass!"` {
 		println(stream.String())
 		t.Fail()
@@ -182,7 +182,7 @@ func TestSink_HasNotKeyFilterOut(t *testing.T) {
 
 	log.Log("Gandalf", "You cannot pass!") // cite from the book
 
-	out.Flush().Close()
+	out.Close()
 	if strings.TrimSpace(stream.String()) != "" {
 		println(stream.String())
 		t.Fail()
@@ -197,7 +197,7 @@ func TestSink_HasValueFilterMissedKeyPass(t *testing.T) {
 
 	log.Log("key", "passed")
 
-	out.Flush().Close()
+	out.Close()
 	if strings.TrimSpace(stream.String()) != `key="passed"` {
 		println(stream.String())
 		t.Fail()
@@ -213,7 +213,7 @@ func TestSink_HasValueFilterPass(t *testing.T) {
 
 	log.Log("key", "passed", "key", "and this passed too")
 
-	out.Flush().Close()
+	out.Close()
 	if strings.TrimSpace(stream.String()) != `key="passed" key="and this passed too"` {
 		println(stream.String())
 		t.Fail()
@@ -228,7 +228,7 @@ func TestSink_HasValueFilterOut(t *testing.T) {
 
 	log.Log("key", "try it")
 
-	out.Flush().Close()
+	out.Close()
 	if strings.TrimSpace(stream.String()) != "" {
 		println(stream.String())
 		t.Fail()
@@ -243,7 +243,7 @@ func TestSink_HasIntRangeFilterMissedKeyPass(t *testing.T) {
 
 	log.Log("another key", 3)
 
-	out.Flush().Close()
+	out.Close()
 	if strings.TrimSpace(stream.String()) != `"another key"=3` {
 		println(stream.String())
 		t.Fail()
@@ -258,7 +258,7 @@ func TestSink_IntRangeFilterPass(t *testing.T) {
 
 	log.Log("key", 2)
 
-	out.Flush().Close()
+	out.Close()
 	if strings.TrimSpace(stream.String()) != `key=2` {
 		println(stream.String())
 		t.Fail()
@@ -273,7 +273,7 @@ func TestSink_IntRangeFilterFilterOut(t *testing.T) {
 
 	log.Log("key", 4)
 
-	out.Flush().Close()
+	out.Close()
 	if strings.TrimSpace(stream.String()) != "" {
 		println(stream.String())
 		t.Fail()
@@ -288,7 +288,7 @@ func TestSink_FloatRangeFilterMissedKeyPass(t *testing.T) {
 
 	log.Log("another key", 3)
 
-	out.Flush().Close()
+	out.Close()
 	if strings.TrimSpace(stream.String()) != `"another key"=3` {
 		println(stream.String())
 		t.Fail()
@@ -303,7 +303,7 @@ func TestSink_FloatRangeFilterPass(t *testing.T) {
 
 	log.Log("key", 2.0)
 
-	out.Flush().Close()
+	out.Close()
 	if strings.TrimSpace(stream.String()) != `key=2e+00` {
 		println(stream.String())
 		t.Fail()
@@ -318,7 +318,7 @@ func TestSink_FloatRangeFilterOut(t *testing.T) {
 
 	log.Log("key", 4.0)
 
-	out.Flush().Close()
+	out.Close()
 	if strings.TrimSpace(stream.String()) != "" {
 		println(stream.String())
 		t.Fail()
@@ -337,7 +337,7 @@ func TestSink_TimeRangeFilterPass(t *testing.T) {
 
 	log.Log("key", halfHourAfterNow)
 
-	out.Flush().Close()
+	out.Close()
 	if strings.TrimSpace(stream.String()) != `key=`+halfHourAsString {
 		println(stream.String())
 		t.Fail()
@@ -355,7 +355,7 @@ func TestSink_TimeRangeFilterOut(t *testing.T) {
 
 	log.Log("key", hourAfterNow)
 
-	out.Flush().Close()
+	out.Close()
 	if strings.TrimSpace(stream.String()) != "" {
 		println(stream.String())
 		t.Fail()
@@ -377,7 +377,7 @@ func TestSink_WithCustomPass(t *testing.T) {
 
 	log.Log("key", 2)
 
-	out.Flush().Close()
+	out.Close()
 	if strings.TrimSpace(stream.String()) != `key=2` {
 		println(stream.String())
 		t.Fail()
@@ -393,7 +393,7 @@ func TestSink_WithCustomMissedKeyPass(t *testing.T) {
 
 	log.Log("another key", 3)
 
-	out.Flush().Close()
+	out.Close()
 	if strings.TrimSpace(stream.String()) != `"another key"=3` {
 		println(stream.String())
 		t.Fail()
@@ -415,7 +415,7 @@ func TestSink_WithCustomFilterOut(t *testing.T) {
 
 	log.Log("key", 2)
 
-	out.Flush().Close()
+	out.Close()
 	if strings.TrimSpace(stream.String()) != "" {
 		println(stream.String())
 		t.Fail()
