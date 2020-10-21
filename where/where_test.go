@@ -62,7 +62,7 @@ func TestWhere_GetAllInfo_Logfmt(t *testing.T) {
 		t.Logf("expected %s got %v", expected, stream.String())
 		t.Fail()
 	}
-	expected = `function="`
+	expected = `func="`
 	if !strings.Contains(stream.String(), expected) {
 		t.Logf("expected %s got %v", expected, stream.String())
 		t.Fail()

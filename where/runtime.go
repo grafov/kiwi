@@ -75,7 +75,7 @@ func What(parts int) []*kiwi.Pair {
 	}
 	if parts&Function > 0 {
 		pairs = append(pairs, &kiwi.Pair{
-			Key: "function",
+			Key: "func",
 			Eval: func() string {
 				pc, _, _, _ := runtime.Caller(skip)
 				function := runtime.FuncForPC(pc).Name()
