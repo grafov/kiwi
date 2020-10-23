@@ -2,9 +2,7 @@ language: go
 
 # Versions of go that are explicitly supported.
 go:
- - 1.13
- - 1.11
- - 1.8
+ - 1.15
  - tip
 
 # Required for coverage.
