@@ -162,7 +162,7 @@ func TestGlobalLogger_LogComplexValue_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
 	out := kiwi.SinkTo(output, kiwi.AsLogfmt()).Start()
 
-	kiwi.Log("k", .12345E+5i, "k2", 1.e+0i)
+	kiwi.Log("k", .12345e+5i, "k2", 1.e+0i)
 
 	out.Close()
 	if strings.TrimSpace(output.String()) != "k=(0.000000+12345.000000i) k2=(0.000000+1.000000i)" {

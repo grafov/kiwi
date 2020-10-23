@@ -61,6 +61,7 @@ func TestRace_NewFromGlobal_Logfmt(t *testing.T) {
 	}
 	Log("k", "The sample string.", "instance", 0)
 }
+
 // Test logging of string value.
 func TestRace_ForkFromGlobal_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
@@ -75,6 +76,7 @@ func TestRace_ForkFromGlobal_Logfmt(t *testing.T) {
 	}
 	Log("k", "The sample string.", "instance", 0)
 }
+
 // Test logging of string value.
 func TestRace_Fork_Logfmt(t *testing.T) {
 	output := bytes.NewBufferString("")
@@ -97,7 +99,8 @@ func TestRace_Fork_Logfmt(t *testing.T) {
 }
 
 // Test logging of string value.
-func TestR	output := bytes.NewBufferString("")
+func TestRace_ForkFork(t *testing.T) {
+	output := bytes.NewBufferString("")
 	out := SinkTo(output, AsLogfmt()).Start()
 	defer out.Close()
 	var (
