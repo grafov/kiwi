@@ -78,8 +78,7 @@ func What(parts int) []*kiwi.Pair {
 			Key: "func",
 			Eval: func() string {
 				pc, _, _, _ := runtime.Caller(skip)
-				function := runtime.FuncForPC(pc).Name()
-				return function
+				return runtime.FuncForPC(pc).Name()
 			},
 			Type: kiwi.StringVal,
 		})
