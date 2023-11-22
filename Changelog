@@ -1,0 +1,10 @@
+2023-11-22	Alexander Grafov <grafov@inet.name>
+
+	Reset() behavior changed
+	Now Reset() drops both log records and context values.
+	Early kiwi versions keep context values untouched.
+
+	Return() added
+	Return context and log records backward to upstream function.
+
+2023-11-22	Check commits for previous changes.

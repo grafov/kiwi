@@ -2,7 +2,7 @@ package kiwi
 
 // The logger instance context.
 
-/* Copyright (c) 2016-2019, Alexander I.Grafov <grafov@gmail.com>
+/* Copyright (c) 2016-2019, 2023, Alexander I.Grafov <grafov@gmail.com>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -116,9 +116,9 @@ func (l *Logger) Without(keys ...string) *Logger {
 	return l
 }
 
-// ResetContext resets the context of the logger. The function is not
+// WithoutAll resets the context of the logger. The function is not
 // concurrent safe.
-func (l *Logger) ResetContext() *Logger {
+func (l *Logger) WithoutAll() *Logger {
 	l.context = nil
 	return l
 }

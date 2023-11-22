@@ -21,7 +21,7 @@ record. It allows fine control on that should be logged in the moment and especi
 debugging. So `kiwi` separates output logic (when and where you want write) from logging process
 itself (just log anything what you want).
 
-## Features offered by structered logging and logfmt generally and by Kiwi particularly
+## Features
 
 * simple logfmt-like format for high readability by humans
 * JSON format that liked by robots
@@ -29,12 +29,15 @@ itself (just log anything what you want).
 * change log verbosity and set of record fields on the fly
 * dynamic filtering
 * keep context of the application
+* delayed logging
 * fast forking of subloggers with inherited context
+* passing data into child loggers and back
 * optional lazy evaluation of arguments for lowering logger footprint
+* light realization without any external libs but standard library
 
 Kiwi logger has built around the idea:
 
-*Log everything in the code with as much details as possible. But actually write only that you need in the moment.*
+*Log everything in the code with as much details as possible. But actually save in the log files only that you need.*
 
 In the ideal world of course you could log _everything_ and it is right way. Then you are look up
 the central log storage that gathered logs from all the applications instances. You could view and
@@ -226,6 +229,22 @@ application is complex thing hence you will need initialize a new instance of ki
 
 Logger accepts functions without args that returns a string: `func () string`.
 Hence value of `lazy-sample` from the example above will be evaluated only on `Log()` call.
+
+## Reverse context
+
+```go
+func main() {
+	log1 := kiwi.New()
+	someF(log1)
+}
+
+func someF(log kiwi.Logger) {
+	log2 := log.New().With("context key", "context value")
+	log2.Add("log it")
+	defer log2.Return()
+}
+
+```
 
 ## Additional features in other packages
 

@@ -1,8 +1,8 @@
 package kiwi
 
-// Obsoleted functions that may be removed in the future.
+// Obsoleted functions that will be removed just after v1.0.
 
-/* Copyright (c) 2016-2020, Alexander I.Grafov <grafov@gmail.com>
+/* Copyright (c) 2016-2020, 2023, Alexander I.Grafov <grafov@inet.name>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // FlushAll should wait for all the sinks to be flushed. It does
 // nothing currently. It has left for compatibility with old API.
+// Deprecated: just no need for this feature.
 func FlushAll() {
 	Log(InfoKey, "obsoleted", MessageKey, "FlushAll() is obsoleted, you should remove it from the code")
 }
@@ -41,7 +42,25 @@ func FlushAll() {
 // Flush waits that all previously sent to the output records
 // worked. It does nothing currently. It has left for compatibility
 // with old API.
+// Deprecated: just no need for sinks anymore.
 func (s *Sink) Flush() *Sink {
 	Log(InfoKey, "obsoleted", MessageKey, "sink.Flush() is obsoleted, you should remove it from the code")
 	return s
+}
+
+// ResetContext resets the context of the logger. The function is not
+// concurrent safe.
+// Deprecated: use WithoutAll() instead.
+func (l *Logger) ResetContext() *Logger {
+	l.context = nil
+	return l
+}
+
+// ResetContext resets the global context for the global logger and
+// its descendants. It is safe for concurrency.
+// Deprecated: use WithoutAll() instead.
+func ResetContext() {
+	global.Lock()
+	context = nil
+	global.Unlock()
 }

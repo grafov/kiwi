@@ -4,7 +4,7 @@ import "fmt"
 
 // This file consists of definition of global logging methods.
 
-/* Copyright (c) 2016-2019, Alexander I.Grafov <grafov@gmail.com>
+/* Copyright (c) 2016-2019, 2023, Alexander I.Grafov <grafov@inet.name>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // use Logger type instead.
 func Log(kv ...interface{}) {
 	// 1. Log the context.
-	var record = make([]*Pair, 0, len(context)+len(kv))
+	record := make([]*Pair, 0, len(context)+len(kv))
 	global.RLock()
 	for _, p := range context {
 		// Evaluate delayed context value here before the output.
@@ -54,12 +54,12 @@ func Log(kv ...interface{}) {
 	global.RUnlock()
 	// 2. Log the regular key-value pairs that came in the args.
 	var (
-		key          string
-		shouldBeAKey = true
+		key         string
+		shouldBeKey = true
 	)
 	for _, val := range kv {
 		var p *Pair
-		if shouldBeAKey {
+		if shouldBeKey {
 			switch v := val.(type) {
 			case string:
 				key = v
@@ -79,10 +79,10 @@ func Log(kv ...interface{}) {
 			}
 			record = append(record, p)
 		}
-		shouldBeAKey = !shouldBeAKey
+		shouldBeKey = !shouldBeKey
 	}
 	// Add the value without the key for odd number for key-val pairs.
-	if !shouldBeAKey && key != MessageKey {
+	if !shouldBeKey && key != MessageKey {
 		record = append(record, toPair(MessageKey, key))
 	}
 	// 2. Pass the record to the collector.
