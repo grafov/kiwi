@@ -2,7 +2,7 @@ package kiwi
 
 // Obsoleted functions that will be removed just after v1.0.
 
-/* Copyright (c) 2016-2020, 2023, Alexander I.Grafov <grafov@inet.name>
+/* Copyright (c) 2016-2024, Alexander I.Grafov <grafov@inet.name>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // nothing currently. It has left for compatibility with old API.
 // Deprecated: just no need for this feature.
 func FlushAll() {
-	Log(InfoKey, "obsoleted", MessageKey, "FlushAll() is obsoleted, you should remove it from the code")
+	Log(InfoKey, "deprecated", MessageKey, "FlushAll() is deprecated, you should remove it from the code")
 }
 
 // Flush waits that all previously sent to the output records
@@ -44,22 +44,47 @@ func FlushAll() {
 // with old API.
 // Deprecated: just no need for sinks anymore.
 func (s *Sink) Flush() *Sink {
-	Log(InfoKey, "obsoleted", MessageKey, "sink.Flush() is obsoleted, you should remove it from the code")
+	Log(InfoKey, "deprecated", MessageKey, "sink.Flush() is deprecated, you should remove it from the code")
 	return s
 }
 
 // ResetContext resets the context of the logger. The function is not
 // concurrent safe.
-// Deprecated: use WithoutAll() instead.
+// Deprecated: use Reset() instead.
 func (l *Logger) ResetContext() *Logger {
+	Log(InfoKey, "deprecated", MessageKey, "ResetContext() is deprecated, you should remove it from the code")
+	l.c.Lock()
+	defer l.c.Unlock()
 	l.context = nil
 	return l
 }
 
 // ResetContext resets the global context for the global logger and
 // its descendants. It is safe for concurrency.
-// Deprecated: use WithoutAll() instead.
+// Deprecated: use Reset() instead.
 func ResetContext() {
+	Log(InfoKey, "deprecated", MessageKey, "ResetContext() is deprecated, you should remove it from the code")
+	global.Lock()
+	defer global.Unlock()
+	context = nil
+}
+
+// WithoutAll resets the context of the logger. The function is not
+// concurrent safe.
+// Deprecated: use Reset() instead.
+func (l *Logger) WithoutAll() *Logger {
+	Log(InfoKey, "deprecated", MessageKey, "WithoutAll() is deprecated, you should remove it from the code")
+	l.c.Lock()
+	defer l.c.Unlock()
+	l.context = nil
+	return l
+}
+
+// WithoutAll resets the global context for the global logger and
+// its descendants. It is safe for concurrency.
+// Deprecated: use Reset() instead.
+func WithoutAll() {
+	Log(InfoKey, "deprecated", MessageKey, "WithoutAll() is deprecated, you should remove it from the code")
 	global.Lock()
 	context = nil
 	global.Unlock()

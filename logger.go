@@ -1,10 +1,13 @@
 package kiwi
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
 // This file consists of Logger related structures and functions.
 
-/* Copyright (c) 2016-2019, 2023, Alexander I.Grafov <grafov@inet.name>
+/* Copyright (c) 2016-2024, Alexander I.Grafov <grafov@inet.name>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,20 +38,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ॐ तारे तुत्तारे तुरे स्व */
 
 var (
-	MessageKey = "message"
+	MessageKey = "msg"
 	ErrorKey   = "kiwi-error"
 	InfoKey    = "kiwi-info"
 )
 
 type (
-	// Logger keeps context and log record. There are many loggers initialized
-	// in different places of application. Loggers are not safe for
-	// concurrent usage so then you need logger for another goroutine you will need clone existing instance.
-	// See Logger.New() method below for details.
+	// Logger keeps context and log record. There are many loggers
+	// initialized in different places of application. Subloggers
+	// are still safe for concurrent usage. See Logger.New()
+	// method below for details.
+	//
+	// Thread safe logic was changed in v0.6: early version was
+	// not thread safe for logger instances.
 	Logger struct {
+		c       sync.RWMutex // sync context
 		context []*Pair
-		pairs   []*Pair
 		parent  *Logger
+		p       sync.Mutex // sync pairs
+		pairs   []*Pair
 	}
 	// Stringer is the same as fmt.Stringer
 	Stringer interface {
@@ -72,7 +80,7 @@ type (
 )
 
 // Fork creates a new logger instance that inherited the context from
-// the global logger. Thi fuction is concurrent safe.
+// the global logger. This fuction is concurrent safe.
 func Fork() *Logger {
 	newContext := make([]*Pair, len(context))
 	global.RLock()
@@ -92,8 +100,10 @@ func New() *Logger {
 // from the logger from the parent logger. But the values of the
 // current record of the parent logger discarded.
 func (l *Logger) Fork() *Logger {
+	l.c.RLock()
 	fork := Logger{parent: l, context: make([]*Pair, len(l.context))}
 	copy(fork.context, l.context)
+	l.c.RUnlock()
 	return &fork
 }
 
@@ -107,8 +117,9 @@ func (l *Logger) New() *Logger {
 // Log is the most common method for flushing previously added key-val pairs to an output.
 // After current record is flushed all pairs removed from a record except contextSrc pairs.
 func (l *Logger) Log(keyVals ...interface{}) {
-	// 1. Log the context.
-	record := make([]*Pair, 0, len(l.context)+len(l.pairs)+len(keyVals))
+	l.Add(keyVals...)
+	record := make([]*Pair, 0, len(l.context)+len(l.pairs))
+	l.c.RLock()
 	for _, p := range l.context {
 		if p.Eval != nil {
 			// Evaluate delayed context value here before output.
@@ -117,7 +128,8 @@ func (l *Logger) Log(keyVals ...interface{}) {
 			record = append(record, &Pair{p.Key, p.Val, nil, p.Type})
 		}
 	}
-	// 2. Log the regular key-value pairs that added before by Add() calls.
+	l.c.RUnlock()
+	l.p.Lock()
 	for _, p := range l.pairs {
 		if p.Eval != nil {
 			record = append(record, &Pair{p.Key, p.Eval.(func() string)(), p.Eval, p.Type})
@@ -125,34 +137,9 @@ func (l *Logger) Log(keyVals ...interface{}) {
 			record = append(record, &Pair{p.Key, p.Val, nil, p.Type})
 		}
 	}
-	// 3. Log the regular key-value pairs that come in the args.
-	var (
-		key         string
-		shouldBeKey = true
-	)
-	for _, val := range keyVals {
-		if shouldBeKey {
-			switch v := val.(type) {
-			case string:
-				key = v
-			case *Pair:
-				record = append(record, v)
-				continue
-			default:
-				record = append(record, toPair(ErrorKey, fmt.Sprintf("non a string type (%T) for the key (%v)", val, val)))
-				key = MessageKey
-			}
-		} else {
-			record = append(record, toPair(key, val))
-		}
-		shouldBeKey = !shouldBeKey
-	}
-	if !shouldBeKey && key != MessageKey {
-		record = append(record, toPair(MessageKey, key))
-	}
-	// 4. Pass the record to the collector.
-	sinkRecord(record)
 	l.pairs = nil
+	l.p.Unlock()
+	sinkRecord(record)
 }
 
 // Add a new key-value pairs to the log record.
@@ -173,7 +160,8 @@ func (l *Logger) Add(keyVals ...interface{}) *Logger {
 		key         string
 		shouldBeKey = true
 	)
-	// key=val pairs
+	l.p.Lock()
+	defer l.p.Unlock()
 	for _, val := range keyVals {
 		if shouldBeKey {
 			switch v := val.(type) {
@@ -198,21 +186,28 @@ func (l *Logger) Add(keyVals ...interface{}) *Logger {
 }
 
 // Reset logger values added after last Log() call and logger context.
-// Behavior changed: early kiwi versions keep context values untouched!
+// Behavior changed: early kiwi versions (before v0.6) keep context values untouched!
 func (l *Logger) Reset() *Logger {
+	l.c.Lock()
 	l.context = nil
+	l.c.Unlock()
+	l.p.Lock()
 	l.pairs = nil
+	l.p.Unlock()
 	return l
 }
 
 // Return just return back to upper logger the context and added (not
 // flushed) records. So you can log them in upper logger.
 func (l *Logger) Return() {
-	// XXX no thread safe yet, just for checking the concept
+	l.c.Lock()
 	for _, c := range l.context {
 		l.parent.context = append(l.parent.context, c)
 	}
+	l.c.Unlock()
+	l.p.Lock()
 	for _, p := range l.pairs {
 		l.parent.pairs = append(l.parent.pairs, p)
 	}
+	l.p.Unlock()
 }

@@ -2,7 +2,7 @@ package kiwi
 
 // The logger instance context.
 
-/* Copyright (c) 2016-2019, 2023, Alexander I.Grafov <grafov@gmail.com>
+/* Copyright (c) 2016-2024, Alexander I.Grafov <grafov@inet.name>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -61,19 +61,6 @@ next:
 				}
 				l.context = append(l.context, p)
 				continue
-			// Also the slice of key-value pairs could be passed. Next
-			// arg should be a key.
-			case []*Pair:
-				for _, p := range t {
-					for i, c := range l.context {
-						if c.Key == p.Key {
-							l.context[i] = p
-							break
-						}
-					}
-					l.context = append(l.context, p)
-				}
-				continue
 			// The key must be be a string type. The logger generates
 			// error as a new key-value pair for the record.
 			default:
@@ -113,12 +100,5 @@ func (l *Logger) Without(keys ...string) *Logger {
 			}
 		}
 	}
-	return l
-}
-
-// WithoutAll resets the context of the logger. The function is not
-// concurrent safe.
-func (l *Logger) WithoutAll() *Logger {
-	l.context = nil
 	return l
 }

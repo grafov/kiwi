@@ -2,7 +2,7 @@ package kiwi
 
 // Global context for all logger instances including global logger.
 
-/* Copyright (c) 2016-2020, 2023, Alexander I.Grafov <grafov@inet.name>
+/* Copyright (c) 2016-2024, Alexander I.Grafov <grafov@inet.name>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -120,13 +120,5 @@ func Without(keys ...string) {
 			}
 		}
 	}
-	global.Unlock()
-}
-
-// WithoutAll resets the global context for the global logger and
-// its descendants. It is safe for concurrency.
-func WithoutAll() {
-	global.Lock()
-	context = nil
 	global.Unlock()
 }
